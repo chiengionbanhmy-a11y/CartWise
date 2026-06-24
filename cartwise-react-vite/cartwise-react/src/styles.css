@@ -898,3 +898,153 @@ main { max-width: 1280px; }
   .robot-image-wrap,
   .modal-robot-area .robot-image-wrap { width: 80px; height: 90px; }
 }
+
+
+/* ===== CartWise V5 final fixes ===== */
+.cawi-floating {
+  transition: left 2.6s ease-in-out, top 2.6s ease-in-out !important;
+  z-index: 1500 !important;
+}
+.cawi-floating .cawi-bubble {
+  right: 118px !important;
+  left: auto !important;
+  bottom: 24px !important;
+  max-width: 210px !important;
+  white-space: normal;
+}
+.robot-image-wrap {
+  width: 116px !important;
+  height: 128px !important;
+}
+.cawi-inline .robot-image-wrap {
+  width: 112px !important;
+  height: 124px !important;
+}
+.robot-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform: rotate(var(--head-rot, 0deg));
+  transition: transform .16s ease;
+}
+.robot-image,
+.cawi-inline .robot-image,
+.modal-robot-area .robot-image,
+.modal-robot-area .cawi-inline .robot-image {
+  width: 116px !important;
+  height: auto;
+}
+.cawi-inline .robot-image,
+.modal-robot-area .robot-image,
+.modal-robot-area .cawi-inline .robot-image {
+  width: 112px !important;
+}
+.theme-1 .robot-visual { filter: hue-rotate(38deg) saturate(1.08); }
+.theme-2 .robot-visual { filter: hue-rotate(120deg) saturate(1.12); }
+.theme-3 .robot-visual { filter: hue-rotate(205deg) saturate(1.10); }
+.theme-4 .robot-visual { filter: hue-rotate(290deg) saturate(1.14); }
+.theme-1 .robot-image,
+.theme-2 .robot-image,
+.theme-3 .robot-image,
+.theme-4 .robot-image {
+  filter: drop-shadow(0 8px 16px rgba(15,23,42,.16)) !important;
+}
+.cawi.is-hovered .robot-image {
+  filter: drop-shadow(0 12px 22px rgba(251,146,60,.26)) !important;
+}
+.robot-look-eye {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #374151;
+  opacity: .95;
+  transform: translate(var(--eye-x, 0px), var(--eye-y, 0px));
+  transition: transform .1s ease;
+  pointer-events: none;
+}
+.left-eye { left: 39px; top: 41px; }
+.right-eye { left: 69px; top: 41px; }
+.cawi.is-sleeping .robot-look-eye { opacity: 0; }
+.robot-smile-overlay { display: none !important; }
+.cawi.is-hovered .robot-image {
+  animation: robotHappyShake .42s ease-in-out 1 !important;
+}
+.robot-sleep-eyes {
+  left: 36px !important;
+  top: 41px !important;
+  width: 43px !important;
+}
+.cawi.is-moving .robot-image {
+  animation: robotWalkVisual 1.25s ease-in-out infinite !important;
+}
+.cawi.is-poofing { transition: none !important; }
+.cawi.is-poofing .robot-image {
+  animation: robotPoofBlink .78s ease-out both !important;
+}
+.modal-robot-area {
+  position: fixed !important;
+  right: 28px !important;
+  top: 128px !important;
+  bottom: auto !important;
+  z-index: 3200 !important;
+  pointer-events: auto;
+}
+.modal-robot-area .cawi {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.modal-robot-area .cawi-bubble {
+  order: 0;
+  margin: 0 8px 0 0 !important;
+  max-width: 245px !important;
+}
+.modal-robot-area .robot-image-wrap {
+  width: 112px !important;
+  height: 124px !important;
+}
+.store-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.store-brand img {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.store-row {
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+}
+.store-row a {
+  white-space: nowrap;
+}
+.product-card img {
+  aspect-ratio: 4 / 3;
+  object-fit: contain !important;
+  padding: 18px;
+  background: linear-gradient(135deg, #fff, #f8fafc);
+}
+.modal-image-panel > img {
+  object-fit: contain !important;
+  max-height: 520px;
+  padding: 18px;
+  background: white;
+}
+@media (max-width: 980px) {
+  .cawi-floating .cawi-bubble { display: none !important; }
+  .robot-image, .cawi-inline .robot-image, .modal-robot-area .robot-image { width: 94px !important; }
+  .robot-image-wrap, .cawi-inline .robot-image-wrap, .modal-robot-area .robot-image-wrap { width: 94px !important; height: 104px !important; }
+  .modal-robot-area { right: 12px !important; top: 116px !important; }
+  .modal-robot-area .cawi-bubble { display: none; }
+}
+@media (max-width: 640px) {
+  .robot-image, .cawi-inline .robot-image, .modal-robot-area .robot-image { width: 80px !important; }
+  .robot-image-wrap, .cawi-inline .robot-image-wrap, .modal-robot-area .robot-image-wrap { width: 80px !important; height: 90px !important; }
+}

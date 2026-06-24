@@ -5,7 +5,16 @@ function ProductCard({ product, currency = 'VND', onOpenProduct }) {
   const best = getBestStore(product);
   return (
     <article className="product-card">
-      <img src={product.image} alt={product.name} loading="lazy" />
+      <img
+        src={product.image}
+        alt={product.name}
+        loading="lazy"
+        onError={(event) => {
+          if (product.fallbackImage && event.currentTarget.src !== product.fallbackImage) {
+            event.currentTarget.src = product.fallbackImage;
+          }
+        }}
+      />
       <div className="product-body">
         <span className="category-chip">{product.subCategory}</span>
         <h3>{product.name}</h3>

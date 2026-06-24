@@ -1,17 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-const closeWaypoints = [
-  { left: 'calc(100vw - 150px)', top: 'calc(50vh - 90px)' },
-  { left: 'calc(100vw - 150px)', top: 'calc(50vh + 10px)' },
-  { left: '28px', top: 'calc(50vh - 70px)' },
-  { left: '28px', top: 'calc(50vh + 24px)' }
-];
-
-const farWaypoints = [
-  { left: 'calc(100vw - 150px)', top: 'calc(50vh - 90px)' },
-  { left: '28px', top: 'calc(50vh - 70px)' },
-  { left: 'calc(100vw - 150px)', top: 'calc(100vh - 180px)' },
-  { left: '28px', top: 'calc(100vh - 180px)' }
+const waypoints = [
+  { left: 'calc(100vw - 160px)', top: 'calc(50vh - 92px)' },
+  { left: 'calc(100vw - 160px)', top: 'calc(50vh + 28px)' },
+  { left: 'calc(100vw - 160px)', top: 'calc(100vh - 190px)' },
+  { left: 'calc(100vw - 160px)', top: '140px' }
 ];
 
 function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi Robo!', page = 'home' }) {
@@ -22,15 +15,29 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [hovered, setHovered] = useState(false);
   const [themeIndex, setThemeIndex] = useState(Number(localStorage.getItem('cawi-theme') || 0));
   const [bubble, setBubble] = useState(message);
+  const [eyes, setEyes] = useState({ x: 0, y: 0, head: 0 });
 
   const lastActivity = useRef(Date.now());
   const lastMove = useRef(Date.now());
-  const justWoke = useRef(false);
-  const currentPath = useRef(closeWaypoints);
+  const robotRef = useRef(null);
 
   useEffect(() => {
     if (!sleeping && !hovered) setBubble(message);
   }, [message, page, sleeping, hovered]);
+
+  useEffect(() => {
+    function followPointer(event) {
+      const rect = robotRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 260));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 220));
+      setEyes({ x: dx * 5, y: dy * 3.5, head: dx * 4 });
+    }
+    window.addEventListener('mousemove', followPointer, { passive: true });
+    return () => window.removeEventListener('mousemove', followPointer);
+  }, []);
 
   useEffect(() => {
     if (mode !== 'floating') return;
@@ -39,15 +46,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       lastActivity.current = Date.now();
       setMoving(false);
       setPoofing(false);
-
       if (sleeping) {
         setSleeping(false);
-        justWoke.current = true;
         setBubble('Bạn đã quay lại rồi ư?');
-        setTimeout(() => {
-          justWoke.current = false;
-          setBubble(message);
-        }, 2800);
+        setTimeout(() => setBubble(message), 2800);
       }
     }
 
@@ -66,20 +68,16 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         return;
       }
 
-      if (inactiveFor >= 20000 && now - lastMove.current >= 42000 && !sleeping && !moving && !poofing) {
-        const isFarMove = pointIndex % 3 === 2;
-        if (isFarMove) {
-          currentPath.current = farWaypoints;
+      if (inactiveFor >= 20000 && now - lastMove.current >= 52000 && !sleeping && !moving && !poofing) {
+        const shouldPoof = pointIndex % 3 === 2;
+        if (shouldPoof) {
           setPoofing(true);
-          setTimeout(() => {
-            setPointIndex((prev) => (prev + 1) % currentPath.current.length);
-          }, 260);
-          setTimeout(() => setPoofing(false), 820);
+          setTimeout(() => setPointIndex((prev) => (prev + 1) % waypoints.length), 260);
+          setTimeout(() => setPoofing(false), 850);
         } else {
-          currentPath.current = closeWaypoints;
           setMoving(true);
-          setPointIndex((prev) => (prev + 1) % currentPath.current.length);
-          setTimeout(() => setMoving(false), 2400);
+          setPointIndex((prev) => (prev + 1) % waypoints.length);
+          setTimeout(() => setMoving(false), 2600);
         }
         lastMove.current = now;
       }
@@ -91,12 +89,20 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
   }, [message, mode, moving, pointIndex, poofing, sleeping]);
 
-  const points = currentPath.current || closeWaypoints;
-  const currentPoint = points[pointIndex % points.length];
-
+  const currentPoint = waypoints[pointIndex % waypoints.length];
   const floatingStyle = useMemo(() => (
-    mode === 'floating' ? { left: currentPoint.left, top: currentPoint.top } : undefined
-  ), [mode, currentPoint]);
+    mode === 'floating' ? {
+      left: currentPoint.left,
+      top: currentPoint.top,
+      '--eye-x': `${eyes.x}px`,
+      '--eye-y': `${eyes.y}px`,
+      '--head-rot': `${eyes.head}deg`
+    } : {
+      '--eye-x': `${eyes.x}px`,
+      '--eye-y': `${eyes.y}px`,
+      '--head-rot': `${eyes.head}deg`
+    }
+  ), [mode, currentPoint, eyes]);
 
   function handleClick(event) {
     event.stopPropagation();
@@ -107,6 +113,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
   return (
     <aside
+      ref={robotRef}
       className={`cawi cawi-${mode} theme-${themeIndex} ${moving ? 'is-moving' : ''} ${poofing ? 'is-poofing' : ''} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''}`}
       style={floatingStyle}
       onMouseEnter={() => {
@@ -124,11 +131,15 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       <div className={`cawi-bubble ${sleeping ? 'sleeping-bubble' : ''}`}>{bubble}</div>
       <div className="robot-image-wrap">
         <span className="robot-poof" />
-        <img src="/robot-cawi-v4.png" alt="Cawi Robo" className="robot-image" />
+        <div className="robot-visual">
+          <img src="/robot-cawi-v4.png" alt="Cawi Robo" className="robot-image" />
+          <span className="robot-look-eye left-eye" />
+          <span className="robot-look-eye right-eye" />
+          <span className="robot-sleep-eyes" />
+        </div>
         <span className="robot-hover-sparkle sparkle-1">✿</span>
         <span className="robot-hover-sparkle sparkle-2">♡</span>
         <span className="robot-hover-sparkle sparkle-3">✦</span>
-        <span className="robot-sleep-eyes" />
       </div>
     </aside>
   );

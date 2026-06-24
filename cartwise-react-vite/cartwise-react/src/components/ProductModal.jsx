@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import CawiRobot from './CawiRobot.jsx';
 import { formatCurrency } from '../data/currency.js';
-import { getBestStore, getSavingAmount } from '../data/products.js';
+import { getBestStore, getSavingAmount, getStoreLogo } from '../data/products.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 
@@ -37,7 +37,15 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
         <button className="close-btn" onClick={onClose}>×</button>
         <div className="modal-grid">
           <section className="modal-image-panel">
-            <img src={product.image} alt={product.name} />
+            <img
+              src={product.image}
+              alt={product.name}
+              onError={(event) => {
+                if (product.fallbackImage && event.currentTarget.src !== product.fallbackImage) {
+                  event.currentTarget.src = product.fallbackImage;
+                }
+              }}
+            />
             <div className="quick-convert">
               <h4>Quy đổi tiền tệ nhanh</h4>
               <div className="currency-grid compact">
@@ -68,7 +76,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                 const isBest = store.storeName === best.storeName;
                 return (
                   <div className={isBest ? 'store-row best' : 'store-row'} key={store.storeName}>
-                    <div>
+                    <div className="store-brand">
+                      <img src={getStoreLogo(store.storeName)} alt={store.storeName} />
                       <strong>{store.storeName}</strong>
                       {isBest && <span className="best-label">Giá tốt nhất</span>}
                     </div>
@@ -78,14 +87,14 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                 );
               })}
             </div>
-
-            <div className="modal-robot-area">
-              <CawiRobot
-                mode="inline"
-                message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
-              />
-            </div>
           </section>
+        </div>
+
+        <div className="modal-robot-area">
+          <CawiRobot
+            mode="inline"
+            message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
+          />
         </div>
       </div>
     </div>

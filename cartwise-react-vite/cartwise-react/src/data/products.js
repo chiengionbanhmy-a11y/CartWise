@@ -25,37 +25,51 @@ const storeSearchUrl = (storeName, productName) => {
 };
 
 
+
 const realProductImages = {
-  'water-lavie-500': 'https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=900&q=80',
-  'water-aquafina-500': 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=900&q=80',
-  'coca-can': 'https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=900&q=80',
-  'th-milk': 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=900&q=80',
-  'haohao': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80',
-  'oreo': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=80',
-  'mouse-logitech': 'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=80',
-  'mouse-razer': 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=900&q=80',
-  'mouse-rapoo': 'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=900&q=80',
-  'keyboard-mechanical': 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80',
-  'headphone-jbl': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80',
-  'powerbank-anker': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=900&q=80',
-  'phone-samsung': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
-  'speaker-bluetooth': 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=900&q=80',
-  'popmart-labubu': 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?auto=format&fit=crop&w=900&q=80',
-  'funko-hero': 'https://images.unsplash.com/photo-1608889476561-6242cfdbf622?auto=format&fit=crop&w=900&q=80',
-  'lego-classic': 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=900&q=80',
-  'anime-figure': 'https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?auto=format&fit=crop&w=900&q=80',
-  'boardgame': 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=80',
-  'teddy-bear': 'https://images.unsplash.com/photo-1563901935883-cb61f5d49be4?auto=format&fit=crop&w=900&q=80',
-  'lipstick': 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=900&q=80',
-  'sunscreen': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=80',
-  'cleanser': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=900&q=80',
-  'notebook': 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=80',
-  'pen': 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=80',
-  'casio': 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&w=900&q=80',
-  'study-chair': 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=900&q=80',
-  'desk-lamp': 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80',
-  'rice-cooker': 'https://images.unsplash.com/photo-1628277613967-6abca504d0ac?auto=format&fit=crop&w=900&q=80',
-  'mini-fan': 'https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?auto=format&fit=crop&w=900&q=80'
+  'water-lavie-500': 'https://cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg',
+  'water-aquafina-500': 'https://cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg',
+  'coca-can': 'https://cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg',
+  'th-milk': 'https://cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg',
+  'mouse-logitech': 'https://cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg'
+};
+
+const directStoreUrls = {
+  'water-lavie-500': {
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-suoi-khoang/nuoc-khoang-la-vie-500ml'
+  },
+  'water-aquafina-500': {
+    'WinMart': 'https://winmart.vn/products/aquafina-nuoc-tinh-khiet-500ml--s10011216'
+  },
+  'coca-can': {
+    'WinMart': 'https://winmart.vn/products/coca-cola-nuoc-giai-khat-320ml--s10011650',
+    'Shopee Mall': 'https://shopee.vn/cocacola_official_store'
+  },
+  'th-milk': {
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tiet-trung-th-it-duong-180ml-loc',
+    'WinMart': 'https://winmart.vn/products/th-milk-sttt-vi-tu-nhien-hilo-180ml--s10170474'
+  },
+  'mouse-logitech': {
+    'FPT Shop': 'https://fptshop.com.vn/phu-kien/chuot-may-tinh-khong-day-logitech-m331-wireless-mouse'
+  }
+};
+
+const storeLogos = {
+  'WinMart': 'https://www.google.com/s2/favicons?domain=winmart.vn&sz=64',
+  'Bách Hóa Xanh': 'https://www.google.com/s2/favicons?domain=bachhoaxanh.com&sz=64',
+  'Co.op Food': 'https://www.google.com/s2/favicons?domain=cooponline.vn&sz=64',
+  'Shopee Mall': 'https://www.google.com/s2/favicons?domain=shopee.vn&sz=64',
+  'Lazada Mall': 'https://www.google.com/s2/favicons?domain=lazada.vn&sz=64',
+  'Tiki': 'https://www.google.com/s2/favicons?domain=tiki.vn&sz=64',
+  'FPT Shop': 'https://www.google.com/s2/favicons?domain=fptshop.com.vn&sz=64',
+  'CellphoneS': 'https://www.google.com/s2/favicons?domain=cellphones.com.vn&sz=64',
+  'GearVN': 'https://www.google.com/s2/favicons?domain=gearvn.com&sz=64',
+  'Thế Giới Di Động': 'https://www.google.com/s2/favicons?domain=thegioididong.com&sz=64',
+  'MyKingdom': 'https://www.google.com/s2/favicons?domain=mykingdom.com.vn&sz=64',
+  'Hasaki': 'https://www.google.com/s2/favicons?domain=hasaki.vn&sz=64',
+  'Guardian': 'https://www.google.com/s2/favicons?domain=guardian.com.vn&sz=64',
+  'Nhà sách Fahasa': 'https://www.google.com/s2/favicons?domain=fahasa.com&sz=64',
+  'Điện Máy Xanh': 'https://www.google.com/s2/favicons?domain=dienmayxanh.com&sz=64'
 };
 
 export const exchangeRates = {
@@ -119,10 +133,11 @@ export const products = [
 
 
 products.forEach((product) => {
+  product.fallbackImage = product.image;
   product.image = realProductImages[product.id] || product.image;
   product.stores = product.stores.map((store) => ({
     ...store,
-    storeUrl: store.storeUrl && store.storeUrl !== '#' ? store.storeUrl : storeSearchUrl(store.storeName, product.name)
+    storeUrl: directStoreUrls[product.id]?.[store.storeName] || (store.storeUrl && store.storeUrl !== '#' ? store.storeUrl : storeSearchUrl(store.storeName, product.name))
   }));
 });
 
@@ -131,3 +146,5 @@ export const categories = ['Tất cả', ...Array.from(new Set(products.map((p) 
 export const getBestStore = (product) => [...product.stores].sort((a, b) => a.storePrice - b.storePrice)[0];
 export const getWorstStore = (product) => [...product.stores].sort((a, b) => b.storePrice - a.storePrice)[0];
 export const getSavingAmount = (product) => Math.max(0, getWorstStore(product).storePrice - getBestStore(product).storePrice);
+
+export const getStoreLogo = (storeName) => storeLogos[storeName] || 'https://www.google.com/s2/favicons?domain=google.com&sz=64';
