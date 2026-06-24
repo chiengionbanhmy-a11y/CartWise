@@ -287,7 +287,11 @@ p { color: var(--muted); line-height: 1.65; }
 .cawi-floating {
   position: fixed;
   z-index: 1200;
-  transition: left 2.8s ease, right 2.8s ease, top 2.8s ease, bottom 2.8s ease;
+  transition:
+    left 7.5s ease-in-out,
+    right 7.5s ease-in-out,
+    top 7.5s ease-in-out,
+    bottom 7.5s ease-in-out;
 }
 
 .cawi-bottom-left {
@@ -506,7 +510,7 @@ p { color: var(--muted); line-height: 1.65; }
 }
 
 .cawi-floating.is-moving .robot {
-  animation: robotWalk 1.05s ease-in-out infinite;
+  animation: robotWalk 1.4s ease-in-out infinite;
 }
 
 .cawi-floating.is-nudging .robot {
@@ -525,11 +529,19 @@ p { color: var(--muted); line-height: 1.65; }
 
 @keyframes robotWalk {
   0%, 100% {
-    transform: translateY(0) scale(var(--robot-scale)) rotate(0deg);
+    transform: translateY(0) scale(var(--robot-scale)) rotate(-1deg);
+  }
+
+  25% {
+    transform: translateY(-4px) scale(var(--robot-scale)) rotate(1.5deg);
   }
 
   50% {
-    transform: translateY(-7px) scale(var(--robot-scale)) rotate(3deg);
+    transform: translateY(-7px) scale(var(--robot-scale)) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(-4px) scale(var(--robot-scale)) rotate(-1.5deg);
   }
 }
 
