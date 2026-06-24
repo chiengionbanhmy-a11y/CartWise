@@ -704,3 +704,197 @@ main { max-width: 1280px; }
   .robot-image-wrap { width: 74px; height: 84px; }
   .robot-image { width: 72px; }
 }
+
+
+/* ===== CartWise V4 fixes: robot, auth, modal, real-photo style ===== */
+.auth-visual-card {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(255,200,74,.28), transparent 26%),
+    linear-gradient(135deg, #ffffff, #fff7ed 45%, #eff6ff);
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+.auth-visual-card p { color: #475569; }
+.auth-visual-card img {
+  width: 108px;
+  height: 108px;
+  padding: 12px;
+  border-radius: 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 16px 36px rgba(15,23,42,.08);
+}
+.auth-provider img { width: 26px; height: 26px; object-fit: contain; }
+.provider-phone { font-size: 20px; color: #111827; background: #eef2ff; }
+
+.product-card img, .modal-image-panel > img {
+  object-fit: cover;
+  background: #fff;
+}
+.product-card {
+  background: rgba(255,255,255,.94);
+}
+
+.cawi-floating {
+  position: fixed;
+  transition: left 2.4s ease-in-out, top 2.4s ease-in-out;
+  z-index: 1200;
+  max-width: min(260px, calc(100vw - 32px));
+}
+.cawi-floating.is-poofing { transition: none; }
+.cawi-floating .cawi-bubble {
+  position: absolute;
+  right: 112px;
+  bottom: 20px;
+  margin: 0;
+  max-width: 190px;
+}
+.cawi-inline .cawi-bubble {
+  display: block;
+  max-width: 240px;
+}
+.robot-image-wrap {
+  position: relative;
+  width: 112px;
+  height: 124px;
+  display: grid;
+  place-items: center;
+}
+.cawi-inline .robot-image-wrap {
+  width: 102px;
+  height: 112px;
+}
+.robot-image {
+  width: 112px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 8px 16px rgba(15,23,42,.16));
+  animation: robotFloat 3.4s ease-in-out infinite;
+  transition: transform .2s ease, filter .2s ease;
+}
+.cawi-inline .robot-image { width: 102px; }
+.theme-1 .robot-image { filter: hue-rotate(38deg) saturate(1.05) drop-shadow(0 8px 16px rgba(15,23,42,.16)); }
+.theme-2 .robot-image { filter: hue-rotate(120deg) saturate(1.08) drop-shadow(0 8px 16px rgba(15,23,42,.16)); }
+.theme-3 .robot-image { filter: hue-rotate(205deg) saturate(1.08) drop-shadow(0 8px 16px rgba(15,23,42,.16)); }
+.theme-4 .robot-image { filter: hue-rotate(290deg) saturate(1.12) drop-shadow(0 8px 16px rgba(15,23,42,.16)); }
+.cawi.is-moving .robot-image { animation: robotWalkVisual 1.25s ease-in-out infinite; }
+.cawi.is-hovered .robot-image { animation: robotHappyShake .42s ease-in-out 1; }
+.cawi.is-hovered .robot-smile-overlay { opacity: 0 !important; }
+
+.robot-hover-sparkle {
+  position: absolute;
+  color: #fb7185;
+  font-size: 19px;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(251,113,133,.22));
+}
+.sparkle-1 { top: 12px; left: 0; }
+.sparkle-2 { top: 4px; right: 6px; }
+.sparkle-3 { bottom: 20px; left: 6px; color: #f9a8d4; }
+.cawi.is-hovered .robot-hover-sparkle { animation: sparklePop .8s ease both; }
+.cawi.is-hovered .sparkle-2 { animation-delay: .08s; }
+.cawi.is-hovered .sparkle-3 { animation-delay: .15s; }
+
+.robot-sleep-eyes {
+  position: absolute;
+  left: 37px;
+  top: 43px;
+  width: 42px;
+  height: 12px;
+  opacity: 0;
+  pointer-events: none;
+}
+.robot-sleep-eyes::before,
+.robot-sleep-eyes::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: #2d2945;
+}
+.robot-sleep-eyes::before { left: 0; transform: rotate(7deg); }
+.robot-sleep-eyes::after { right: 0; transform: rotate(-7deg); }
+.cawi.is-sleeping .robot-sleep-eyes { opacity: 1; }
+.cawi.is-sleeping .robot-image { filter: saturate(.85) brightness(.96) drop-shadow(0 8px 16px rgba(15,23,42,.16)); }
+
+.robot-poof {
+  position: absolute;
+  inset: 30px 10px 16px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+}
+.cawi.is-poofing .robot-poof {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,.95) 0 12px, transparent 13px),
+    radial-gradient(circle at 50% 35%, rgba(255,220,188,.9) 0 18px, transparent 19px),
+    radial-gradient(circle at 75% 58%, rgba(255,255,255,.85) 0 14px, transparent 15px);
+  animation: smokePoof .75s ease-out both;
+}
+.cawi.is-poofing .robot-image { animation: robotPoofBlink .75s ease-out both; }
+
+.modal-robot-area {
+  position: fixed !important;
+  right: 34px;
+  bottom: 96px;
+  z-index: 2600;
+  margin: 0 !important;
+  display: flex;
+  align-items: flex-end;
+  animation: robotSpawn .55s ease both;
+}
+.modal-robot-area .cawi-bubble {
+  position: static;
+  margin: 0 12px 28px 0;
+}
+.modal-robot-area .robot-image,
+.modal-robot-area .cawi-inline .robot-image { width: 112px; }
+.modal-robot-area .robot-image-wrap,
+.modal-robot-area .cawi-inline .robot-image-wrap {
+  width: 112px;
+  height: 124px;
+}
+
+@keyframes robotHappyShake {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  20% { transform: translateY(-2px) rotate(-4deg) scale(1.04); }
+  40% { transform: translateY(-4px) rotate(4deg) scale(1.06); }
+  60% { transform: translateY(-2px) rotate(-2deg) scale(1.04); }
+  80% { transform: translateY(-3px) rotate(2deg) scale(1.05); }
+}
+@keyframes sparklePop {
+  0% { opacity: 0; transform: scale(.4) translateY(8px); }
+  45% { opacity: 1; transform: scale(1.15) translateY(-7px); }
+  100% { opacity: 0; transform: scale(.8) translateY(-18px); }
+}
+@keyframes robotPoofBlink {
+  0% { opacity: 1; transform: scale(1); }
+  45% { opacity: 0; transform: scale(.65); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes robotWalkVisual {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  25% { transform: translateY(-2px) rotate(1deg); }
+  50% { transform: translateY(-5px) rotate(0deg); }
+  75% { transform: translateY(-2px) rotate(-1deg); }
+}
+
+@media (max-width: 980px) {
+  .cawi-floating .cawi-bubble { display: none; }
+  .robot-image,
+  .modal-robot-area .robot-image { width: 94px; }
+  .robot-image-wrap,
+  .modal-robot-area .robot-image-wrap { width: 94px; height: 104px; }
+  .modal-robot-area { right: 18px; bottom: 78px; }
+}
+@media (max-width: 640px) {
+  .robot-image,
+  .modal-robot-area .robot-image { width: 80px; }
+  .robot-image-wrap,
+  .modal-robot-area .robot-image-wrap { width: 80px; height: 90px; }
+}

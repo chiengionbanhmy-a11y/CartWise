@@ -10,7 +10,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   return (
     <header className="navbar navbar-minimal">
       <button className="brand" onClick={() => onNavigate('home')} aria-label="CartWise Home">
-        <img src="/cartwise-logo-icon.png" alt="CartWise logo" className="brand-logo-image" />
+        <img src="/cartwise-logo-icon-v4.png" alt="CartWise logo" className="brand-logo-image" />
         <span>
           <strong>CartWise</strong>
           <small>Smart cart, smart decisions</small>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 const options = [
-  { key: 'google', label: 'Google', icon: 'https://cdn.simpleicons.org/google' },
-  { key: 'gmail', label: 'Gmail', icon: 'https://cdn.simpleicons.org/gmail' },
-  { key: 'facebook', label: 'Facebook', icon: 'https://cdn.simpleicons.org/facebook' },
+  { key: 'google', label: 'Google', icon: 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' },
+  { key: 'gmail', label: 'Gmail', icon: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg' },
+  { key: 'facebook', label: 'Facebook', icon: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg' },
   { key: 'phone', label: 'Số điện thoại', icon: null, phone: true }
 ];
 
@@ -23,7 +23,7 @@ function LoginModal({ mode = 'login', onClose, onLogin }) {
             <h2>{isRegister ? 'Đăng ký tài khoản CartWise' : 'Đăng nhập vào CartWise'}</h2>
             <p>{isRegister ? 'Tạo tài khoản để lưu hồ sơ, cài đặt ngôn ngữ, tiền tệ và đồng bộ trải nghiệm mua sắm.' : 'Đăng nhập để tiếp tục sử dụng cài đặt hồ sơ, so sánh giá và trợ lý Cawi Robo.'}</p>
             <div className="auth-visual-card">
-              <img src="/cartwise-logo-icon.png" alt="CartWise" />
+              <img src="/cartwise-logo-icon-v4.png" alt="CartWise" />
               <p>So sánh giá, xem ưu đãi, và đi đến nơi mua chính thức chỉ trong vài bước.</p>
             </div>
           </div>
