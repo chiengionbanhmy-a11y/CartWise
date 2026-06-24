@@ -36,7 +36,7 @@ function CawiRobot({ mode = 'floating', message = 'Mình là Cawi Robo!', page =
     const interval = setInterval(() => {
       if (mode !== 'floating') return;
       const inactive = Date.now() - lastInteract.current;
-      if (inactive > 10000 && !moving) {
+      if (inactive > 15000 && !moving) {
         setMoving(true);
         setPositionIndex((i) => i + 1);
         lastInteract.current = Date.now();
