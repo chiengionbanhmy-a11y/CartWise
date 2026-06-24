@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartWise - Robot Fix</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ĐOẠN CODE NÀY ĐỂ BẠN THAM KHẢO HOẶC THAY THẾ VÀO PHẦN TRANG WEB CỦA BẠN -->
+    
+    <!-- Khung chứa toàn bộ Widget Robot (Góc dưới bên phải màn hình) -->
+    <div class="cartwise-robot-widget">
+        
+        <!-- Bong bóng thoại (Chat Bubble) đã được sửa lỗi vỡ chữ dọc -->
+        <div class="robot-chat-bubble">
+            <p>Chào bạn, mình là CartwiRo!</p>
+            <!-- Nút đóng bong bóng thoại nếu người dùng muốn ẩn -->
+            <button class="robot-close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+        </div>
+
+        <!-- Khung chứa hình ảnh con Robot -->
+        <div class="robot-avatar-container">
+            <!-- Thay bằng link ảnh thực tế của con robot của bạn nếu có -->
+            <img src="robot.png" alt="CartWise Robot" class="robot-img">
+            
+            <!-- CHÚ Ý: Đã xóa hoàn toàn thẻ chứa chữ 'zzz' ở đây theo yêu cầu -->
+        </div>
+
+    </div>
+
+</body>
+</html>
