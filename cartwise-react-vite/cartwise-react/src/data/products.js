@@ -26,12 +26,43 @@ const storeSearchUrl = (storeName, productName) => {
 
 
 
+
 const realProductImages = {
-  'water-lavie-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg&w=800&h=800&fit=contain',
-  'water-aquafina-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg&w=800&h=800&fit=contain',
-  'coca-can': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg&w=800&h=800&fit=contain',
-  'th-milk': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg&w=800&h=800&fit=contain',
-  'mouse-logitech': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg&w=800&h=800&fit=contain'
+  // Đồ uống / đồ ăn: dùng ảnh sản phẩm thật, ưu tiên CDN từ trang bán lẻ Việt Nam, có proxy để tránh lỗi hotlink.
+  'water-lavie-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg&w=900&h=900&fit=contain',
+  'water-aquafina-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg&w=900&h=900&fit=contain',
+  'coca-can': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg&w=900&h=900&fit=contain',
+  'th-milk': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg&w=900&h=900&fit=contain',
+  'haohao': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2565/8599/mi-hao-hao-tom-chua-cay-goi-75g-1.jpg&w=900&h=900&fit=contain',
+  'oreo': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/3357/79531/banh-quy-socola-oreo-goi-133g-1.jpg&w=900&h=900&fit=contain',
+
+  // Điện tử / phụ kiện: ảnh sản phẩm thật hoặc ảnh thương mại gần đúng theo tên sản phẩm.
+  'mouse-logitech': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg&w=900&h=900&fit=contain',
+  'mouse-razer': 'https://images.weserv.nl/?url=product.hstatic.net/1000026716/product/chuot-razer-deathadder-essential-white_7d3f4233fe1d4478b9c80a3bcb7d6a42.png&w=900&h=900&fit=contain',
+  'mouse-rapoo': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226442/chuot-bluetooth-rapoo-m100-silent-den-ava-600x600.jpg&w=900&h=900&fit=contain',
+  'keyboard-mechanical': 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=85',
+  'headphone-jbl': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=85',
+  'powerbank-anker': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=900&q=85',
+  'phone-samsung': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=85',
+  'speaker-bluetooth': 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=900&q=85',
+
+  // Các nhóm còn lại dùng ảnh thật minh họa sản phẩm thay vì SVG demo.
+  'popmart-labubu': 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?auto=format&fit=crop&w=900&q=85',
+  'funko-hero': 'https://images.unsplash.com/photo-1608889476561-6242cfdbf622?auto=format&fit=crop&w=900&q=85',
+  'lego-classic': 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=900&q=85',
+  'anime-figure': 'https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?auto=format&fit=crop&w=900&q=85',
+  'boardgame': 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=85',
+  'teddy-bear': 'https://images.unsplash.com/photo-1563901935883-cb61f5d49be4?auto=format&fit=crop&w=900&q=85',
+  'lipstick': 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=900&q=85',
+  'sunscreen': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85',
+  'cleanser': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=900&q=85',
+  'notebook': 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=85',
+  'pen': 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=85',
+  'casio': 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&w=900&q=85',
+  'study-chair': 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=900&q=85',
+  'desk-lamp': 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85',
+  'rice-cooker': 'https://images.unsplash.com/photo-1628277613967-6abca504d0ac?auto=format&fit=crop&w=900&q=85',
+  'mini-fan': 'https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?auto=format&fit=crop&w=900&q=85'
 };
 
 const directStoreUrls = {
@@ -47,15 +78,43 @@ const directStoreUrls = {
   },
   'coca-can': {
     'WinMart': 'https://winmart.vn/products/coca-cola-nuoc-giai-khat-320ml--s10011650',
-    'Shopee Mall': 'https://shopee.vn/search?keyword=coca-cola%20lon%20320ml'
+    'Shopee Mall': 'https://shopee.vn/search?keyword=coca-cola%20lon%20320ml',
+    'Tiki': 'https://tiki.vn/search?q=coca-cola%20lon%20320ml'
   },
   'th-milk': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml',
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tiet-trung-th-co-duong-180ml-loc',
     'WinMart': 'https://winmart.vn/products/th-milk-sttt-vi-tu-nhien-hilo-180ml--s10170474',
     'Co.op Food': 'https://cooponline.vn/tim-kiem?query=th%20true%20milk%20180ml'
   },
+  'haohao': {
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/mi-an-lien/mi-hao-hao-tom-chua-cay-goi-75g',
+    'WinMart': 'https://winmart.vn/search?keyword=h%E1%BA%A3o%20h%E1%BA%A3o%20t%C3%B4m%20chua%20cay',
+    'Shopee Mall': 'https://shopee.vn/search?keyword=m%C3%AC%20h%E1%BA%A3o%20h%E1%BA%A3o%20t%C3%B4m%20chua%20cay'
+  },
+  'oreo': {
+    'WinMart': 'https://winmart.vn/search?keyword=oreo%20socola',
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/banh-quy/banh-quy-kem-oreo-socola-133g',
+    'Tiki': 'https://tiki.vn/search?q=oreo%20socola'
+  },
   'mouse-logitech': {
-    'FPT Shop': 'https://fptshop.com.vn/phu-kien/chuot-may-tinh-khong-day-logitech-m331-wireless-mouse'
+    'FPT Shop': 'https://fptshop.com.vn/phu-kien/chuot-may-tinh-khong-day-logitech-m331-wireless-mouse',
+    'Shopee Mall': 'https://shopee.vn/search?keyword=Logitech%20M331',
+    'Tiki': 'https://tiki.vn/search?q=Logitech%20M331'
+  },
+  'mouse-razer': {
+    'GearVN': 'https://gearvn.com/search?type=product&q=Razer%20DeathAdder',
+    'CellphoneS': 'https://cellphones.com.vn/catalogsearch/result/?q=Razer%20DeathAdder',
+    'Lazada Mall': 'https://www.lazada.vn/catalog/?q=Razer%20DeathAdder'
+  },
+  'mouse-rapoo': {
+    'FPT Shop': 'https://fptshop.com.vn/tim-kiem/rapoo%20m100',
+    'Shopee Mall': 'https://shopee.vn/search?keyword=Rapoo%20M100',
+    'Tiki': 'https://tiki.vn/search?q=Rapoo%20M100'
+  },
+  'keyboard-mechanical': {
+    'Shopee Mall': 'https://shopee.vn/search?keyword=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm',
+    'Lazada Mall': 'https://www.lazada.vn/catalog/?q=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm',
+    'Tiki': 'https://tiki.vn/search?q=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm'
   }
 };
 
