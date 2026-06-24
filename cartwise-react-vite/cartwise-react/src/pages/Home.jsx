@@ -16,35 +16,53 @@ function Home({ appState, onOpenProduct, onNavigate }) {
     });
   }, [products, query, category]);
 
+  function stubFeature(name) {
+    alert(`${name} đang ở chế độ demo giao diện. Nếu bạn muốn, mình có thể làm tiếp chức năng thật ở bản cập nhật sau.`);
+  }
+
   return (
     <>
-      <section className="hero-section">
-        <div className="hero-content">
-          <span className="eyebrow">AI Shopping Assistant</span>
-          <h1>CartWise giúp bạn tìm nơi mua rẻ hơn trong vài giây</h1>
-          <p>So sánh giá, xem ưu đãi, đổi tiền tệ và nhận tư vấn từ Cawi Robo trước khi mua.</p>
-          <div className="hero-actions">
-            <button className="primary" onClick={() => onNavigate('stores')}>Khám phá điểm bán</button>
-            <button className="secondary" onClick={() => onNavigate('flash')}>Xem Flash Sale</button>
-          </div>
+      <section className="home-hero section-block">
+        <div className="hero-top-tag">
+          <span>✧</span>
+          <span>Mua sắm thông minh hơn mỗi ngày</span>
         </div>
-        <div className="hero-card">
-          <div className="score-ring">98%</div>
-          <h3>Tỉ lệ tìm được giá tốt</h3>
-          <p>Demo dữ liệu sản phẩm đa dạng: đồ uống, điện tử, đồ chơi, mỹ phẩm, học tập, gia dụng.</p>
+
+        <h1 className="hero-title-center">
+          <span className="hero-title-dark">Smart Cart, </span>
+          <span className="hero-title-accent">Smart Decisions</span>
+        </h1>
+
+        <div className="hero-search-wrap">
+          <div className="hero-search-input">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Tìm sản phẩm bạn muốn so sánh giá..."
+            />
+            <button className="icon-btn search-btn" aria-label="Tìm kiếm">🔍</button>
+          </div>
+          <button className="utility-btn" onClick={() => stubFeature('Tải ảnh / chụp ảnh')}>📷 Tải ảnh / chụp ảnh</button>
+          <button className="utility-btn" onClick={() => stubFeature('Quét mã vạch')}>▦ Quét mã vạch</button>
+        </div>
+
+        <div className="category-tabs scroll-tabs home-tabs">
+          {categories.map((c) => (
+            <button key={c} className={category === c ? 'tab active' : 'tab'} onClick={() => setCategory(c)}>{c}</button>
+          ))}
+        </div>
+
+        <div className="hero-cta-row">
+          <button className="primary" onClick={() => onNavigate('stores')}>Khám phá điểm bán</button>
+          <button className="secondary" onClick={() => onNavigate('flash')}>Xem Flash Sale</button>
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="section-heading">
-          <span className="eyebrow">Tìm kiếm thông minh</span>
-          <h2>Tìm sản phẩm để so sánh ngay</h2>
-        </div>
-        <div className="search-panel">
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t.search} />
-          <div className="category-tabs scroll-tabs">
-            {categories.map((c) => <button key={c} className={category === c ? 'tab active' : 'tab'} onClick={() => setCategory(c)}>{c}</button>)}
-          </div>
+      <section className="section-block compact-products">
+        <div className="section-heading center">
+          <span className="eyebrow">Gợi ý nổi bật</span>
+          <h2>Sản phẩm đang được tìm kiếm nhiều</h2>
+          <p>Chọn một sản phẩm để xem chi tiết, so sánh giá và mở link mua trực tiếp.</p>
         </div>
         <div className="product-grid">
           {filtered.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}

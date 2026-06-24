@@ -2,6 +2,28 @@ const img = (name) => new URL(`../assets/products/${name}.svg`, import.meta.url)
 
 const future = (hours) => Date.now() + hours * 60 * 60 * 1000;
 
+const storeSearchUrl = (storeName, productName) => {
+  const q = encodeURIComponent(productName);
+  const map = {
+    'WinMart': `https://winmart.vn/search?keyword=${q}`,
+    'Bách Hóa Xanh': `https://www.bachhoaxanh.com/tu-khoa/${q}`,
+    'Co.op Food': `https://cooponline.vn/tim-kiem?query=${q}`,
+    'Shopee Mall': `https://shopee.vn/search?keyword=${q}`,
+    'Lazada Mall': `https://www.lazada.vn/catalog/?q=${q}`,
+    'Tiki': `https://tiki.vn/search?q=${q}`,
+    'FPT Shop': `https://fptshop.com.vn/tim-kiem/${q}`,
+    'CellphoneS': `https://cellphones.com.vn/catalogsearch/result/?q=${q}`,
+    'GearVN': `https://gearvn.com/search?type=product&q=${q}`,
+    'Thế Giới Di Động': `https://www.thegioididong.com/tim-kiem?key=${q}`,
+    'MyKingdom': `https://www.mykingdom.com.vn/search?query=${q}`,
+    'Hasaki': `https://hasaki.vn/tim-kiem.html?key=${q}`,
+    'Guardian': `https://www.guardian.com.vn/search?type=product&q=${q}`,
+    'Nhà sách Fahasa': `https://www.fahasa.com/catalogsearch/result/?q=${q}`,
+    'Điện Máy Xanh': `https://www.dienmayxanh.com/tim-kiem?key=${q}`
+  };
+  return map[storeName] || '#';
+};
+
 export const exchangeRates = {
   VND: 1,
   USD: 0.000039,
@@ -20,9 +42,9 @@ export const products = [
     id: 'water-lavie-500', name: 'Nước khoáng Lavie 500ml', category: 'Đồ uống', subCategory: 'Nước khoáng', image: img('lavie'),
     description: 'Nước khoáng đóng chai tiện lợi cho học sinh, sinh viên và văn phòng.', basePrice: 6500, originalPrice: 8000, discountPercent: 19, offerEndTime: future(5), tags: ['nuoc','lavie','water','do uong'],
     stores: [
-      { storeName: 'Bách Hóa Xanh', storePrice: 6500, storeUrl: '#' },
-      { storeName: 'WinMart', storePrice: 7000, storeUrl: '#' },
-      { storeName: 'Co.op Food', storePrice: 7200, storeUrl: '#' }
+      { storeName: 'Bách Hóa Xanh', storePrice: 6500, storeUrl: '#'  },
+      { storeName: 'WinMart', storePrice: 7000, storeUrl: '#'  },
+      { storeName: 'Co.op Food', storePrice: 7200, storeUrl: '#'  }
     ]
   },
   { id: 'water-aquafina-500', name: 'Nước Aquafina 500ml', category: 'Đồ uống', subCategory: 'Nước tinh khiết', image: img('aquafina'), description: 'Nước tinh khiết phổ biến, dễ mua tại nhiều cửa hàng.', basePrice: 6000, originalPrice: 8000, discountPercent: 25, offerEndTime: future(3), tags: ['nuoc','aquafina','water'], stores: [{storeName:'WinMart',storePrice:6000,storeUrl:'#'},{storeName:'Bách Hóa Xanh',storePrice:6500,storeUrl:'#'},{storeName:'Co.op Food',storePrice:7000,storeUrl:'#'}] },
@@ -60,6 +82,14 @@ export const products = [
   { id: 'rice-cooker', name: 'Nồi cơm điện mini', category: 'Gia dụng', subCategory: 'Nhà bếp', image: img('ricecooker'), description: 'Nồi cơm mini phù hợp ký túc xá và hộ nhỏ.', basePrice: 399000, originalPrice: 590000, discountPercent: 32, offerEndTime: future(27), tags: ['noi com','gia dung','nha bep'], stores: [{storeName:'Điện Máy Xanh',storePrice:399000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:420000,storeUrl:'#'},{storeName:'Tiki',storePrice:450000,storeUrl:'#'}] },
   { id: 'mini-fan', name: 'Quạt mini để bàn', category: 'Gia dụng', subCategory: 'Quạt', image: img('fan'), description: 'Quạt mini sạc USB, tiện dùng trên bàn học.', basePrice: 99000, originalPrice: 159000, discountPercent: 38, offerEndTime: future(30), tags: ['quat','gia dung','mini fan'], stores: [{storeName:'Shopee Mall',storePrice:99000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:120000,storeUrl:'#'},{storeName:'Tiki',storePrice:135000,storeUrl:'#'}] }
 ];
+
+
+products.forEach((product) => {
+  product.stores = product.stores.map((store) => ({
+    ...store,
+    storeUrl: store.storeUrl && store.storeUrl !== '#' ? store.storeUrl : storeSearchUrl(store.storeName, product.name)
+  }));
+});
 
 export const categories = ['Tất cả', ...Array.from(new Set(products.map((p) => p.category)))];
 
