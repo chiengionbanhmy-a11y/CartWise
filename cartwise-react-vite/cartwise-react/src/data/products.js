@@ -27,27 +27,32 @@ const storeSearchUrl = (storeName, productName) => {
 
 
 const realProductImages = {
-  'water-lavie-500': 'https://cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg',
-  'water-aquafina-500': 'https://cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg',
-  'coca-can': 'https://cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg',
-  'th-milk': 'https://cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg',
-  'mouse-logitech': 'https://cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg'
+  'water-lavie-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg&w=800&h=800&fit=contain',
+  'water-aquafina-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg&w=800&h=800&fit=contain',
+  'coca-can': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg&w=800&h=800&fit=contain',
+  'th-milk': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg&w=800&h=800&fit=contain',
+  'mouse-logitech': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg&w=800&h=800&fit=contain'
 };
 
 const directStoreUrls = {
   'water-lavie-500': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-suoi-khoang/nuoc-khoang-la-vie-500ml'
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-suoi-khoang/nuoc-khoang-la-vie-500ml',
+    'WinMart': 'https://winmart.vn/search?keyword=la%20vie%20500ml',
+    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=la%20vie%20500ml'
   },
   'water-aquafina-500': {
-    'WinMart': 'https://winmart.vn/products/aquafina-nuoc-tinh-khiet-500ml--s10011216'
+    'WinMart': 'https://winmart.vn/products/aquafina-nuoc-tinh-khiet-500ml--s10011216',
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-tinh-khiet/nuoc-uong-dong-chai-aquafina-500ml',
+    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=aquafina%20500ml'
   },
   'coca-can': {
     'WinMart': 'https://winmart.vn/products/coca-cola-nuoc-giai-khat-320ml--s10011650',
-    'Shopee Mall': 'https://shopee.vn/cocacola_official_store'
+    'Shopee Mall': 'https://shopee.vn/search?keyword=coca-cola%20lon%20320ml'
   },
   'th-milk': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tiet-trung-th-it-duong-180ml-loc',
-    'WinMart': 'https://winmart.vn/products/th-milk-sttt-vi-tu-nhien-hilo-180ml--s10170474'
+    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml',
+    'WinMart': 'https://winmart.vn/products/th-milk-sttt-vi-tu-nhien-hilo-180ml--s10170474',
+    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=th%20true%20milk%20180ml'
   },
   'mouse-logitech': {
     'FPT Shop': 'https://fptshop.com.vn/phu-kien/chuot-may-tinh-khong-day-logitech-m331-wireless-mouse'
@@ -96,7 +101,7 @@ export const products = [
     ]
   },
   { id: 'water-aquafina-500', name: 'Nước Aquafina 500ml', category: 'Đồ uống', subCategory: 'Nước tinh khiết', image: img('aquafina'), description: 'Nước tinh khiết phổ biến, dễ mua tại nhiều cửa hàng.', basePrice: 6000, originalPrice: 8000, discountPercent: 25, offerEndTime: future(3), tags: ['nuoc','aquafina','water'], stores: [{storeName:'WinMart',storePrice:6000,storeUrl:'#'},{storeName:'Bách Hóa Xanh',storePrice:6500,storeUrl:'#'},{storeName:'Co.op Food',storePrice:7000,storeUrl:'#'}] },
-  { id: 'coca-can', name: 'Coca-Cola lon 320ml', category: 'Đồ uống', subCategory: 'Nước ngọt', image: img('coca'), description: 'Nước ngọt có gas, phù hợp combo ăn vặt.', basePrice: 9500, originalPrice: 12000, discountPercent: 21, offerEndTime: future(8), tags: ['coca','nuoc ngot','do uong'], stores: [{storeName:'Shopee Mall',storePrice:9500,storeUrl:'#'},{storeName:'WinMart',storePrice:11000,storeUrl:'#'},{storeName:'Tiki',storePrice:10500,storeUrl:'#'}] },
+  { id: 'coca-can', name: 'Coca-Cola lon 320ml', category: 'Đồ uống', subCategory: 'Nước ngọt', image: img('coca'), description: 'Nước ngọt có gas, phù hợp combo ăn vặt.', basePrice: 9500, originalPrice: 12000, discountPercent: 21, offerEndTime: future(8), tags: ['coca','nuoc ngot','do uong'], stores: [{storeName:'WinMart',storePrice:9500,storeUrl:'#'},{storeName:'Tiki',storePrice:10500,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:11000,storeUrl:'#'}] },
   { id: 'th-milk', name: 'Sữa TH True Milk 180ml', category: 'Đồ ăn', subCategory: 'Sữa', image: img('milk'), description: 'Sữa hộp nhỏ gọn cho bữa phụ.', basePrice: 8200, originalPrice: 10000, discountPercent: 18, offerEndTime: future(4), tags: ['sua','milk','th true milk'], stores: [{storeName:'Bách Hóa Xanh',storePrice:8200,storeUrl:'#'},{storeName:'WinMart',storePrice:9000,storeUrl:'#'},{storeName:'Co.op Food',storePrice:8800,storeUrl:'#'}] },
   { id: 'haohao', name: 'Mì Hảo Hảo tôm chua cay', category: 'Đồ ăn', subCategory: 'Mì gói', image: img('noodle'), description: 'Mì gói phổ biến, dễ so sánh giá theo lốc/thùng.', basePrice: 3900, originalPrice: 5000, discountPercent: 22, offerEndTime: future(12), tags: ['mi','hao hao','do an'], stores: [{storeName:'Bách Hóa Xanh',storePrice:3900,storeUrl:'#'},{storeName:'WinMart',storePrice:4500,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:4100,storeUrl:'#'}] },
   { id: 'oreo', name: 'Bánh Oreo vị socola', category: 'Đồ ăn', subCategory: 'Bánh kẹo', image: img('oreo'), description: 'Bánh quy socola, nhiều mức giá theo gói/combo.', basePrice: 11500, originalPrice: 15000, discountPercent: 23, offerEndTime: future(10), tags: ['oreo','banh','snack'], stores: [{storeName:'WinMart',storePrice:11500,storeUrl:'#'},{storeName:'Bách Hóa Xanh',storePrice:12800,storeUrl:'#'},{storeName:'Tiki',storePrice:12000,storeUrl:'#'}] },
