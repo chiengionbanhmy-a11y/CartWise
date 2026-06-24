@@ -19,7 +19,7 @@ function App() {
   const [page, setPage] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [authMode, setAuthMode] = useState(null);
   const [user, setUser] = useState(savedUser);
   const [profile, setProfile] = useState(savedSettings.profile || { name: savedUser?.name || 'Người dùng CartWise', avatar: 'CW' });
   const [language, setLanguage] = useState(savedSettings.language || 'vi');
@@ -41,7 +41,7 @@ function App() {
     setUser(newUser);
     setProfile((prev) => ({ ...prev, name: newUser.name }));
     localStorage.setItem('cartwise-user', JSON.stringify(newUser));
-    setLoginOpen(false);
+    setAuthMode(null);
   }
 
   function handleLogout() {
@@ -52,7 +52,7 @@ function App() {
   function openSettings() {
     if (!user) {
       alert('Bạn cần đăng nhập hoặc đăng ký trước khi chỉnh sửa hồ sơ và cài đặt.');
-      setLoginOpen(true);
+      setAuthMode('login');
       return;
     }
     setSettingsOpen(true);
@@ -72,7 +72,8 @@ function App() {
         appState={appState}
         onNavigate={navigate}
         onOpenSettings={openSettings}
-        onOpenLogin={() => setLoginOpen(true)}
+        onOpenLogin={() => setAuthMode('login')}
+        onOpenRegister={() => setAuthMode('register')}
         onLogout={handleLogout}
       />
 
@@ -110,7 +111,7 @@ function App() {
         />
       )}
 
-      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} onLogin={handleLogin} />}
+      {authMode && <LoginModal mode={authMode} onClose={() => setAuthMode(null)} onLogin={handleLogin} />}
     </div>
   );
 }

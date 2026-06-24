@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
+import { Search, Mic, Camera, ScanLine } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import { categories } from '../data/products.js';
 
 function Home({ appState, onOpenProduct, onNavigate }) {
-  const { products, t, currency } = appState;
+  const { products, currency } = appState;
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('Tất cả');
 
@@ -16,13 +17,14 @@ function Home({ appState, onOpenProduct, onNavigate }) {
     });
   }, [products, query, category]);
 
+  const topProducts = filtered.slice(0, 8);
   function stubFeature(name) {
-    alert(`${name} đang ở chế độ demo giao diện. Nếu bạn muốn, mình có thể làm tiếp chức năng thật ở bản cập nhật sau.`);
+    alert(`${name} đang ở chế độ demo giao diện. Mình có thể làm chức năng thật ở bản tiếp theo.`);
   }
 
   return (
     <>
-      <section className="home-hero section-block">
+      <section className="home-hero section-block minimal-hero">
         <div className="hero-top-tag">
           <span>✧</span>
           <span>Mua sắm thông minh hơn mỗi ngày</span>
@@ -33,23 +35,42 @@ function Home({ appState, onOpenProduct, onNavigate }) {
           <span className="hero-title-accent">Smart Decisions</span>
         </h1>
 
-        <div className="hero-search-wrap">
-          <div className="hero-search-input">
+        <div className="browser-search-row">
+          <div className="browser-search-shell">
+            <Search size={24} className="shell-left-icon" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm sản phẩm bạn muốn so sánh giá..."
+              placeholder="Tìm trên CartWise hoặc nhập tên sản phẩm"
             />
-            <button className="icon-btn search-btn" aria-label="Tìm kiếm">🔍</button>
+            <div className="shell-right-icons">
+              <button className="shell-icon-btn" aria-label="Tìm bằng giọng nói" onClick={() => stubFeature('Tìm kiếm bằng giọng nói')}>
+                <Mic size={22} />
+              </button>
+              <button className="shell-icon-btn" aria-label="Tải ảnh / chụp ảnh" onClick={() => stubFeature('Tải ảnh / chụp ảnh')}>
+                <Camera size={22} />
+              </button>
+              <button className="shell-icon-btn highlight" aria-label="Tìm kiếm" onClick={() => stubFeature('Tìm kiếm')}>
+                <Search size={22} />
+              </button>
+            </div>
           </div>
-          <button className="utility-btn" onClick={() => stubFeature('Tải ảnh / chụp ảnh')}>📷 Tải ảnh / chụp ảnh</button>
-          <button className="utility-btn" onClick={() => stubFeature('Quét mã vạch')}>▦ Quét mã vạch</button>
+          <button className="utility-tile" onClick={() => stubFeature('Quét mã vạch')}>
+            <ScanLine size={22} />
+            <span>Quét mã vạch</span>
+          </button>
         </div>
 
-        <div className="category-tabs scroll-tabs home-tabs">
+        <div className="scroll-tabs home-tabs centered-tabs">
           {categories.map((c) => (
             <button key={c} className={category === c ? 'tab active' : 'tab'} onClick={() => setCategory(c)}>{c}</button>
           ))}
+        </div>
+
+        <div className="hero-stats-strip">
+          <div><strong>300+</strong><span>Sản phẩm demo</span></div>
+          <div><strong>15+</strong><span>Điểm bán so sánh</span></div>
+          <div><strong>1 click</strong><span>Đi đến nơi mua</span></div>
         </div>
 
         <div className="hero-cta-row">
@@ -61,11 +82,11 @@ function Home({ appState, onOpenProduct, onNavigate }) {
       <section className="section-block compact-products">
         <div className="section-heading center">
           <span className="eyebrow">Gợi ý nổi bật</span>
-          <h2>Sản phẩm đang được tìm kiếm nhiều</h2>
-          <p>Chọn một sản phẩm để xem chi tiết, so sánh giá và mở link mua trực tiếp.</p>
+          <h2>Những sản phẩm được xem nhiều hôm nay</h2>
+          <p>Giao diện tối giản, rõ ràng và mở link mua trực tiếp sang nơi bán tương ứng.</p>
         </div>
         <div className="product-grid">
-          {filtered.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
+          {topProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
         </div>
       </section>
     </>

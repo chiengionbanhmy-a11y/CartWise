@@ -1,4 +1,4 @@
-function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onLogout }) {
+function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout }) {
   const { page, t, user, profile } = appState;
   const navs = [
     ['home', t.home],
@@ -6,20 +6,23 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onLogout })
     ['stores', t.stores],
     ['about', t.about]
   ];
+
   return (
-    <header className="navbar">
+    <header className="navbar navbar-minimal">
       <button className="brand" onClick={() => onNavigate('home')} aria-label="CartWise Home">
-        <span className="brand-logo">CW</span>
+        <img src="/cartwise-logo-icon.png" alt="CartWise logo" className="brand-logo-image" />
         <span>
           <strong>CartWise</strong>
-          <small>Smart shopping bot</small>
+          <small>Smart cart, smart decisions</small>
         </span>
       </button>
+
       <nav className="nav-links">
         {navs.map(([key, label]) => (
           <button key={key} className={page === key ? 'nav-active' : ''} onClick={() => onNavigate(key)}>{label}</button>
         ))}
       </nav>
+
       <div className="nav-actions">
         {user ? (
           <>
@@ -27,9 +30,12 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onLogout })
             <button className="ghost" onClick={onLogout}>{t.logout}</button>
           </>
         ) : (
-          <button className="primary small" onClick={onOpenLogin}>{t.login}</button>
+          <>
+            <button className="ghost auth-trigger" onClick={onOpenLogin}>{t.login}</button>
+            <button className="primary small auth-trigger" onClick={onOpenRegister}>Đăng ký</button>
+          </>
         )}
-        <button className="ghost" onClick={onOpenSettings}>{t.settings}</button>
+        <button className="ghost settings-trigger" onClick={onOpenSettings}>{t.settings}</button>
       </div>
     </header>
   );
