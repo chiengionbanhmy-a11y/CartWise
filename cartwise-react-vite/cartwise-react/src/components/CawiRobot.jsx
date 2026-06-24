@@ -70,7 +70,7 @@ function CawiRobot({ mode = 'floating', message = 'Mình là Cawi Robo!', page =
   useEffect(() => {
     if (mode !== 'floating') return;
     setMoving(true);
-    const timer = setTimeout(() => setMoving(false), 900);
+    const timer = setTimeout(() => setMoving(false), 1600);
     return () => clearTimeout(timer);
   }, [page, mode]);
 
@@ -96,7 +96,7 @@ function CawiRobot({ mode = 'floating', message = 'Mình là Cawi Robo!', page =
 
         setTimeout(() => {
           setMoving(false);
-        }, 2800);
+        }, 7500);
 
         lastInteract.current = Date.now();
       }
