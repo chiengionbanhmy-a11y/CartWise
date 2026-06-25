@@ -4053,3 +4053,126 @@ main {
   .cartbot-eye-pupil.left { left: 35px; }
   .cartbot-eye-pupil.right { left: 56px; }
 }
+
+/* ===== v16 robot eye + send button polish ===== */
+.cartbot-avatar,
+.cartbot-mini-avatar {
+  --face-x-left: 35px;
+  --face-x-right: 63px;
+  --face-y: 41px;
+  --eye-size: 24px;
+  --pupil-size: 12px;
+}
+
+.cartbot-mini-avatar {
+  --face-x-left: 18px;
+  --face-x-right: 30px;
+  --face-y: 16px;
+  --eye-size: 12px;
+  --pupil-size: 6px;
+}
+
+.cartbot-head-layer {
+  overflow: visible;
+  transition: transform .016s linear !important;
+}
+
+.cartbot-eye-blank,
+.cartbot-mini-eye-blank {
+  top: var(--face-y) !important;
+  width: var(--eye-size) !important;
+  height: var(--eye-size) !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.98) 0 22%, #ffffff 23% 100%) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8), 0 0 0 2px rgba(15,23,42,.06) !important;
+  z-index: 2;
+}
+
+.cartbot-eye-blank.left,
+.cartbot-mini-eye-blank.left { left: var(--face-x-left) !important; }
+.cartbot-eye-blank.right,
+.cartbot-mini-eye-blank.right { left: var(--face-x-right) !important; }
+
+.cartbot-eye-pupil,
+.cartbot-mini-pupil {
+  top: calc(var(--face-y) + 6px) !important;
+  width: var(--pupil-size) !important;
+  height: var(--pupil-size) !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.95) 0 18%, transparent 19% 100%), #030712 !important;
+  transform: translate(var(--pupil-x), var(--pupil-y)) !important;
+  transition: transform .016s linear !important;
+  z-index: 3;
+}
+
+.cartbot-eye-pupil.left,
+.cartbot-mini-pupil.left { left: calc(var(--face-x-left) + 6px) !important; }
+.cartbot-eye-pupil.right,
+.cartbot-mini-pupil.right { left: calc(var(--face-x-right) + 6px) !important; }
+
+.cartbot-mini-avatar {
+  position: relative;
+  width: 44px;
+  height: 52px;
+  flex: 0 0 44px;
+}
+
+.cartbot-mini-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 8px 14px rgba(15,23,42,.14));
+}
+
+.cartbot-status {
+  background: #22c55e !important;
+  color: #ffffff !important;
+}
+
+.cartbot-status i {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.22) !important;
+}
+
+.cartbot-send,
+.cartbot-mic {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.cartbot-send svg,
+.cartbot-mic svg {
+  display: block !important;
+  flex: none;
+  margin: 0 !important;
+}
+
+.cartbot-send svg {
+  width: 20px !important;
+  height: 20px !important;
+  transform: none !important;
+}
+
+@media (max-width: 720px) {
+  .cartbot-avatar,
+  .cartbot-img {
+    width: 104px !important;
+  }
+
+  .cartbot-avatar {
+    --face-x-left: 30px;
+    --face-x-right: 53px;
+    --face-y: 35px;
+    --eye-size: 20px;
+    --pupil-size: 10px;
+  }
+
+  .cartbot-mini-avatar {
+    --face-x-left: 17px;
+    --face-x-right: 28px;
+    --face-y: 15px;
+    --eye-size: 11px;
+    --pupil-size: 5px;
+  }
+}

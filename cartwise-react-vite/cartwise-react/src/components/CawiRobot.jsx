@@ -66,7 +66,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     target: { pupilX: 0, pupilY: 0, headX: 0, headY: 0, headRot: 0 }
   });
 
-  const robotImage = '/cartwise-cartbot-v15-clean.png';
+  const robotImage = '/cartwise-cartbot-v16-eyefix.png';
 
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
@@ -119,7 +119,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       const data = followRef.current;
       const c = data.current;
       const t = data.target;
-      const ease = 0.28;
+      const ease = 0.42;
 
       c.pupilX += (t.pupilX - c.pupilX) * ease;
       c.pupilY += (t.pupilY - c.pupilY) * ease;
@@ -149,15 +149,15 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
       const faceCenterX = rect.left + rect.width * 0.5;
       const faceCenterY = rect.top + rect.height * 0.32;
-      const dx = Math.max(-1, Math.min(1, (event.clientX - faceCenterX) / 190));
-      const dy = Math.max(-1, Math.min(1, (event.clientY - faceCenterY) / 150));
+      const dx = Math.max(-1, Math.min(1, (event.clientX - faceCenterX) / 140));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - faceCenterY) / 115));
 
       followRef.current.target = {
-        pupilX: dx * 3.8,
-        pupilY: dy * 3.2,
-        headX: dx * 1.8,
-        headY: dy * 1.2,
-        headRot: dx * 5.2
+        pupilX: dx * 4.6,
+        pupilY: dy * 3.8,
+        headX: dx * 2.2,
+        headY: dy * 1.6,
+        headRot: dx * 6.4
       };
 
       if (!followRef.current.rafId) {
@@ -398,8 +398,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
               </svg>
             </button>
             <button type="submit" className="cartbot-send" aria-label="Gửi tin nhắn">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 3a1 1 0 0 1 .707.293l6 6a1 1 0 0 1-1.414 1.414L13 6.414V20a1 1 0 1 1-2 0V6.414l-4.293 4.293A1 1 0 1 1 5.293 9.293l6-6A1 1 0 0 1 12 3Z"/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 18V6" />
+                <path d="M7 11l5-5 5 5" />
               </svg>
             </button>
           </form>
