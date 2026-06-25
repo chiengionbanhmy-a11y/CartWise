@@ -562,3 +562,31 @@
   max-height: 132px !important;
   overflow-y: auto !important;
 }
+
+
+/* =======================================================
+   v25 — Resize từ 1 góc bất kỳ: kéo ra xa tâm để phóng to, kéo gần tâm để thu nhỏ
+   ======================================================= */
+
+.cw22-resize-handle {
+  width: 38px !important;
+  height: 38px !important;
+  z-index: 30 !important;
+}
+
+.cw22-resize-handle::before {
+  inset: 3px !important;
+  background: rgba(255,255,255,.001) !important;
+}
+
+/* Vì góc nào cũng có thể phóng to/thu nhỏ cả ngang và dọc, dùng cùng một kiểu con trỏ thống nhất */
+.cw22-resize-handle.top-left,
+.cw22-resize-handle.top-right,
+.cw22-resize-handle.bottom-left,
+.cw22-resize-handle.bottom-right {
+  cursor: nwse-resize !important;
+}
+
+.cw22-resizing .cw22-chat {
+  box-shadow: 0 30px 76px rgba(15,23,42,.22), 0 0 0 2px rgba(251,146,60,.18) !important;
+}

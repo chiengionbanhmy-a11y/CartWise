@@ -181,33 +181,20 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     const handleMouseMove = (event) => {
       if (resizeRef.current) {
         const data = resizeRef.current;
-        const dx = event.clientX - data.startX;
-        const dy = event.clientY - data.startY;
         const minW = 320;
         const minH = 360;
 
-        let nextX = data.left;
-        let nextY = data.top;
-        let nextW = data.width;
-        let nextH = data.height;
+        // v25: Giữ chuột ở BẤT KỲ 1 góc nào cũng có thể phóng to/thu nhỏ cả chiều ngang và chiều dọc.
+        // Kéo ra xa tâm khung chat = phóng to. Kéo gần tâm = thu nhỏ.
+        // Không giới hạn vị trí/kích thước tối đa, chỉ giữ kích thước tối thiểu để khung chat không bị vỡ.
+        const distanceX = Math.abs(event.clientX - data.centerX);
+        const distanceY = Math.abs(event.clientY - data.centerY);
 
-        if (data.corner.includes('right')) {
-          nextW = Math.max(minW, data.width + dx);
-        }
+        const nextW = Math.max(minW, distanceX * 2);
+        const nextH = Math.max(minH, distanceY * 2);
 
-        if (data.corner.includes('left')) {
-          nextW = Math.max(minW, data.width - dx);
-          nextX = data.left + (data.width - nextW);
-        }
-
-        if (data.corner.includes('bottom')) {
-          nextH = Math.max(minH, data.height + dy);
-        }
-
-        if (data.corner.includes('top')) {
-          nextH = Math.max(minH, data.height - dy);
-          nextY = data.top + (data.height - nextH);
-        }
+        const nextX = data.centerX - nextW / 2;
+        const nextY = data.centerY - nextH / 2;
 
         setChatPosition({ x: nextX, y: nextY });
         setChatSize({ width: nextW, height: nextH });
@@ -288,7 +275,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       left: rect.left,
       top: rect.top,
       width: rect.width,
-      height: rect.height
+      height: rect.height,
+      centerX: rect.left + rect.width / 2,
+      centerY: rect.top + rect.height / 2
     };
     setChatPosition({ x: rect.left, y: rect.top });
     setChatSize({ width: rect.width, height: rect.height });
