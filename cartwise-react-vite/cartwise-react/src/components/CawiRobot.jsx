@@ -58,6 +58,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   const bubbleTimer = useRef(null);
   const robotRef = useRef(null);
   const dragRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
@@ -138,14 +139,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   useEffect(() => {
     function handleMouseMove(event) {
       if (!dragRef.current) return;
-      const nextX = event.clientX - dragRef.current.offsetX;
-      const nextY = event.clientY - dragRef.current.offsetY;
-      const maxX = Math.max(8, window.innerWidth - 420);
-      const maxY = Math.max(8, window.innerHeight - 660);
-
       setChatPosition({
-        x: Math.min(Math.max(8, nextX), maxX),
-        y: Math.min(Math.max(8, nextY), maxY)
+        x: event.clientX - dragRef.current.offsetX,
+        y: event.clientY - dragRef.current.offsetY
       });
     }
 
@@ -187,6 +183,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     : undefined;
 
   function startDrag(event) {
+    if (event.target.closest('button')) return;
     const card = event.currentTarget.closest('.cartbot-chat');
     if (!card) return;
     const rect = card.getBoundingClientRect();
@@ -194,9 +191,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top
     };
-    if (!chatPosition) {
-      setChatPosition({ x: rect.left, y: rect.top });
-    }
+    setChatPosition({ x: rect.left, y: rect.top });
     document.body.classList.add('cartbot-dragging');
   }
 
@@ -231,6 +226,28 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     setTimeout(() => {
       setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
     }, 450);
+  }
+
+  function startVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setInput((prev) => prev || 'Trình duyệt này chưa hỗ trợ nhập bằng giọng nói.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => {
+      const transcript = event.results?.[0]?.[0]?.transcript || '';
+      setInput(transcript);
+    };
+    recognition.onerror = () => {
+      setInput((prev) => prev || 'Không nhận được giọng nói, bạn thử lại nhé.');
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
   }
 
   return (
@@ -288,9 +305,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Hỏi CartBot..."
+              placeholder="Nhập câu hỏi của bạn..."
             />
-            <button type="submit">Gửi</button>
+            <button type="button" className="cartbot-mic" onClick={startVoiceInput} aria-label="Nhập bằng giọng nói">🎙</button>
+            <button type="submit" className="cartbot-send" aria-label="Gửi tin nhắn">↑</button>
           </form>
         </div>
       )}
@@ -306,19 +324,17 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         <span className="cartbot-flower flower-2">❀</span>
         <span className="cartbot-flower flower-3">♡</span>
 
-        <div className="cartbot-avatar-bg">
-          <div className="cartbot-head-layer">
-            <img src="/cartwise-cartbot-v11-handle.png" alt="Cawi CartBot" className="cartbot-img" />
-            <span className="cartbot-eye-mask left" />
-            <span className="cartbot-eye-mask right" />
-            <span className="cartbot-eye-pupil left" />
-            <span className="cartbot-eye-pupil right" />
-            <span className="cartbot-sleep-face">
-              <i className="left" />
-              <i className="right" />
-              <b>zzz</b>
-            </span>
-          </div>
+        <div className="cartbot-head-layer">
+          <img src="/cartwise-cartbot-v12-handle.png" alt="Cawi CartBot" className="cartbot-img" />
+          <span className="cartbot-eye-mask left" />
+          <span className="cartbot-eye-mask right" />
+          <span className="cartbot-eye-pupil left" />
+          <span className="cartbot-eye-pupil right" />
+          <span className="cartbot-sleep-face">
+            <i className="left" />
+            <i className="right" />
+            <b>zzz</b>
+          </span>
         </div>
       </div>
     </aside>
