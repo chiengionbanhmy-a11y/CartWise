@@ -40,6 +40,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [themeIndex, setThemeIndex] = useState(() => Number(localStorage.getItem('cawi-theme') || 0));
   const [input, setInput] = useState('');
   const [chatPosition, setChatPosition] = useState(null);
+  const [chatSize, setChatSize] = useState(null);
   const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }]);
 
   const rootRef = useRef(null);
@@ -47,6 +48,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const bubbleTimer = useRef(null);
   const clickTimer = useRef(null);
   const dragRef = useRef(null);
+  const resizeRef = useRef(null);
   const recognitionRef = useRef(null);
   const moveTimeoutRef = useRef(null);
   const lastActivity = useRef(Date.now());
@@ -176,28 +178,76 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   }, [mode, moving, sleeping]);
 
   useEffect(() => {
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
     const handleMouseMove = (event) => {
+      if (resizeRef.current) {
+        const data = resizeRef.current;
+        const dx = event.clientX - data.startX;
+        const dy = event.clientY - data.startY;
+        const minW = 360;
+        const minH = 430;
+        const maxW = Math.max(minW, window.innerWidth - 24);
+        const maxH = Math.max(minH, window.innerHeight - 24);
+
+        let nextX = data.left;
+        let nextY = data.top;
+        let nextW = data.width;
+        let nextH = data.height;
+
+        if (data.corner.includes('right')) nextW = data.width + dx;
+        if (data.corner.includes('left')) {
+          nextW = data.width - dx;
+          nextX = data.left + dx;
+        }
+        if (data.corner.includes('bottom')) nextH = data.height + dy;
+        if (data.corner.includes('top')) {
+          nextH = data.height - dy;
+          nextY = data.top + dy;
+        }
+
+        nextW = clamp(nextW, minW, maxW);
+        nextH = clamp(nextH, minH, maxH);
+        nextX = clamp(nextX, 8, window.innerWidth - nextW - 8);
+        nextY = clamp(nextY, 8, window.innerHeight - nextH - 8);
+
+        setChatPosition({ x: nextX, y: nextY });
+        setChatSize({ width: nextW, height: nextH });
+        return;
+      }
+
       if (!dragRef.current) return;
-      setChatPosition({ x: event.clientX - dragRef.current.offsetX, y: event.clientY - dragRef.current.offsetY });
+      const width = chatSize?.width ?? dragRef.current.width;
+      const height = chatSize?.height ?? dragRef.current.height;
+      const nextX = clamp(event.clientX - dragRef.current.offsetX, 8, window.innerWidth - width - 8);
+      const nextY = clamp(event.clientY - dragRef.current.offsetY, 8, window.innerHeight - height - 8);
+      setChatPosition({ x: nextX, y: nextY });
     };
+
     const handleMouseUp = () => {
       dragRef.current = null;
+      resizeRef.current = null;
       document.body.classList.remove('cw22-dragging');
+      document.body.classList.remove('cw22-resizing');
     };
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [chatSize]);
 
   const widgetStyle = useMemo(() => {
     if (mode === 'floating') return { right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
     return undefined;
   }, [mode, stopIndex]);
 
-  const chatStyle = chatPosition ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' } : undefined;
+  const chatStyle = {
+    ...(chatPosition ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' } : {}),
+    ...(chatSize ? { width: `${chatSize.width}px`, height: `${chatSize.height}px` } : {})
+  };
 
   const toggleTheme = () => {
     const next = (themeIndex + 1) % themes.length;
@@ -212,9 +262,29 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     const card = event.currentTarget.closest('.cw22-chat');
     if (!card) return;
     const rect = card.getBoundingClientRect();
-    dragRef.current = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top };
+    dragRef.current = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, width: rect.width, height: rect.height };
     setChatPosition({ x: rect.left, y: rect.top });
     document.body.classList.add('cw22-dragging');
+  };
+
+  const startResize = (corner, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const card = event.currentTarget.closest('.cw22-chat');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    resizeRef.current = {
+      corner,
+      startX: event.clientX,
+      startY: event.clientY,
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height
+    };
+    setChatPosition({ x: rect.left, y: rect.top });
+    setChatSize({ width: rect.width, height: rect.height });
+    document.body.classList.add('cw22-resizing');
   };
 
   const handleRobotClick = (event) => {
@@ -327,6 +397,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 18V6" /><path d="M7 11l5-5 5 5" /></svg>
             </button>
           </form>
+          <button className="cw22-resize-handle top-left" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-left', event)} />
+          <button className="cw22-resize-handle top-right" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-right', event)} />
+          <button className="cw22-resize-handle bottom-left" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-left', event)} />
+          <button className="cw22-resize-handle bottom-right" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-right', event)} />
         </div>
       )}
 

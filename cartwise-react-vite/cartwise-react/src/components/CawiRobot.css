@@ -154,3 +154,273 @@
 
 @media (max-width: 900px) { .cw22-chat { right: 12px; bottom: 142px; width: min(92vw, 460px); min-width: 300px; height: min(560px, calc(100vh - 112px)); } .cw22-avatar { width: 104px; height: 124px; } .cw22-bubble { max-width: 210px; } }
 @media (max-width: 640px) { .cw22-avatar { width: 96px; height: 116px; } .cw22-chat { width: calc(100vw - 16px); min-width: 0; right: 8px; bottom: 128px; border-radius: 22px; } .cw22-msg { font-size: 15px; } .cw22-input { padding: 12px; } }
+
+/* =======================================================
+   v23 — robot mouth/body + chat default position + 4-corner resize
+   ======================================================= */
+
+/* Robot bé hơn một chút, nhưng phần thân xe đẩy to hơn đầu */
+.cw22-avatar {
+  width: 104px !important;
+  height: 128px !important;
+}
+
+.cw22-inline .cw22-avatar {
+  width: 112px !important;
+  height: 136px !important;
+}
+
+.cw22-modal .cw22-avatar {
+  width: 98px !important;
+  height: 122px !important;
+}
+
+/* Đầu nhỏ/gọn hơn */
+.cw22-head-wrap {
+  width: 78px !important;
+  height: 72px !important;
+  margin-left: -39px !important;
+}
+
+.cw22-head {
+  top: 15px !important;
+  height: 66px !important;
+}
+
+.cw22-face {
+  left: 12px !important;
+  right: 12px !important;
+  top: 18px !important;
+  height: 42px !important;
+  border-radius: 22px !important;
+}
+
+.cw22-brow {
+  top: 7px !important;
+}
+
+.cw22-eye {
+  top: 15px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.cw22-eye.left {
+  left: 11px !important;
+}
+
+.cw22-eye.right {
+  right: 11px !important;
+}
+
+.cw22-pupil {
+  width: 7px !important;
+  height: 7px !important;
+}
+
+/* Mồm dịch xuống dưới, không đè vào mắt */
+.cw22-mouth {
+  bottom: 3px !important;
+  width: 22px !important;
+  height: 10px !important;
+  margin-left: -11px !important;
+  border-bottom-width: 4px !important;
+}
+
+/* Má cũng hạ nhẹ để bố cục mặt tự nhiên hơn */
+.cw22-cheek {
+  bottom: 5px !important;
+}
+
+/* Phần thân xe đẩy to hơn phần đầu, cân đối hơn */
+.cw22-cart {
+  width: 96px !important;
+  height: 68px !important;
+  margin-left: -48px !important;
+  top: 62px !important;
+}
+
+.cw22-cart-handle {
+  left: -5px !important;
+  top: 17px !important;
+  width: 23px !important;
+  height: 14px !important;
+}
+
+.cw22-cart-rim {
+  left: 7px !important;
+  right: 5px !important;
+  height: 15px !important;
+}
+
+.cw22-basket {
+  left: 10px !important;
+  right: 6px !important;
+  top: 11px !important;
+  bottom: 12px !important;
+  border-radius: 0 0 17px 17px !important;
+}
+
+.cw22-bumper {
+  left: 34px !important;
+  right: 34px !important;
+}
+
+.cw22-wheel {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.cw22-wheel.left {
+  left: 14px !important;
+}
+
+.cw22-wheel.right {
+  right: 12px !important;
+}
+
+/* Mini bot trong header chat cũng đồng bộ lại kích cỡ mặt/thân */
+.cw22-mini-avatar {
+  width: 58px !important;
+  height: 62px !important;
+}
+
+.cw22-robot.mini {
+  transform: scale(.48) !important;
+}
+
+/* Khung chat: lần đầu mở nằm thấp hơn, rõ trên màn hình laptop 100% */
+.cw22-chat {
+  right: 56px !important;
+  bottom: 24px !important;
+  width: min(620px, calc(100vw - 92px)) !important;
+  height: min(680px, calc(100vh - 62px)) !important;
+  min-width: 360px !important;
+  min-height: 430px !important;
+  max-width: calc(100vw - 16px) !important;
+  max-height: calc(100vh - 16px) !important;
+  resize: none !important; /* dùng resize handle 4 góc riêng */
+  position: fixed !important;
+}
+
+/* Khi người dùng kéo/resize bằng JS, inline style vẫn được ưu tiên */
+.cw22-chat[style*="left"] {
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* 4 góc resize rõ ràng nhưng không làm xấu giao diện */
+.cw22-resize-handle {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  z-index: 8;
+  opacity: .7;
+}
+
+.cw22-resize-handle::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-color: rgba(100, 116, 139, .68);
+  border-style: solid;
+}
+
+.cw22-resize-handle.top-left {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+
+.cw22-resize-handle.top-left::after {
+  left: 8px;
+  top: 8px;
+  border-width: 2px 0 0 2px;
+}
+
+.cw22-resize-handle.top-right {
+  right: 0;
+  top: 0;
+  cursor: nesw-resize;
+}
+
+.cw22-resize-handle.top-right::after {
+  right: 8px;
+  top: 8px;
+  border-width: 2px 2px 0 0;
+}
+
+.cw22-resize-handle.bottom-left {
+  left: 0;
+  bottom: 0;
+  cursor: nesw-resize;
+}
+
+.cw22-resize-handle.bottom-left::after {
+  left: 8px;
+  bottom: 8px;
+  border-width: 0 0 2px 2px;
+}
+
+.cw22-resize-handle.bottom-right {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+
+.cw22-resize-handle.bottom-right::after {
+  right: 8px;
+  bottom: 8px;
+  border-width: 0 2px 2px 0;
+}
+
+.cw22-resize-handle:hover::after {
+  border-color: rgba(251, 146, 60, .95);
+}
+
+.cw22-resizing,
+.cw22-resizing * {
+  user-select: none !important;
+}
+
+/* Giữ input luôn nhìn thấy trong khung chat */
+.cw22-chat header {
+  flex: 0 0 auto !important;
+}
+
+.cw22-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.cw22-quick,
+.cw22-input {
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 900px) {
+  .cw22-chat {
+    right: 12px !important;
+    bottom: 18px !important;
+    width: min(92vw, 520px) !important;
+    height: min(620px, calc(100vh - 44px)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cw22-chat {
+    right: 8px !important;
+    bottom: 12px !important;
+    width: calc(100vw - 16px) !important;
+    height: min(580px, calc(100vh - 24px)) !important;
+    min-width: 0 !important;
+  }
+
+  .cw22-avatar {
+    width: 94px !important;
+    height: 116px !important;
+  }
+}
