@@ -1,31 +1,29 @@
 import { useEffect, useState } from 'react';
 
 function PromoPopup({ onNavigate }) {
-  const [visible, setVisible] = useState(false);
-
+  const [show, setShow] = useState(false);
   useEffect(() => {
-    const seen = sessionStorage.getItem('cartwise-popup-seen');
-    if (!seen) {
-      const timer = setTimeout(() => setVisible(true), 650);
-      return () => clearTimeout(timer);
-    }
+    if (sessionStorage.getItem('cartwise-promo-closed')) return;
+    const timer = setTimeout(() => setShow(true), 650);
+    return () => clearTimeout(timer);
   }, []);
-
-  if (!visible) return null;
-
-  function close() {
-    sessionStorage.setItem('cartwise-popup-seen', '1');
-    setVisible(false);
-  }
-
+  if (!show) return null;
+  const close = () => { sessionStorage.setItem('cartwise-promo-closed', '1'); setShow(false); };
   return (
-    <div className="promo-backdrop" role="presentation" onClick={close}>
-      <section className="promo-popup" role="dialog" aria-modal="true" aria-label="Thông báo ưu đãi" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={close} aria-label="Đóng">×</button>
-        <span className="promo-badge">Flash Sale hôm nay</span>
-        <h2>So sánh giá trước khi mua để tránh mua hớ</h2>
-        <p>CartWise kiểm tra giá, phí ship, voucher và gợi ý nơi đáng mua nhất.</p>
-        <button type="button" onClick={() => { close(); onNavigate('flash'); }}>Xem ưu đãi ngay</button>
+    <div className="promo-stack">
+      <section className="promo-card hot">
+        <button onClick={close} className="mini-close">×</button>
+        <span className="badge">FLASH SALE</span>
+        <h3>Giảm tới 50% cho sản phẩm hot hôm nay</h3>
+        <p>So sánh giá ngay để không bỏ lỡ deal tốt.</p>
+        <button className="dark-btn" onClick={() => { close(); onNavigate('flash'); }}>Mua ngay</button>
+      </section>
+      <section className="promo-card voucher">
+        <button onClick={close} className="mini-close">×</button>
+        <span className="badge light">NEW USER</span>
+        <h3>Người mới nhận voucher giảm 10%</h3>
+        <p>Áp dụng cho đơn hàng trên 100.000₫.</p>
+        <button className="dark-btn" onClick={close}>Nhận voucher</button>
       </section>
     </div>
   );

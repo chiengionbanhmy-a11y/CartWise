@@ -1,283 +1,277 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const positionClasses = ['pos-bottom-right', 'pos-middle-right', 'pos-bottom-left'];
-const variantClasses = ['classic', 'orange', 'blue'];
-const SpeechRecognition = typeof window !== 'undefined'
-  ? window.SpeechRecognition || window.webkitSpeechRecognition
-  : null;
+const floatingStops = ['130px', '34vh', 'calc(100vh - 210px)', '48vh'];
 
-function RobotShape({ small = false, mood = 'normal', variant = 'classic' }) {
-  return (
-    <span className={`${small ? 'mini-cawi' : 'cawi-shape'} ${mood} ${variant}`} aria-hidden="true">
-      <span className="cawi-handle" />
-      <span className="cawi-antenna" />
-      <span className="cawi-ear cawi-ear-left" />
-      <span className="cawi-ear cawi-ear-right" />
-      <span className="cawi-head">
-        <span className="cawi-face">
-          <span className="cawi-eye"><span /></span>
-          <span className="cawi-eye"><span /></span>
-        </span>
-      </span>
-      <span className="cawi-cart-body">
-        <span className="cawi-core" />
-        <span className="cawi-wheel cawi-wheel-left" />
-        <span className="cawi-wheel cawi-wheel-right" />
-      </span>
-      <span className="cawi-shadow" />
-    </span>
-  );
+const quickQuestions = [
+  'Sản phẩm nào rẻ nhất?',
+  'Cách đổi tiền tệ?',
+  'Cách mua sản phẩm?',
+  'Robot có thể giúp gì?',
+  'Tìm ưu đãi hot'
+];
+
+function getBotReply(text) {
+  const q = text.toLowerCase();
+
+  if (q.includes('rẻ') || q.includes('giá') || q.includes('so sánh')) {
+    return 'Bạn hãy bấm “So sánh” ở sản phẩm. Mình sẽ chỉ ra nơi bán rẻ nhất, mức tiết kiệm và link mua trực tiếp.';
+  }
+
+  if (q.includes('tiền') || q.includes('usd') || q.includes('vnd') || q.includes('quy đổi')) {
+    return 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
+  }
+
+  if (q.includes('mua') || q.includes('link') || q.includes('cửa hàng')) {
+    return 'Bạn bấm “Mua ở đây” ở từng điểm bán. CartWise sẽ mở trang mua hoặc trang tìm kiếm chính thức của cửa hàng đó.';
+  }
+
+  if (q.includes('ưu đãi') || q.includes('sale') || q.includes('flash')) {
+    return 'Bạn vào mục Flash Sale để xem các sản phẩm đang giảm giá và đồng hồ đếm ngược ưu đãi.';
+  }
+
+  if (q.includes('robot') || q.includes('giúp')) {
+    return 'Mình là Cawi CartBot. Mình hỗ trợ so sánh giá, gợi ý nơi mua, nhắc ưu đãi và giải thích cách dùng CartWise.';
+  }
+
+  return 'Mình đã hiểu. Bạn có thể hỏi mình về so sánh giá, nơi mua rẻ nhất, đổi tiền tệ, flash sale hoặc cách sử dụng CartWise nhé.';
 }
 
-function CawiRobot({ page, message }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: 'Chào bạn! 👋 Mình là Cawi CartBot, trợ lý mua sắm thông minh của bạn. Mình có thể giúp gì cho bạn hôm nay?' },
-    { id: 2, type: 'user', text: 'Cách đổi tiền tệ?' },
-    { id: 3, type: 'bot', text: 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.' }
-  ]);
+function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi CartBot!' }) {
+  const [stopIndex, setStopIndex] = useState(1);
+  const [moving, setMoving] = useState(false);
+  const [sleeping, setSleeping] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [bubbleVisible, setBubbleVisible] = useState(true);
+  const [bubbleText, setBubbleText] = useState(message);
+  const [themeIndex, setThemeIndex] = useState(Number(localStorage.getItem('cawi-theme') || 0));
+  const [pointer, setPointer] = useState({ eyeX: 0, eyeY: 0, head: 0 });
   const [input, setInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [mood, setMood] = useState('normal');
-  const [clickCount, setClickCount] = useState(0);
-  const [variantIndex, setVariantIndex] = useState(0);
-  const [positionIndex, setPositionIndex] = useState(0);
-  const chatInputRef = useRef(null);
-  const messagesRef = useRef(null);
-  const idleTimerRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const [messages, setMessages] = useState([
+    { from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }
+  ]);
+
+  const lastActivity = useRef(Date.now());
+  const lastMove = useRef(Date.now());
+  const clickTimer = useRef(null);
+  const bubbleTimer = useRef(null);
+  const robotRef = useRef(null);
+
+  const showBubble = (text, duration = 15000) => {
+    setBubbleText(text);
+    setBubbleVisible(true);
+    if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+    if (duration > 0) {
+      bubbleTimer.current = setTimeout(() => setBubbleVisible(false), duration);
+    }
+  };
 
   useEffect(() => {
-    function trackEyes(event) {
-      const shapes = document.querySelectorAll('.cawi-shape, .mini-cawi');
-      shapes.forEach((shape) => {
-        const rect = shape.getBoundingClientRect();
-        const x = event.clientX - (rect.left + rect.width / 2);
-        const y = event.clientY - (rect.top + rect.height / 2);
-        const limitX = Math.max(-5, Math.min(5, x / 28));
-        const limitY = Math.max(-4, Math.min(4, y / 34));
-        shape.style.setProperty('--eye-x', `${limitX}px`);
-        shape.style.setProperty('--eye-y', `${limitY}px`);
+    showBubble(message, 15000);
+    return () => bubbleTimer.current && clearTimeout(bubbleTimer.current);
+  }, [message]);
+
+  useEffect(() => {
+    function followMouse(event) {
+      const rect = robotRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height * 0.34;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 180));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 160));
+
+      setPointer({
+        eyeX: dx * 7.5,
+        eyeY: dy * 5,
+        head: dx * 5
       });
     }
 
-    window.addEventListener('pointermove', trackEyes);
-    return () => window.removeEventListener('pointermove', trackEyes);
+    window.addEventListener('mousemove', followMouse, { passive: true });
+    return () => window.removeEventListener('mousemove', followMouse);
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (!isOpen) {
-        setMood((prev) => prev === 'normal' ? 'blink' : 'normal');
+    function markActivity() {
+      lastActivity.current = Date.now();
+      setMoving(false);
+
+      if (sleeping) {
+        setSleeping(false);
+        showBubble('Bạn đã quay lại rồi ư? Mình sẵn sàng hỗ trợ tiếp nè!', 5000);
       }
-    }, 4500);
-    return () => clearInterval(timer);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!SpeechRecognition) return undefined;
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'vi-VN';
-    recognition.interimResults = false;
-    recognition.continuous = false;
-
-    recognition.addEventListener('result', (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0]?.transcript || '')
-        .join(' ')
-        .trim();
-
-      if (transcript) {
-        setInput((current) => `${current}${current ? ' ' : ''}${transcript}`);
-        requestAnimationFrame(() => chatInputRef.current?.focus());
-      }
-    });
-
-    recognition.addEventListener('end', () => setIsListening(false));
-    recognition.addEventListener('error', () => setIsListening(false));
-    recognitionRef.current = recognition;
-
-    return () => recognition.abort();
-  }, []);
-
-  useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [messages]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => chatInputRef.current?.focus(), 80);
-    }
-  }, [isOpen]);
+    const events = ['mousemove', 'mousedown', 'scroll', 'keydown', 'touchstart', 'input'];
+    events.forEach((eventName) => window.addEventListener(eventName, markActivity, { passive: true }));
 
-  useEffect(() => {
-    const resetIdleTimer = () => {
-      window.clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = window.setTimeout(() => {
-        if (!isOpen) {
-          setPositionIndex((index) => (index + 1) % positionClasses.length);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const inactiveFor = now - lastActivity.current;
+
+      if (inactiveFor >= 30000) {
+        if (!sleeping) {
+          setSleeping(true);
+          setMoving(false);
+          showBubble('khò khò', 0);
         }
-      }, 10000);
-    };
+        return;
+      }
 
-    resetIdleTimer();
-    window.addEventListener('pointermove', resetIdleTimer);
-    window.addEventListener('keydown', resetIdleTimer);
-    window.addEventListener('scroll', resetIdleTimer, { passive: true });
+      if (mode === 'floating' && inactiveFor >= 20000 && now - lastMove.current >= 20000 && !moving && !sleeping) {
+        setMoving(true);
+        setStopIndex((prev) => (prev + 1) % floatingStops.length);
+        lastMove.current = now;
+        setTimeout(() => setMoving(false), 2300);
+      }
+    }, 1000);
 
     return () => {
-      window.clearTimeout(idleTimerRef.current);
-      window.removeEventListener('pointermove', resetIdleTimer);
-      window.removeEventListener('keydown', resetIdleTimer);
-      window.removeEventListener('scroll', resetIdleTimer);
+      events.forEach((eventName) => window.removeEventListener(eventName, markActivity));
+      clearInterval(interval);
     };
-  }, [isOpen]);
+  }, [mode, moving, sleeping]);
 
-  function toggleChat() {
-    setIsOpen((current) => !current);
-    setMood('normal');
-    setClickCount((count) => {
-      const next = count + 1;
-      if (next % 3 === 0) {
-        setVariantIndex((index) => (index + 1) % variantClasses.length);
-        setMood('wave');
-      }
-      return next;
-    });
+  const style = useMemo(() => {
+    const vars = {
+      '--eye-x': `${pointer.eyeX}px`,
+      '--eye-y': `${pointer.eyeY}px`,
+      '--head-rot': `${pointer.head}deg`
+    };
+
+    if (mode === 'floating') {
+      return {
+        ...vars,
+        right: '22px',
+        top: floatingStops[stopIndex],
+        bottom: 'auto',
+        left: 'auto'
+      };
+    }
+
+    return vars;
+  }, [mode, pointer, stopIndex]);
+
+  function handleRobotClick(event) {
+    event.stopPropagation();
+
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+
+      const next = (themeIndex + 1) % 5;
+      setThemeIndex(next);
+      localStorage.setItem('cawi-theme', String(next));
+      showBubble('Mình vừa đổi màu rồi đó ✨', 3500);
+      return;
+    }
+
+    clickTimer.current = setTimeout(() => {
+      setChatOpen((open) => !open);
+      setBubbleVisible(false);
+      clickTimer.current = null;
+    }, 260);
   }
 
-  function quickAsk(text) {
-    setInput(text);
-    requestAnimationFrame(() => chatInputRef.current?.focus());
-  }
+  function sendMessage(text) {
+    const clean = text.trim();
+    if (!clean) return;
 
-  function sendMessage(event) {
-    event?.preventDefault();
-    const text = input.trim();
-    if (!text) return;
-
-    setMessages((current) => [...current, { id: Date.now(), type: 'user', text }]);
+    setMessages((prev) => [...prev, { from: 'user', text: clean }]);
     setInput('');
 
-    window.setTimeout(() => {
-      const lower = text.toLowerCase();
-      let reply = 'Mình đã nhận câu hỏi. Ở bản demo, Cawi sẽ hỗ trợ bạn so sánh giá, kiểm tra ưu đãi và tìm nơi mua phù hợp hơn.';
-      if (lower.includes('rẻ') || lower.includes('giá')) {
-        reply = 'Mình sẽ so sánh giá từ các nơi bán, sau đó gợi ý lựa chọn có tổng chi phí hợp lý nhất.';
-      }
-      if (lower.includes('tiền tệ') || lower.includes('đổi tiền')) {
-        reply = 'Khi mở chi tiết sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
-      }
-      if (lower.includes('ưu đãi') || lower.includes('sale')) {
-        reply = 'Bạn có thể vào mục Flash Sale để xem các ưu đãi nổi bật và sản phẩm đang giảm giá.';
-      }
-      if (lower.includes('cần thiết') || lower.includes('nên mua')) {
-        reply = 'Điểm cần thiết nên dựa trên nhu cầu, tần suất sử dụng, ngân sách, sản phẩm thay thế và thời điểm mua; Cawi chỉ hỗ trợ bạn ra quyết định chứ không quyết định thay bạn.';
-      }
-      setMessages((current) => [...current, { id: Date.now() + 1, type: 'bot', text: reply }]);
-    }, 420);
+    setTimeout(() => {
+      setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
+    }, 450);
   }
-
-  function handleMic() {
-    const recognition = recognitionRef.current;
-    if (!recognition) {
-      alert('Trình duyệt này chưa hỗ trợ nhập giọng nói. Bạn có thể thử trên Chrome hoặc Edge.');
-      return;
-    }
-
-    if (isListening) {
-      recognition.stop();
-      return;
-    }
-
-    setIsListening(true);
-    recognition.start();
-  }
-
-  function handleKeyDown(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage(event);
-    }
-  }
-
-  const positionClass = positionClasses[positionIndex];
-  const variant = variantClasses[variantIndex];
 
   return (
-    <div className={`cawi-widget ${isOpen ? 'open' : ''} ${positionClass}`}>
-      {!isOpen && <div className="cawi-bubble">{message}</div>}
-
-      <button className="cawi-button" type="button" onClick={toggleChat} aria-label="Mở Cawi CartBot">
-        <RobotShape mood={mood} variant={variant} />
-      </button>
-
-      <section className={`cawi-chat ${isOpen ? 'is-open' : ''}`} aria-hidden={!isOpen} aria-label="Cawi CartBot">
-        <header className="cawi-chat-header">
-          <div className="chat-title-row">
-            <RobotShape small variant={variant} />
-            <div>
-              <strong>Cawi CartBot</strong>
-              <span><i /> Đang hoạt động</span>
-            </div>
-          </div>
-          <div className="chat-header-actions">
-            <button type="button" onClick={() => setIsOpen(false)} aria-label="Thu nhỏ">—</button>
-            <button type="button" onClick={() => setIsOpen(false)} aria-label="Đóng">×</button>
-          </div>
-        </header>
-
-        <div ref={messagesRef} className="cawi-chat-messages">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`cawi-message-row ${msg.type}`}>
-              {msg.type === 'bot' && <RobotShape small variant={variant} />}
-              <p>{msg.text}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="quick-pills" aria-label="Gợi ý câu hỏi nhanh">
-          <button type="button" onClick={() => quickAsk('Sản phẩm nào rẻ nhất?')}>Sản phẩm nào rẻ nhất?</button>
-          <button type="button" onClick={() => quickAsk('Có nên mua sản phẩm này không?')}>Có nên mua không?</button>
-          <button type="button" onClick={() => quickAsk('Cách đổi tiền tệ?')}>Cách đổi tiền tệ?</button>
-        </div>
-
-        <form className="cawi-chat-input-shell" onSubmit={sendMessage}>
-          <RobotShape small variant={variant} />
-
-          <textarea
-            ref={chatInputRef}
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={1}
-            placeholder="Nhập câu hỏi của bạn..."
-            aria-label="Nhập câu hỏi của bạn"
-          />
-
-          <button className={`cawi-mic-button ${isListening ? 'listening' : ''}`} type="button" onClick={handleMic} aria-label="Nhập bằng giọng nói">
-            <svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false">
-              <path d="M24 5.8c-4.55 0-8.25 3.7-8.25 8.25v11.2c0 4.55 3.7 8.25 8.25 8.25s8.25-3.7 8.25-8.25v-11.2c0-4.55-3.7-8.25-8.25-8.25Z" />
-              <path d="M10.8 23.9v1.35C10.8 32.55 16.7 38.5 24 38.5s13.2-5.95 13.2-13.25V23.9" />
-              <path d="M24 38.5v5.7" />
-              <path d="M17.6 44.2h12.8" />
-            </svg>
+    <aside
+      ref={robotRef}
+      className={`cartbot-widget cartbot-${mode} theme-${themeIndex} ${moving ? 'is-moving' : ''} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''} ${chatOpen ? 'chat-open' : ''}`}
+      style={style}
+      aria-label="Cawi CartBot"
+    >
+      {bubbleVisible && !chatOpen && (
+        <div className="cartbot-bubble">
+          <p>{bubbleText}</p>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setBubbleVisible(false);
+            }}
+            aria-label="Đóng lời thoại"
+          >
+            ×
           </button>
+        </div>
+      )}
 
-          <button className="cawi-send-button" type="submit" aria-label="Gửi câu hỏi">
-            <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
-              <path d="M18 28V8" />
-              <path d="M10.5 15.5 18 8l7.5 7.5" />
-            </svg>
-          </button>
-        </form>
+      {chatOpen && (
+        <div className="cartbot-chat" onClick={(event) => event.stopPropagation()}>
+          <header>
+            <strong>Cawi CartBot</strong>
+            <button type="button" onClick={() => setChatOpen(false)}>×</button>
+          </header>
 
-        <small className="chat-disclaimer">Cawi CartBot có thể mắc sai sót. Vui lòng kiểm tra lại thông tin quan trọng.</small>
-      </section>
-    </div>
+          <div className="cartbot-messages">
+            {messages.map((item, index) => (
+              <div key={`${item.from}-${index}`} className={`cartbot-msg ${item.from}`}>
+                {item.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="cartbot-quick">
+            {quickQuestions.map((q) => (
+              <button key={q} type="button" onClick={() => sendMessage(q)}>{q}</button>
+            ))}
+          </div>
+
+          <form
+            className="cartbot-input"
+            onSubmit={(event) => {
+              event.preventDefault();
+              sendMessage(input);
+            }}
+          >
+            <input
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder="Hỏi CartBot..."
+            />
+            <button type="submit">Gửi</button>
+          </form>
+        </div>
+      )}
+
+      <div
+        className="cartbot-avatar"
+        onClick={handleRobotClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        title="Click 1 lần để mở chat, click 2 lần để đổi màu"
+      >
+        <span className="cartbot-flower flower-1">✿</span>
+        <span className="cartbot-flower flower-2">❀</span>
+        <span className="cartbot-flower flower-3">♡</span>
+
+        <div className="cartbot-head-layer">
+          <img src="/cartwise-cartbot-v10-twoeyes-handle.png" alt="Cawi CartBot" className="cartbot-img" />
+          <span className="cartbot-eye-mask left" />
+          <span className="cartbot-eye-mask right" />
+          <span className="cartbot-eye-pupil left" />
+          <span className="cartbot-eye-pupil right" />
+          <span className="cartbot-sleep-face">
+            <i className="left" />
+            <i className="right" />
+            <b>zzz</b>
+          </span>
+        </div>
+      </div>
+    </aside>
   );
 }
 

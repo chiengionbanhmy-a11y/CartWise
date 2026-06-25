@@ -1,6 +1,6 @@
 {
-  "name": "cartwise-v13-navy-chat-cawi-old",
-  "version": "13.2.0",
+  "name": "cartwise-demo",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,12 +9,11 @@
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "4.3.4",
-    "vite": "5.4.11",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "devDependencies": {}
 }

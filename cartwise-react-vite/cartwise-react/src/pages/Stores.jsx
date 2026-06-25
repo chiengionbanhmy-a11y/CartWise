@@ -1,39 +1,37 @@
 import { useMemo, useState } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 
+const groups = ['Đồ ăn', 'Đồ uống', 'Điện tử', 'Chuột & phụ kiện', 'Đồ chơi', 'Mỹ phẩm', 'Học tập', 'Gia dụng', 'Nội thất'];
+
 function Stores({ appState, onOpenProduct }) {
   const { products, currency } = appState;
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('Tất cả');
-  const categories = ['Tất cả', ...new Set(products.map((item) => item.category))];
-
-  const visibleProducts = useMemo(() => products.filter((product) => {
-    const matchQuery = product.name.toLowerCase().includes(query.toLowerCase());
-    const matchCategory = category === 'Tất cả' || product.category === category;
-    return matchQuery && matchCategory;
-  }), [products, query, category]);
+  const [openGroup, setOpenGroup] = useState('Đồ uống');
+  const list = useMemo(() => products.filter((p) => p.category === openGroup), [products, openGroup]);
 
   return (
-    <div className="page-stack">
-      <section className="simple-hero stores">
-        <span className="eyebrow">Price Comparison</span>
-        <h1>So sánh sản phẩm theo tổng chi phí</h1>
-        <p>Không chỉ xem giá niêm yết, CartWise tính cả phí ship, voucher, thời gian giao và độ tin cậy nơi bán.</p>
-      </section>
-
-      <div className="store-filters">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nhập tên sản phẩm cần so sánh..." />
-        <div>
-          {categories.map((item) => (
-            <button key={item} type="button" className={category === item ? 'active' : ''} onClick={() => setCategory(item)}>{item}</button>
-          ))}
-        </div>
+    <section className="section-block page-block">
+      <div className="section-heading center">
+        <span className="eyebrow">Điểm bán</span>
+        <h1>So sánh sản phẩm theo từng nhóm</h1>
+        <p>Bấm “Xem” để mở danh sách sản phẩm và biết nơi nào đang bán rẻ hơn.</p>
       </div>
-
+      <div className="store-group-grid">
+        {groups.map((g) => (
+          <article key={g} className={openGroup === g ? 'store-group active' : 'store-group'}>
+            <h3>{g}</h3>
+            <p>{products.filter((p) => p.category === g).length || 0} sản phẩm demo</p>
+            <button className={openGroup === g ? 'dark-btn' : 'primary'} onClick={() => setOpenGroup(g)}>Xem</button>
+          </article>
+        ))}
+      </div>
+      <div className="section-heading compact">
+        <h2>Đang xem: {openGroup}</h2>
+        <p>Mỗi sản phẩm có bảng so sánh giá chi tiết khi bấm vào.</p>
+      </div>
       <div className="product-grid">
-        {visibleProducts.map((product) => <ProductCard key={product.id} product={product} currency={currency} onOpenProduct={onOpenProduct} />)}
+        {list.length ? list.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />) : <p className="empty-state">Nhóm này chưa có dữ liệu, hãy thêm sản phẩm vào products.js.</p>}
       </div>
-    </div>
+    </section>
   );
 }
 

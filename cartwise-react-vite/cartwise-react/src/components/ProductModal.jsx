@@ -1,69 +1,102 @@
-import { currencies, formatCurrency, getBestOffer } from '../data/products.js';
+import { useEffect, useMemo, useState } from 'react';
+import CawiRobot from './CawiRobot.jsx';
+import { formatCurrency } from '../data/currency.js';
+import { getBestStore, getSavingAmount, getStoreLogo } from '../data/products.js';
+
+const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
+
+function getCountdown(endTime) {
+  const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
+  const total = Math.floor(diff / 1000);
+  const h = String(Math.floor(total / 3600)).padStart(2, '0');
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+  const s = String(total % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
 
 function ProductModal({ product, currency, onCurrencyChange, onClose }) {
-  const offers = product.stores
-    .map((offer) => ({ ...offer, total: offer.price + offer.shipping - offer.voucher }))
-    .sort((a, b) => a.total - b.total || b.trust - a.trust);
-  const best = getBestOffer(product);
-  const saving = Math.max(0, product.baseline - best.total);
+  const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
+  const [countdown, setCountdown] = useState(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
+  const best = useMemo(() => getBestStore(product), [product]);
+  const saving = useMemo(() => getSavingAmount(product), [product]);
+
+  useEffect(() => {
+    if (!product.offerEndTime) return;
+    const timer = setInterval(() => setCountdown(getCountdown(product.offerEndTime)), 1000);
+    return () => clearInterval(timer);
+  }, [product.offerEndTime]);
+
+  function selectCurrency(cur) {
+    setLocalCurrency(cur);
+    onCurrencyChange?.(cur);
+  }
 
   return (
-    <div className="modal-backdrop" role="presentation" onClick={onClose}>
-      <section className="product-modal" role="dialog" aria-modal="true" aria-label="Chi tiết so sánh sản phẩm" onClick={(event) => event.stopPropagation()}>
-        <button className="modal-close" type="button" onClick={onClose} aria-label="Đóng">×</button>
-        <div className="modal-hero">
-          <div className="modal-emoji">{product.image}</div>
-          <div>
-            <span className="category-pill">{product.category}</span>
+    <div className="modal-backdrop product-backdrop" role="dialog" aria-modal="true">
+      <div className="product-modal">
+        <button className="close-btn" onClick={onClose}>×</button>
+        <div className="modal-grid">
+          <section className="modal-image-panel">
+            <img
+              src={product.image}
+              alt={product.name}
+              onError={(event) => {
+                if (product.fallbackImage && event.currentTarget.src !== product.fallbackImage) {
+                  event.currentTarget.src = product.fallbackImage;
+                }
+              }}
+            />
+            <div className="quick-convert">
+              <h4>Quy đổi tiền tệ nhanh</h4>
+              <div className="currency-grid compact">
+                {currencies.map((cur) => (
+                  <button key={cur} className={localCurrency === cur ? 'choice active' : 'choice'} onClick={() => selectCurrency(cur)}>{cur}</button>
+                ))}
+              </div>
+              <small>Quy đổi tham khảo từ VNĐ.</small>
+            </div>
+          </section>
+
+          <section className="modal-info-panel">
+            <span className="category-chip">{product.category} · {product.subCategory}</span>
             <h2>{product.name}</h2>
-            <p>CartWise so sánh tổng chi phí thực trả gồm giá sản phẩm, phí vận chuyển và voucher.</p>
-            <div className="modal-stats">
-              <span>★ {product.rating}</span>
-              <span>Need Score {product.needScore}/10</span>
-              <span>Tiết kiệm {formatCurrency(saving, currency)}</span>
+            <p>{product.description}</p>
+
+            <div className="best-price-box">
+              <span>Giá tốt nhất</span>
+              <strong>{formatCurrency(best.storePrice, localCurrency)}</strong>
+              <p>Rẻ nhất tại <b>{best.storeName}</b></p>
+              {saving > 0 && <em>Tiết kiệm lên tới {formatCurrency(saving, localCurrency)}</em>}
+              {countdown && <div className="countdown">Ưu đãi sắp hết: <b>{countdown}</b></div>}
             </div>
-          </div>
-        </div>
 
-        <div className="currency-row">
-          <span>Quy đổi nhanh:</span>
-          {currencies.map((item) => (
-            <button
-              key={item.code}
-              className={currency === item.code ? 'active' : ''}
-              type="button"
-              onClick={() => onCurrencyChange(item.code)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="offer-table" role="table" aria-label="Bảng giá so sánh">
-          <div className="offer-head" role="row">
-            <span>Nơi bán</span>
-            <span>Giá</span>
-            <span>Ship</span>
-            <span>Voucher</span>
-            <span>Tổng trả</span>
-            <span>Độ tin cậy</span>
-          </div>
-          {offers.map((offer, index) => (
-            <div className={`offer-row ${index === 0 ? 'best' : ''}`} role="row" key={offer.store}>
-              <span>{offer.store}{index === 0 && <b> Rẻ nhất</b>}</span>
-              <span>{formatCurrency(offer.price, currency)}</span>
-              <span>{formatCurrency(offer.shipping, currency)}</span>
-              <span>-{formatCurrency(offer.voucher, currency)}</span>
-              <strong>{formatCurrency(offer.total, currency)}</strong>
-              <span>{offer.trust}/5 · {offer.delivery}</span>
+            <h3>Bảng so sánh giá</h3>
+            <div className="store-table">
+              {product.stores.map((store) => {
+                const isBest = store.storeName === best.storeName;
+                return (
+                  <div className={isBest ? 'store-row best' : 'store-row'} key={store.storeName}>
+                    <div className="store-brand">
+                      <img src={getStoreLogo(store.storeName)} alt={store.storeName} />
+                      <strong>{store.storeName}</strong>
+                      {isBest && <span className="best-label">Giá tốt nhất</span>}
+                    </div>
+                    <b>{formatCurrency(store.storePrice, localCurrency)}</b>
+                    <a href={store.storeUrl} target="_blank" rel="noreferrer">Mua ở đây</a>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          </section>
         </div>
 
-        <div className="modal-note">
-          <strong>Gợi ý của Cawi:</strong> lựa chọn tốt nhất không chỉ là giá niêm yết thấp nhất. CartWise ưu tiên tổng chi phí thực trả, độ tin cậy và thời gian giao hàng.
+        <div className="modal-robot-area">
+          <CawiRobot
+            mode="modal"
+            message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
+          />
         </div>
-      </section>
+      </div>
     </div>
   );
 }
