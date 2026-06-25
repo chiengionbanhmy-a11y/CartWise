@@ -76,9 +76,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     }
   };
 
-  useEffect(() => {
-    showBubble(message, 15000);
-  
   const renderRobotVisual = (variant = 'full') => {
     const mini = variant === 'mini';
 
@@ -130,6 +127,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       </div>
     );
   };
+
+  useEffect(() => {
+    showBubble(message, 15000);
+  
 
   return () => {
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
