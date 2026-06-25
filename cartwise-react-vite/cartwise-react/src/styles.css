@@ -2471,3 +2471,599 @@ body {
     grid-template-columns: 1fr 70px !important;
   }
 }
+
+
+
+
+/* =======================================================
+   CARTWISE V11 — robot nổi bật hơn + mắt cao hơn + chat kéo thả
+   ======================================================= */
+
+/* Nền riêng cho robot để không hòa vào nền website */
+.cartbot-avatar {
+  width: 140px !important;
+  height: 162px !important;
+  position: relative;
+}
+
+.cartbot-avatar-bg {
+  position: relative;
+  width: 142px;
+  height: 158px;
+  display: grid;
+  place-items: center;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,255,255,1), rgba(255,255,255,.92) 58%, rgba(238,248,255,.96) 100%);
+  border: 1px solid rgba(226,232,240,.95);
+  box-shadow:
+    0 18px 42px rgba(15,23,42,.18),
+    0 0 0 8px rgba(255,255,255,.45);
+}
+
+.cartbot-img {
+  width: 132px !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+/* Mắt đưa lên cao hơn để đúng vị trí trên mặt */
+.cartbot-eye-mask {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  top: 29.4% !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,1),
+    0 3px 8px rgba(0,0,0,.12) !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.cartbot-eye-mask.left {
+  left: 38.4% !important;
+}
+
+.cartbot-eye-mask.right {
+  left: 58.6% !important;
+}
+
+.cartbot-eye-pupil {
+  position: absolute !important;
+  width: 12px !important;
+  height: 12px !important;
+  top: calc(29.4% + 6px) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 25%, #fff 0 2.5px, transparent 3.5px),
+    #020617 !important;
+  transform: translate(var(--eye-x, 0px), var(--eye-y, 0px)) !important;
+  transition: transform .06s linear !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+}
+
+.cartbot-eye-pupil.left {
+  left: calc(38.4% + 6px) !important;
+}
+
+.cartbot-eye-pupil.right {
+  left: calc(58.6% + 6px) !important;
+}
+
+/* Mắt ngủ cũng dịch lên đúng vị trí */
+.cartbot-sleep-face {
+  position: absolute !important;
+  left: 36.2% !important;
+  top: 27.5% !important;
+  width: 50px !important;
+  height: 30px !important;
+  transform: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.cartbot-sleep-face i {
+  position: absolute !important;
+  top: 8px !important;
+  width: 18px !important;
+  height: 9px !important;
+  border-bottom: 3px solid #ffffff !important;
+  border-radius: 0 0 18px 18px !important;
+}
+
+.cartbot-sleep-face i.left {
+  left: 0 !important;
+}
+
+.cartbot-sleep-face i.right {
+  right: 0 !important;
+}
+
+.cartbot-sleep-face b {
+  position: absolute !important;
+  top: -24px !important;
+  right: -20px !important;
+  color: #7c3aed !important;
+  font-size: 17px !important;
+  animation: zzzDrift 1.6s ease-in-out infinite !important;
+}
+
+.cartbot-widget.is-sleeping .cartbot-eye-mask,
+.cartbot-widget.is-sleeping .cartbot-eye-pupil {
+  opacity: 0 !important;
+}
+
+.cartbot-widget.is-sleeping .cartbot-sleep-face {
+  opacity: 1 !important;
+}
+
+/* Chatbot: hẹp ngang hơn, dài hơn, kéo thả được bằng header */
+.cartbot-chat {
+  position: fixed !important;
+  right: 170px !important;
+  bottom: 24px !important;
+  width: 460px !important;
+  max-width: min(460px, calc(100vw - 32px)) !important;
+  max-height: min(820px, calc(100vh - 48px)) !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+}
+
+.cartbot-chat header {
+  cursor: grab !important;
+  user-select: none !important;
+  padding: 18px 56px 16px 22px !important;
+  font-size: 19px !important;
+}
+
+.cartbot-chat header:active {
+  cursor: grabbing !important;
+}
+
+.cartbot-chat header span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.cartbot-dragging,
+.cartbot-dragging * {
+  cursor: grabbing !important;
+}
+
+.cartbot-messages {
+  max-height: min(520px, calc(100vh - 285px)) !important;
+  min-height: 360px !important;
+  padding: 20px 22px !important;
+  gap: 13px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.cartbot-msg {
+  font-size: 15.5px !important;
+  line-height: 1.5 !important;
+  padding: 13px 15px !important;
+  max-width: 86% !important;
+}
+
+.cartbot-quick {
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+  padding: 0 22px 16px !important;
+  overflow: visible !important;
+}
+
+.cartbot-quick button {
+  font-size: 13px !important;
+  padding: 9px 12px !important;
+}
+
+.cartbot-input {
+  grid-template-columns: 1fr 78px !important;
+  gap: 10px !important;
+  padding: 16px 22px 20px !important;
+}
+
+.cartbot-input input {
+  font-size: 15px !important;
+  padding: 13px 14px !important;
+}
+
+/* Di động */
+@media (max-width: 980px) {
+  .cartbot-avatar,
+  .cartbot-avatar-bg {
+    width: 108px !important;
+  }
+
+  .cartbot-avatar {
+    height: 124px !important;
+  }
+
+  .cartbot-avatar-bg {
+    height: 122px !important;
+    border-radius: 28px;
+  }
+
+  .cartbot-img {
+    width: 102px !important;
+  }
+
+  .cartbot-eye-mask {
+    width: 19px !important;
+    height: 19px !important;
+    top: 29.4% !important;
+  }
+
+  .cartbot-eye-pupil {
+    width: 9px !important;
+    height: 9px !important;
+    top: calc(29.4% + 5px) !important;
+  }
+
+  .cartbot-chat {
+    width: min(420px, calc(100vw - 24px)) !important;
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .cartbot-messages {
+    min-height: 300px !important;
+    max-height: min(460px, calc(100vh - 260px)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cartbot-avatar,
+  .cartbot-avatar-bg {
+    width: 88px !important;
+  }
+
+  .cartbot-avatar {
+    height: 102px !important;
+  }
+
+  .cartbot-avatar-bg {
+    height: 100px !important;
+    border-radius: 24px;
+  }
+
+  .cartbot-img {
+    width: 84px !important;
+  }
+
+  .cartbot-chat {
+    width: min(360px, calc(100vw - 20px)) !important;
+    border-radius: 22px !important;
+  }
+
+  .cartbot-messages {
+    min-height: 280px !important;
+    max-height: min(430px, calc(100vh - 250px)) !important;
+  }
+
+  .cartbot-input {
+    grid-template-columns: 1fr 68px !important;
+  }
+}
+
+
+
+
+/* =======================================================
+   CARTWISE V12 — bỏ nền robot + quai cầm giỏ hàng + chat kéo/thay đổi kích cỡ
+   ======================================================= */
+
+/* Robot không còn nền trắng riêng phía sau */
+.cartbot-avatar {
+  width: 132px !important;
+  height: 154px !important;
+  position: relative !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.cartbot-head-layer {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: rotate(var(--head-rot, 0deg)) !important;
+  transform-origin: 50% 30% !important;
+  transition: transform .1s linear !important;
+}
+
+.cartbot-img {
+  width: 132px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  filter: drop-shadow(0 13px 20px rgba(15,23,42,.2)) !important;
+}
+
+/* Giữ đúng 1 cặp mắt động duy nhất, vị trí cao hơn và tự nhiên hơn */
+.cartbot-eye-mask {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  top: 27.8% !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,1),
+    0 3px 8px rgba(0,0,0,.12) !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.cartbot-eye-mask.left { left: 38.4% !important; }
+.cartbot-eye-mask.right { left: 58.6% !important; }
+
+.cartbot-eye-pupil {
+  position: absolute !important;
+  width: 12px !important;
+  height: 12px !important;
+  top: calc(27.8% + 6px) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 25%, #fff 0 2.5px, transparent 3.5px),
+    #020617 !important;
+  transform: translate(var(--eye-x, 0px), var(--eye-y, 0px)) !important;
+  transition: transform .06s linear !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+}
+
+.cartbot-eye-pupil.left { left: calc(38.4% + 6px) !important; }
+.cartbot-eye-pupil.right { left: calc(58.6% + 6px) !important; }
+
+.cartbot-sleep-face {
+  position: absolute !important;
+  left: 36.2% !important;
+  top: 26.2% !important;
+  width: 50px !important;
+  height: 30px !important;
+  transform: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.cartbot-sleep-face i {
+  position: absolute !important;
+  top: 8px !important;
+  width: 18px !important;
+  height: 9px !important;
+  border-bottom: 3px solid #ffffff !important;
+  border-radius: 0 0 18px 18px !important;
+}
+
+.cartbot-sleep-face i.left { left: 0 !important; }
+.cartbot-sleep-face i.right { right: 0 !important; }
+
+.cartbot-sleep-face b {
+  position: absolute !important;
+  top: -24px !important;
+  right: -20px !important;
+  color: #7c3aed !important;
+  font-size: 17px !important;
+  animation: zzzDrift 1.6s ease-in-out infinite !important;
+}
+
+.cartbot-widget.is-sleeping .cartbot-eye-mask,
+.cartbot-widget.is-sleeping .cartbot-eye-pupil {
+  opacity: 0 !important;
+}
+
+.cartbot-widget.is-sleeping .cartbot-sleep-face {
+  opacity: 1 !important;
+}
+
+/* Khung chat: hẹp hơn, dài hơn, kéo tự do, kéo góc để đổi kích cỡ */
+.cartbot-chat {
+  position: fixed !important;
+  right: 160px !important;
+  bottom: 24px !important;
+  width: 430px !important;
+  height: min(760px, calc(100vh - 48px)) !important;
+  min-width: 340px !important;
+  min-height: 500px !important;
+  max-width: none !important;
+  max-height: none !important;
+  resize: both !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cartbot-chat header {
+  cursor: grab !important;
+  user-select: none !important;
+  flex: 0 0 auto !important;
+  padding: 18px 56px 16px 22px !important;
+  font-size: 19px !important;
+}
+
+.cartbot-chat header:active {
+  cursor: grabbing !important;
+}
+
+.cartbot-chat header span {
+  display: block !important;
+  margin-top: 3px !important;
+  font-size: 12px !important;
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+.cartbot-dragging,
+.cartbot-dragging * {
+  cursor: grabbing !important;
+}
+
+/* Tin nhắn chiếm phần còn lại của khung chat */
+.cartbot-messages {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 20px 22px !important;
+  gap: 13px !important;
+}
+
+.cartbot-msg {
+  font-size: 15.5px !important;
+  line-height: 1.5 !important;
+  padding: 13px 15px !important;
+  max-width: 86% !important;
+}
+
+.cartbot-quick {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+  padding: 0 22px 12px !important;
+  overflow: visible !important;
+}
+
+.cartbot-quick button {
+  font-size: 13px !important;
+  padding: 9px 12px !important;
+}
+
+/* Ô nhập giống kiểu chat hiện đại: không có dấu cộng, không có chữ Cao */
+.cartbot-input {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  grid-template-columns: 1fr 42px 46px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 18px 18px !important;
+  padding: 8px 8px 8px 16px !important;
+  border: 1px solid rgba(226,232,240,.95) !important;
+  border-radius: 999px !important;
+  background: #1f2937 !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 12px 28px rgba(15,23,42,.13) !important;
+}
+
+.cartbot-input input {
+  border: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #f8fafc !important;
+  font-size: 15px !important;
+  padding: 10px 4px !important;
+  min-width: 0 !important;
+}
+
+.cartbot-input input::placeholder {
+  color: #cbd5e1 !important;
+}
+
+.cartbot-mic,
+.cartbot-send {
+  width: 38px !important;
+  height: 38px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  font-weight: 900 !important;
+}
+
+.cartbot-mic {
+  background: transparent !important;
+  color: #f8fafc !important;
+  font-size: 19px !important;
+}
+
+.cartbot-send {
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+/* Resize handle nhìn rõ hơn */
+.cartbot-chat::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 8px !important;
+  bottom: 8px !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-right: 2px solid rgba(100,116,139,.45) !important;
+  border-bottom: 2px solid rgba(100,116,139,.45) !important;
+  pointer-events: none !important;
+}
+
+/* Mobile */
+@media (max-width: 980px) {
+  .cartbot-avatar,
+  .cartbot-img {
+    width: 104px !important;
+  }
+
+  .cartbot-avatar {
+    height: 122px !important;
+  }
+
+  .cartbot-eye-mask {
+    width: 19px !important;
+    height: 19px !important;
+    top: 27.8% !important;
+  }
+
+  .cartbot-eye-pupil {
+    width: 9px !important;
+    height: 9px !important;
+    top: calc(27.8% + 5px) !important;
+  }
+
+  .cartbot-chat {
+    width: 380px !important;
+    height: min(680px, calc(100vh - 30px)) !important;
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cartbot-avatar,
+  .cartbot-img {
+    width: 86px !important;
+  }
+
+  .cartbot-avatar {
+    height: 102px !important;
+  }
+
+  .cartbot-chat {
+    width: min(350px, calc(100vw - 20px)) !important;
+    height: min(640px, calc(100vh - 20px)) !important;
+    min-width: 300px !important;
+    min-height: 440px !important;
+    border-radius: 22px !important;
+  }
+
+  .cartbot-input {
+    grid-template-columns: 1fr 38px 42px !important;
+    margin: 0 12px 14px !important;
+  }
+}
