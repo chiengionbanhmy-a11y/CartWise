@@ -1,95 +1,60 @@
-import { useMemo, useState } from 'react';
-import { Search, Mic, Camera, ScanLine } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
-import { categories } from '../data/products.js';
+
+const categories = [
+  { label: 'Đồ uống', icon: '🥤' },
+  { label: 'Thực phẩm', icon: '🛒' },
+  { label: 'Điện tử', icon: '💻' },
+  { label: 'Gia dụng', icon: '🏠' },
+  { label: 'Mỹ phẩm', icon: '🧴' },
+  { label: 'Thời trang', icon: '👕' }
+];
 
 function Home({ appState, onOpenProduct, onNavigate }) {
-  const { products, currency } = appState;
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('Tất cả');
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return products.filter((p) => {
-      const matchCategory = category === 'Tất cả' || p.category === category;
-      const haystack = [p.name, p.category, p.subCategory, p.description, ...(p.tags || [])].join(' ').toLowerCase();
-      return matchCategory && (!q || haystack.includes(q));
-    });
-  }, [products, query, category]);
-
-  const topProducts = filtered.slice(0, 8);
-  function stubFeature(name) {
-    alert(`${name} đang ở chế độ demo giao diện. Mình có thể làm chức năng thật ở bản tiếp theo.`);
-  }
+  const { t, products, currency } = appState;
 
   return (
-    <>
-      <section className="home-hero section-block minimal-hero">
-        <div className="hero-top-tag">
-          <span>✧</span>
-          <span>Mua sắm thông minh hơn mỗi ngày</span>
-        </div>
-
-        <h1 className="hero-title-center">
-          <span className="hero-title-dark">Smart Cart, </span>
-          <span className="hero-title-accent">Smart Decisions</span>
-        </h1>
-
-        <div className="browser-search-row">
-          <div className="browser-search-shell">
-            <Search size={24} className="shell-left-icon" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm trên CartWise hoặc nhập tên sản phẩm"
-            />
-            <div className="shell-right-icons">
-              <button className="shell-icon-btn" aria-label="Tìm bằng giọng nói" onClick={() => stubFeature('Tìm kiếm bằng giọng nói')}>
-                <Mic size={22} />
-              </button>
-              <button className="shell-icon-btn" aria-label="Tải ảnh / chụp ảnh" onClick={() => stubFeature('Tải ảnh / chụp ảnh')}>
-                <Camera size={22} />
-              </button>
-              <button className="shell-icon-btn highlight" aria-label="Tìm kiếm" onClick={() => stubFeature('Tìm kiếm')}>
-                <Search size={22} />
-              </button>
-            </div>
+    <div className="page-stack">
+      <section className="hero-card">
+        <div>
+          <span className="eyebrow">CartWise AI Shopping Assistant</span>
+          <h1>So sánh giá thông minh<br />Mua sắm tiết kiệm</h1>
+          <p>So sánh giá từ nhiều cửa hàng uy tín, tính tổng chi phí thực trả và nhận gợi ý mua hàng phù hợp.</p>
+          <div className="hero-actions">
+            <button type="button" onClick={() => onNavigate('stores')}>{t.compareNow}</button>
+            <button type="button" onClick={() => onNavigate('flash')}>{t.viewDeals}</button>
           </div>
-          <button className="utility-tile" onClick={() => stubFeature('Quét mã vạch')}>
-            <ScanLine size={22} />
-            <span>Quét mã vạch</span>
-          </button>
         </div>
+        <div className="hero-visual" aria-hidden="true">
+          <span>🏷️</span><span>💸</span><span>🛍️</span><span>⚡</span>
+        </div>
+      </section>
 
-        <div className="scroll-tabs home-tabs centered-tabs">
-          {categories.map((c) => (
-            <button key={c} className={category === c ? 'tab active' : 'tab'} onClick={() => setCategory(c)}>{c}</button>
+      <section>
+        <div className="section-head">
+          <h2>{t.popularCategories}</h2>
+          <button type="button" onClick={() => onNavigate('stores')}>Xem tất cả</button>
+        </div>
+        <div className="category-grid">
+          {categories.map((item) => (
+            <button className="category-card" type="button" key={item.label} onClick={() => onNavigate('stores')}>
+              <span>{item.icon}</span>{item.label}
+            </button>
           ))}
         </div>
-
-        <div className="hero-stats-strip">
-          <div><strong>300+</strong><span>Sản phẩm demo</span></div>
-          <div><strong>15+</strong><span>Điểm bán so sánh</span></div>
-          <div><strong>1 click</strong><span>Đi đến nơi mua</span></div>
-        </div>
-
-        <div className="hero-cta-row">
-          <button className="primary" onClick={() => onNavigate('stores')}>Khám phá điểm bán</button>
-          <button className="secondary" onClick={() => onNavigate('flash')}>Xem Flash Sale</button>
-        </div>
       </section>
 
-      <section className="section-block compact-products">
-        <div className="section-heading center">
-          <span className="eyebrow">Gợi ý nổi bật</span>
-          <h2>Những sản phẩm được xem nhiều hôm nay</h2>
-          <p>Giao diện tối giản, rõ ràng và mở link mua trực tiếp sang nơi bán tương ứng.</p>
+      <section>
+        <div className="section-head">
+          <h2>{t.featuredProducts}</h2>
+          <button type="button" onClick={() => onNavigate('stores')}>Xem tất cả</button>
         </div>
         <div className="product-grid">
-          {topProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
+          {products.slice(0, 4).map((product) => (
+            <ProductCard key={product.id} product={product} currency={currency} onOpenProduct={onOpenProduct} />
+          ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }
 

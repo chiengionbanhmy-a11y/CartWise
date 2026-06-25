@@ -1,91 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CartWise Chat Assistant</title>
-  <link rel="stylesheet" href="cartwise-chat.css" />
-</head>
-<body>
-  <main class="demo-page">
-    <h1>CartWise</h1>
-    <p>Demo giao diện chat mới: ô nhập bo tròn, micro rõ hơn, robot bản cũ không có quai cầm.</p>
-  </main>
-
-  <!-- CARTWISE ASSISTANT START -->
-  <div class="cartwise-assistant" id="cartwiseAssistant">
-    <button class="cw-robot-button" id="cwRobotButton" aria-label="Mở trợ lý CartWise" type="button">
-      <!-- Robot bản cũ: không có quai cầm / strap -->
-      <span class="cw-robot-old" aria-hidden="true">
-        <span class="cw-robot-antenna"></span>
-        <span class="cw-robot-ear cw-robot-ear-left"></span>
-        <span class="cw-robot-ear cw-robot-ear-right"></span>
-        <span class="cw-robot-head">
-          <span class="cw-robot-face">
-            <span class="cw-robot-eye"></span>
-            <span class="cw-robot-eye"></span>
-          </span>
-        </span>
-        <span class="cw-robot-shadow"></span>
-      </span>
-    </button>
-
-    <section class="cw-chat-panel" id="cwChatPanel" aria-label="CartWise chat" aria-hidden="true">
-      <header class="cw-chat-header" id="cwChatHeader">
-        <div>
-          <strong>CartWise Assistant</strong>
-          <span>Hỏi về giá, ưu đãi và lựa chọn mua phù hợp</span>
-        </div>
-        <button class="cw-close-button" id="cwCloseButton" aria-label="Đóng chat" type="button">×</button>
-      </header>
-
-      <div class="cw-chat-messages" id="cwMessages">
-        <div class="cw-message cw-message-bot">
-          Xin chào! Bạn có thể nhập câu hỏi hoặc bấm micro để nói.
-        </div>
-      </div>
-
-      <form class="cw-chat-input-shell" id="cwChatForm">
-        <span class="cw-input-robot-mini" aria-hidden="true">
-          <span class="cw-mini-robot-antenna"></span>
-          <span class="cw-mini-robot-ear cw-mini-left"></span>
-          <span class="cw-mini-robot-ear cw-mini-right"></span>
-          <span class="cw-mini-robot-head">
-            <span class="cw-mini-robot-face">
-              <span></span><span></span>
-            </span>
-          </span>
-        </span>
-
-        <textarea
-          id="cwChatInput"
-          class="cw-chat-input"
-          rows="1"
-          placeholder="Nhập câu hỏi của bạn..."
-          aria-label="Nhập câu hỏi của bạn"
-        ></textarea>
-
-        <button class="cw-mic-button" id="cwMicButton" aria-label="Nhập bằng giọng nói" type="button">
-          <!-- Micro mới: stroke dày hơn, kích thước lớn hơn, dễ nhận diện hơn -->
-          <svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false">
-            <path d="M24 5.8c-4.55 0-8.25 3.7-8.25 8.25v11.2c0 4.55 3.7 8.25 8.25 8.25s8.25-3.7 8.25-8.25v-11.2c0-4.55-3.7-8.25-8.25-8.25Z" />
-            <path d="M10.8 23.9v1.35C10.8 32.55 16.7 38.5 24 38.5s13.2-5.95 13.2-13.25V23.9" />
-            <path d="M24 38.5v5.7" />
-            <path d="M17.6 44.2h12.8" />
-          </svg>
-        </button>
-
-        <button class="cw-send-button" aria-label="Gửi câu hỏi" type="submit">
-          <svg viewBox="0 0 36 36" role="img" aria-hidden="true" focusable="false">
-            <path d="M18 28V8" />
-            <path d="M10.5 15.5 18 8l7.5 7.5" />
-          </svg>
-        </button>
-      </form>
-    </section>
-  </div>
-  <!-- CARTWISE ASSISTANT END -->
-
-  <script src="cartwise-chat.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CartWise - So sánh giá thông minh với Cawi CartBot" />
+    <title>CartWise - So sánh giá thông minh</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

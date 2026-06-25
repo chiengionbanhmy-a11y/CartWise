@@ -1,80 +1,43 @@
 import { useState } from 'react';
-import { languages } from '../data/i18n.js';
-
-const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
-const avatarChoices = ['CW', '🛒', '🤖', '⭐', '💡', '🌏'];
+import { currencies } from '../data/products.js';
 
 function SettingsPanel({ profile, language, currency, onClose, onSave }) {
-  const [draftProfile, setDraftProfile] = useState(profile);
-  const [draftLanguage, setDraftLanguage] = useState(language);
-  const [draftCurrency, setDraftCurrency] = useState(currency);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [draft, setDraft] = useState({ profile, language, currency });
 
-  function requestSave() {
-    setConfirmOpen(true);
-  }
-
-  function confirmSave() {
-    onSave({ profile: draftProfile, language: draftLanguage, currency: draftCurrency });
-    setConfirmOpen(false);
+  function save(event) {
+    event.preventDefault();
+    onSave(draft);
     onClose();
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="settings-panel">
-        <button className="close-btn" onClick={onClose}>×</button>
+    <div className="modal-backdrop" role="presentation" onClick={onClose}>
+      <form className="settings-panel" onSubmit={save} onClick={(event) => event.stopPropagation()}>
+        <button className="modal-close" type="button" onClick={onClose} aria-label="Đóng">×</button>
         <h2>Cài đặt tài khoản</h2>
-        <p className="muted">Thay đổi hồ sơ, ngôn ngữ và đơn vị tiền tệ. Thay đổi chỉ áp dụng sau khi bạn xác nhận.</p>
-
-        <section className="setting-section">
-          <h3>Thay đổi hồ sơ</h3>
-          <div className="profile-editor">
-            <div className="avatar-preview">{draftProfile.avatar}</div>
-            <div>
-              <label>Tên hiển thị</label>
-              <input value={draftProfile.name} onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })} />
-              <div className="avatar-grid">
-                {avatarChoices.map((a) => <button key={a} className={draftProfile.avatar === a ? 'choice active' : 'choice'} onClick={() => setDraftProfile({ ...draftProfile, avatar: a })}>{a}</button>)}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="setting-section">
-          <h3>Ngôn ngữ hiển thị</h3>
-          <div className="choice-grid">
-            {languages.map((lang) => (
-              <button key={lang.code} className={draftLanguage === lang.code ? 'choice active' : 'choice'} onClick={() => setDraftLanguage(lang.code)}>{lang.label}</button>
-            ))}
-          </div>
-        </section>
-
-        <section className="setting-section">
-          <h3>Đơn vị tiền tệ hiển thị</h3>
-          <div className="choice-grid currency-grid">
-            {currencies.map((cur) => <button key={cur} className={draftCurrency === cur ? 'choice active' : 'choice'} onClick={() => setDraftCurrency(cur)}>{cur}</button>)}
-          </div>
-        </section>
-
-        <div className="settings-actions">
-          <button className="ghost" onClick={onClose}>Hủy</button>
-          <button className="primary" onClick={requestSave}>Lưu thay đổi</button>
-        </div>
-
-        {confirmOpen && (
-          <div className="confirm-box">
-            <div>
-              <h3>Bạn có chắc chắn muốn lưu các thay đổi này không?</h3>
-              <p>Sau khi xác nhận, hồ sơ, ngôn ngữ và tiền tệ hiển thị sẽ được cập nhật.</p>
-              <div className="confirm-actions">
-                <button className="ghost" onClick={() => setConfirmOpen(false)}>Không</button>
-                <button className="primary" onClick={confirmSave}>Có</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        <label>
+          Tên hiển thị
+          <input value={draft.profile.name} onChange={(event) => setDraft({ ...draft, profile: { ...draft.profile, name: event.target.value } })} />
+        </label>
+        <label>
+          Avatar chữ tắt
+          <input value={draft.profile.avatar} maxLength={3} onChange={(event) => setDraft({ ...draft, profile: { ...draft.profile, avatar: event.target.value.toUpperCase() } })} />
+        </label>
+        <label>
+          Ngôn ngữ
+          <select value={draft.language} onChange={(event) => setDraft({ ...draft, language: event.target.value })}>
+            <option value="vi">Tiếng Việt</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <label>
+          Đơn vị tiền tệ
+          <select value={draft.currency} onChange={(event) => setDraft({ ...draft, currency: event.target.value })}>
+            {currencies.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
+          </select>
+        </label>
+        <button type="submit">Lưu cài đặt</button>
+      </form>
     </div>
   );
 }

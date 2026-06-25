@@ -1,32 +1,29 @@
-import { formatCurrency } from '../data/currency.js';
-import { getBestStore } from '../data/products.js';
+import { formatCurrency, getBestOffer } from '../data/products.js';
 
 function ProductCard({ product, currency = 'VND', onOpenProduct }) {
-  const best = getBestStore(product);
+  const best = getBestOffer(product);
+  const saving = Math.max(0, product.baseline - best.total);
+
   return (
     <article className="product-card">
-      <img
-        src={product.image}
-        alt={product.name}
-        loading="lazy"
-        onError={(event) => {
-          if (product.fallbackImage && event.currentTarget.src !== product.fallbackImage) {
-            event.currentTarget.src = product.fallbackImage;
-          }
-        }}
-      />
-      <div className="product-body">
-        <span className="category-chip">{product.subCategory}</span>
+      <div className="product-emoji">{product.image}</div>
+      <div className="product-info">
+        <span className="category-pill">{product.category}</span>
         <h3>{product.name}</h3>
-        <p>{product.description}</p>
-        <div className="price-row">
-          <strong>{formatCurrency(best.storePrice, currency)}</strong>
-          {product.originalPrice && <span>{formatCurrency(product.originalPrice, currency)}</span>}
-        </div>
-        <div className="store-line">Rẻ nhất tại <b>{best.storeName}</b></div>
-        <button className="primary full" onClick={() => onOpenProduct(product)}>So sánh</button>
+        <p>★ {product.rating} ({product.reviews})</p>
       </div>
-      {product.discountPercent > 0 && <span className="discount-badge">-{product.discountPercent}%</span>}
+      <div className="product-bottom">
+        <div>
+          <small>Nơi tốt nhất</small>
+          <strong>{best.store}</strong>
+        </div>
+        <div>
+          <small>Tổng trả</small>
+          <strong>{formatCurrency(best.total, currency)}</strong>
+        </div>
+      </div>
+      <div className="product-save">Tiết kiệm tới {formatCurrency(saving, currency)}</div>
+      <button className="card-button" type="button" onClick={() => onOpenProduct(product)}>Xem so sánh</button>
     </article>
   );
 }

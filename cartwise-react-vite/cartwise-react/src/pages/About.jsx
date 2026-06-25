@@ -1,64 +1,45 @@
 import { useState } from 'react';
-import CawiRobot from '../components/CawiRobot.jsx';
 
-const tabs = [
-  { id: 'overview', label: 'Tổng quan' },
-  { id: 'team', label: 'Đội ngũ' },
-  { id: 'contact', label: 'Liên hệ' },
-  { id: 'robot', label: 'Robot CartWise' }
-];
-
-const content = {
+const tabs = {
   overview: {
-    title: 'CartWise là gì?',
-    body: 'CartWise là website so sánh giá thông minh giúp người dùng tìm sản phẩm, xem nơi bán rẻ hơn và nhận gợi ý mua sắm nhanh chóng.'
+    title: 'Tổng quan',
+    body: 'CartWise là ứng dụng hỗ trợ mua sắm thông minh, giúp người dùng so sánh giá, phí vận chuyển, voucher và lựa chọn nơi mua phù hợp hơn.'
   },
   team: {
-    title: 'Đội ngũ phát triển',
-    body: 'CartWise được xây dựng bởi nhóm học sinh yêu thích AI, thiết kế sản phẩm và kinh doanh số. Mỗi thành viên phụ trách nghiên cứu khách hàng, sản phẩm, thiết kế, dữ liệu và truyền thông.'
-  },
-  contact: {
-    title: 'Liên hệ',
-    body: 'Bạn có thể liên hệ nhóm CartWise để góp ý sản phẩm, đề xuất điểm bán hoặc hợp tác phát triển dữ liệu so sánh giá.'
+    title: 'Đội ngũ',
+    body: 'Nhóm tập trung vào nghiên cứu khách hàng, sản phẩm, thiết kế prototype, AI và phân tích kinh doanh để phát triển CartWise theo hướng thực tế.'
   },
   robot: {
-    title: 'Cawi Robo - trợ lý mua sắm của CartWise',
-    body: 'Cawi Robo là mascot độc quyền của CartWise. Robot hỗ trợ tư vấn sản phẩm, nhắc ưu đãi, gợi ý nơi bán rẻ nhất, nhìn theo chuột để tạo cảm giác tương tác và có thể đổi ngoại hình khi người dùng click nhiều lần.'
+    title: 'Robot CartWise',
+    body: 'Cawi Robo là trợ lý mua sắm trên website. Ở bản này robot đã được khôi phục về form cũ, bỏ quai cầm, giữ phần thân dưới cũ và tích hợp chat input mới.'
   }
 };
 
 function About() {
-  const [active, setActive] = useState('overview');
-  const data = content[active];
+  const [tab, setTab] = useState('overview');
+
   return (
-    <section className="section-block page-block about-page">
-      <div className="section-heading center">
+    <div className="page-stack">
+      <section className="simple-hero about">
         <span className="eyebrow">About CartWise</span>
-        <h1>Về chúng tôi</h1>
-        <p>Mọi tab đều có trạng thái active rõ ràng để người dùng biết đang xem mục nào.</p>
-      </div>
-      <div className="about-tabs">
-        {tabs.map((tab) => <button key={tab.id} className={active === tab.id ? 'about-tab active' : 'about-tab'} onClick={() => setActive(tab.id)}>{tab.label}</button>)}
-      </div>
-      <div className="about-card">
-        <div>
-          <span className="category-chip">{tabs.find((t) => t.id === active)?.label}</span>
-          <h2>{data.title}</h2>
-          <p>{data.body}</p>
-          {active === 'robot' && (
-            <ul className="feature-list">
-              <li>Tư vấn sản phẩm khi mở so sánh giá.</li>
-              <li>Nhắc nơi bán rẻ nhất và số tiền tiết kiệm.</li>
-              <li>Mắt và đầu nhìn theo con trỏ chuột.</li>
-              <li>Click 3 lần để đổi ngoại hình robot.</li>
-            </ul>
-          )}
+        <h1>Mua sắm minh bạch hơn, tiết kiệm hơn</h1>
+        <p>CartWise hướng tới việc giúp người dùng ra quyết định mua hàng dựa trên dữ liệu và tiêu chí rõ ràng.</p>
+      </section>
+      <section className="about-tabs">
+        <div className="tab-buttons">
+          {Object.entries(tabs).map(([key, item]) => <button key={key} type="button" className={tab === key ? 'active' : ''} onClick={() => setTab(key)}>{item.title}</button>)}
         </div>
-        <div className="about-robot-box">
-          <CawiRobot mode="inline" message="Mình là Cawi Robo, trợ lý mua sắm của CartWise!" />
-        </div>
-      </div>
-    </section>
+        <article>
+          <h2>{tabs[tab].title}</h2>
+          <p>{tabs[tab].body}</p>
+          <div className="about-metrics">
+            <span><b>15đ</b>Prototype/Demo</span>
+            <span><b>15đ</b>Ứng dụng AI</span>
+            <span><b>5đ</b>Điều chỉnh sau feedback</span>
+          </div>
+        </article>
+      </section>
+    </div>
   );
 }
 

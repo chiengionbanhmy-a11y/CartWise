@@ -1,31 +1,23 @@
-import { useMemo, useState } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
-
-const flashTabs = ['Đồ uống', 'Đồ ăn', 'Điện tử', 'Chuột & phụ kiện', 'Đồ chơi', 'Mỹ phẩm', 'Học tập', 'Gia dụng'];
 
 function FlashSale({ appState, onOpenProduct }) {
   const { products, currency } = appState;
-  const [active, setActive] = useState('Đồ uống');
-  const saleProducts = useMemo(() => {
-    if (active === 'Gia dụng') return products.filter((p) => ['Gia dụng', 'Nội thất'].includes(p.category));
-    if (active === 'Đồ ăn') return products.filter((p) => p.category === 'Đồ ăn');
-    return products.filter((p) => p.category === active);
-  }, [products, active]);
+  const sorted = [...products].sort((a, b) => b.baseline - a.baseline);
 
   return (
-    <section className="section-block page-block">
-      <div className="section-heading center">
-        <span className="eyebrow">Deal hot trong ngày</span>
-        <h1>Flash Sale CartWise</h1>
-        <p>Bấm từng đề mục để xem sản phẩm đang có ưu đãi.</p>
+    <div className="page-stack">
+      <section className="simple-hero flash">
+        <span className="eyebrow">Flash Sale</span>
+        <h1>Ưu đãi hot đang diễn ra</h1>
+        <p>CartWise giúp bạn phân biệt giá giảm thật với giá chỉ nhìn có vẻ rẻ nhờ tính tổng chi phí thực trả.</p>
+      </section>
+      <div className="deal-tabs">
+        <span>Đang diễn ra</span><span>Rẻ nhất hôm nay</span><span>Freeship</span><span>Voucher mạnh</span>
       </div>
-      <div className="category-tabs scroll-tabs big-tabs">
-        {flashTabs.map((tab) => <button key={tab} className={active === tab ? 'tab active' : 'tab'} onClick={() => setActive(tab)}>{tab}</button>)}
+      <div className="product-grid">
+        {sorted.map((product) => <ProductCard key={product.id} product={product} currency={currency} onOpenProduct={onOpenProduct} />)}
       </div>
-      <div className="product-grid reveal">
-        {saleProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
-      </div>
-    </section>
+    </div>
   );
 }
 

@@ -28,7 +28,13 @@ function App() {
   const t = translations[language] || translations.vi;
 
   const appState = useMemo(() => ({
-    page, t, products, user, profile, language, currency
+    page,
+    t,
+    products,
+    user,
+    profile,
+    language,
+    currency
   }), [page, t, user, profile, language, currency]);
 
   function navigate(nextPage) {
@@ -62,8 +68,7 @@ function App() {
     setProfile(next.profile);
     setLanguage(next.language);
     setCurrency(next.currency);
-    const payload = { profile: next.profile, language: next.language, currency: next.currency };
-    localStorage.setItem('cartwise-settings', JSON.stringify(payload));
+    localStorage.setItem('cartwise-settings', JSON.stringify(next));
   }
 
   return (
@@ -77,7 +82,7 @@ function App() {
         onLogout={handleLogout}
       />
 
-      <main>
+      <main className="main-content">
         {page === 'home' && <Home appState={appState} onOpenProduct={setSelectedProduct} onNavigate={navigate} />}
         {page === 'flash' && <FlashSale appState={appState} onOpenProduct={setSelectedProduct} />}
         {page === 'stores' && <Stores appState={appState} onOpenProduct={setSelectedProduct} />}
@@ -88,9 +93,16 @@ function App() {
 
       {!selectedProduct && (
         <CawiRobot
-          mode="floating"
           page={page}
-          message={page === 'stores' ? 'Mình sẽ giúp bạn tìm nơi bán rẻ nhất!' : page === 'flash' ? 'Có nhiều deal hot đang chờ bạn đó!' : page === 'about' ? 'Tìm hiểu thêm về mình trong tab Robot CartWise nhé!' : 'Chào bạn, mình là Cawi CartBot!'}
+          message={
+            page === 'stores'
+              ? 'Mình sẽ giúp bạn tìm nơi bán rẻ nhất!'
+              : page === 'flash'
+                ? 'Có nhiều deal hot đang chờ bạn đó!'
+                : page === 'about'
+                  ? 'Tìm hiểu thêm về mình trong tab Robot CartWise nhé!'
+                  : 'Chào bạn, mình là Cawi CartBot!'
+          }
         />
       )}
 

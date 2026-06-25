@@ -1,43 +1,72 @@
+function Icon({ children }) {
+  return <span className="nav-icon" aria-hidden="true">{children}</span>;
+}
+
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout }) {
   const { page, t, user, profile } = appState;
-  const navs = [
-    ['home', t.home],
-    ['flash', t.flash],
-    ['stores', t.stores],
-    ['about', t.about]
+  const navItems = [
+    { id: 'home', label: t.home, icon: '⌂' },
+    { id: 'stores', label: 'So sánh sản phẩm', icon: '⇄' },
+    { id: 'stores', label: t.stores, icon: '⌖' },
+    { id: 'flash', label: t.flash, icon: '⚡' },
+    { id: 'about', label: t.about, icon: 'ⓘ' }
   ];
 
   return (
-    <header className="navbar navbar-minimal">
-      <button className="brand" onClick={() => onNavigate('home')} aria-label="CartWise Home">
-        <img src="/cartwise-logo-icon-v4.png" alt="CartWise logo" className="brand-logo-image" />
-        <span>
-          <strong>CartWise</strong>
-          <small>Smart cart, smart decisions</small>
-        </span>
-      </button>
+    <>
+      <aside className="sidebar">
+        <button className="brand" type="button" onClick={() => onNavigate('home')}>
+          <span className="brand-mark">🛒</span>
+          <span><b>Cart</b><em>Wise</em></span>
+        </button>
 
-      <nav className="nav-links">
-        {navs.map(([key, label]) => (
-          <button key={key} className={page === key ? 'nav-active' : ''} onClick={() => onNavigate(key)}>{label}</button>
-        ))}
-      </nav>
+        <nav className="nav-list" aria-label="Điều hướng chính">
+          {navItems.map((item, index) => (
+            <button
+              key={`${item.id}-${index}`}
+              className={`nav-item ${page === item.id ? 'active' : ''}`}
+              type="button"
+              onClick={() => onNavigate(item.id)}
+            >
+              <Icon>{item.icon}</Icon>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
 
-      <div className="nav-actions">
-        {user ? (
-          <>
-            <button className="profile-pill" onClick={onOpenSettings}><span>{profile.avatar}</span>{profile.name}</button>
-            <button className="ghost" onClick={onLogout}>{t.logout}</button>
-          </>
-        ) : (
-          <>
-            <button className="ghost auth-trigger" onClick={onOpenLogin}>{t.login}</button>
-            <button className="primary small auth-trigger" onClick={onOpenRegister}>Đăng ký</button>
-          </>
-        )}
-        <button className="ghost settings-trigger" onClick={onOpenSettings}>{t.settings}</button>
-      </div>
-    </header>
+        <div className="sidebar-card">
+          <span>Mới</span>
+          <strong>Tiết kiệm thông minh<br />Mua sắm dễ dàng</strong>
+          <p>CartWise giúp bạn so sánh giá và tìm ưu đãi tốt nhất.</p>
+          <button type="button" onClick={() => onNavigate('stores')}>Khám phá ngay →</button>
+        </div>
+      </aside>
+
+      <header className="topbar">
+        <label className="top-search">
+          <span>⌕</span>
+          <input placeholder="Tìm sản phẩm, thương hiệu..." aria-label="Tìm sản phẩm" />
+        </label>
+
+        <div className="top-actions">
+          <button className="round-action" type="button" aria-label="Thông báo">🔔<small>3</small></button>
+          <button className="round-action" type="button" aria-label="Yêu thích">♡</button>
+          {user ? (
+            <>
+              <button className="profile-chip" type="button" onClick={onOpenSettings}>
+                <span>{profile.avatar || 'CW'}</span>{profile.name}
+              </button>
+              <button className="ghost-small" type="button" onClick={onLogout}>Đăng xuất</button>
+            </>
+          ) : (
+            <>
+              <button className="ghost-small" type="button" onClick={onOpenLogin}>Đăng nhập</button>
+              <button className="solid-small" type="button" onClick={onOpenRegister}>Đăng ký</button>
+            </>
+          )}
+        </div>
+      </header>
+    </>
   );
 }
 

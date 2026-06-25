@@ -1,214 +1,125 @@
-const img = (name) => new URL(`../assets/products/${name}.svg`, import.meta.url).href;
-
-const future = (hours) => Date.now() + hours * 60 * 60 * 1000;
-
-const storeSearchUrl = (storeName, productName) => {
-  const q = encodeURIComponent(productName);
-  const map = {
-    'WinMart': `https://winmart.vn/search?keyword=${q}`,
-    'Bách Hóa Xanh': `https://www.bachhoaxanh.com/tu-khoa/${q}`,
-    'Co.op Food': `https://cooponline.vn/tim-kiem?query=${q}`,
-    'Shopee Mall': `https://shopee.vn/search?keyword=${q}`,
-    'Lazada Mall': `https://www.lazada.vn/catalog/?q=${q}`,
-    'Tiki': `https://tiki.vn/search?q=${q}`,
-    'FPT Shop': `https://fptshop.com.vn/tim-kiem/${q}`,
-    'CellphoneS': `https://cellphones.com.vn/catalogsearch/result/?q=${q}`,
-    'GearVN': `https://gearvn.com/search?type=product&q=${q}`,
-    'Thế Giới Di Động': `https://www.thegioididong.com/tim-kiem?key=${q}`,
-    'MyKingdom': `https://www.mykingdom.com.vn/search?query=${q}`,
-    'Hasaki': `https://hasaki.vn/tim-kiem.html?key=${q}`,
-    'Guardian': `https://www.guardian.com.vn/search?type=product&q=${q}`,
-    'Nhà sách Fahasa': `https://www.fahasa.com/catalogsearch/result/?q=${q}`,
-    'Điện Máy Xanh': `https://www.dienmayxanh.com/tim-kiem?key=${q}`
-  };
-  return map[storeName] || '#';
-};
-
-
-
-
-const realProductImages = {
-  // Đồ uống / đồ ăn: dùng ảnh sản phẩm thật, ưu tiên CDN từ trang bán lẻ Việt Nam, có proxy để tránh lỗi hotlink.
-  'water-lavie-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76429/nuoc-khoang-lavie-500ml-1.jpg&w=900&h=900&fit=contain',
-  'water-aquafina-500': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2563/76432/nuoc-tinh-khiet-aquafina-500ml-1.jpg&w=900&h=900&fit=contain',
-  'coca-can': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2443/76471/nuoc-ngot-coca-cola-lon-320ml-1.jpg&w=900&h=900&fit=contain',
-  'th-milk': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2944/76417/sua-tuoi-tiet-trung-th-true-milk-co-duong-hop-180ml-1.jpg&w=900&h=900&fit=contain',
-  'haohao': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/2565/8599/mi-hao-hao-tom-chua-cay-goi-75g-1.jpg&w=900&h=900&fit=contain',
-  'oreo': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/3357/79531/banh-quy-socola-oreo-goi-133g-1.jpg&w=900&h=900&fit=contain',
-
-  // Điện tử / phụ kiện: ảnh sản phẩm thật hoặc ảnh thương mại gần đúng theo tên sản phẩm.
-  'mouse-logitech': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226190/chuot-khong-day-logitech-m331-ava-600x600.jpg&w=900&h=900&fit=contain',
-  'mouse-razer': 'https://images.weserv.nl/?url=product.hstatic.net/1000026716/product/chuot-razer-deathadder-essential-white_7d3f4233fe1d4478b9c80a3bcb7d6a42.png&w=900&h=900&fit=contain',
-  'mouse-rapoo': 'https://images.weserv.nl/?url=cdn.tgdd.vn/Products/Images/86/226442/chuot-bluetooth-rapoo-m100-silent-den-ava-600x600.jpg&w=900&h=900&fit=contain',
-  'keyboard-mechanical': 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=85',
-  'headphone-jbl': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=85',
-  'powerbank-anker': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=900&q=85',
-  'phone-samsung': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=85',
-  'speaker-bluetooth': 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=900&q=85',
-
-  // Các nhóm còn lại dùng ảnh thật minh họa sản phẩm thay vì SVG demo.
-  'popmart-labubu': 'https://images.unsplash.com/photo-1558060370-d644479cb6f7?auto=format&fit=crop&w=900&q=85',
-  'funko-hero': 'https://images.unsplash.com/photo-1608889476561-6242cfdbf622?auto=format&fit=crop&w=900&q=85',
-  'lego-classic': 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=900&q=85',
-  'anime-figure': 'https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?auto=format&fit=crop&w=900&q=85',
-  'boardgame': 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=900&q=85',
-  'teddy-bear': 'https://images.unsplash.com/photo-1563901935883-cb61f5d49be4?auto=format&fit=crop&w=900&q=85',
-  'lipstick': 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=900&q=85',
-  'sunscreen': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85',
-  'cleanser': 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=900&q=85',
-  'notebook': 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=85',
-  'pen': 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=85',
-  'casio': 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&w=900&q=85',
-  'study-chair': 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?auto=format&fit=crop&w=900&q=85',
-  'desk-lamp': 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85',
-  'rice-cooker': 'https://images.unsplash.com/photo-1628277613967-6abca504d0ac?auto=format&fit=crop&w=900&q=85',
-  'mini-fan': 'https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?auto=format&fit=crop&w=900&q=85'
-};
-
-const directStoreUrls = {
-  'water-lavie-500': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-suoi-khoang/nuoc-khoang-la-vie-500ml',
-    'WinMart': 'https://winmart.vn/search?keyword=la%20vie%20500ml',
-    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=la%20vie%20500ml'
-  },
-  'water-aquafina-500': {
-    'WinMart': 'https://winmart.vn/products/aquafina-nuoc-tinh-khiet-500ml--s10011216',
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/nuoc-tinh-khiet/nuoc-uong-dong-chai-aquafina-500ml',
-    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=aquafina%20500ml'
-  },
-  'coca-can': {
-    'WinMart': 'https://winmart.vn/products/coca-cola-nuoc-giai-khat-320ml--s10011650',
-    'Shopee Mall': 'https://shopee.vn/search?keyword=coca-cola%20lon%20320ml',
-    'Tiki': 'https://tiki.vn/search?q=coca-cola%20lon%20320ml'
-  },
-  'th-milk': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/sua-tuoi/sua-tiet-trung-th-co-duong-180ml-loc',
-    'WinMart': 'https://winmart.vn/products/th-milk-sttt-vi-tu-nhien-hilo-180ml--s10170474',
-    'Co.op Food': 'https://cooponline.vn/tim-kiem?query=th%20true%20milk%20180ml'
-  },
-  'haohao': {
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/mi-an-lien/mi-hao-hao-tom-chua-cay-goi-75g',
-    'WinMart': 'https://winmart.vn/search?keyword=h%E1%BA%A3o%20h%E1%BA%A3o%20t%C3%B4m%20chua%20cay',
-    'Shopee Mall': 'https://shopee.vn/search?keyword=m%C3%AC%20h%E1%BA%A3o%20h%E1%BA%A3o%20t%C3%B4m%20chua%20cay'
-  },
-  'oreo': {
-    'WinMart': 'https://winmart.vn/search?keyword=oreo%20socola',
-    'Bách Hóa Xanh': 'https://www.bachhoaxanh.com/banh-quy/banh-quy-kem-oreo-socola-133g',
-    'Tiki': 'https://tiki.vn/search?q=oreo%20socola'
-  },
-  'mouse-logitech': {
-    'FPT Shop': 'https://fptshop.com.vn/phu-kien/chuot-may-tinh-khong-day-logitech-m331-wireless-mouse',
-    'Shopee Mall': 'https://shopee.vn/search?keyword=Logitech%20M331',
-    'Tiki': 'https://tiki.vn/search?q=Logitech%20M331'
-  },
-  'mouse-razer': {
-    'GearVN': 'https://gearvn.com/search?type=product&q=Razer%20DeathAdder',
-    'CellphoneS': 'https://cellphones.com.vn/catalogsearch/result/?q=Razer%20DeathAdder',
-    'Lazada Mall': 'https://www.lazada.vn/catalog/?q=Razer%20DeathAdder'
-  },
-  'mouse-rapoo': {
-    'FPT Shop': 'https://fptshop.com.vn/tim-kiem/rapoo%20m100',
-    'Shopee Mall': 'https://shopee.vn/search?keyword=Rapoo%20M100',
-    'Tiki': 'https://tiki.vn/search?q=Rapoo%20M100'
-  },
-  'keyboard-mechanical': {
-    'Shopee Mall': 'https://shopee.vn/search?keyword=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm',
-    'Lazada Mall': 'https://www.lazada.vn/catalog/?q=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm',
-    'Tiki': 'https://tiki.vn/search?q=b%C3%A0n%20ph%C3%ADm%20c%C6%A1%2068%20ph%C3%ADm'
-  }
-};
-
-const storeLogos = {
-  'WinMart': 'https://www.google.com/s2/favicons?domain=winmart.vn&sz=64',
-  'Bách Hóa Xanh': 'https://www.google.com/s2/favicons?domain=bachhoaxanh.com&sz=64',
-  'Co.op Food': 'https://www.google.com/s2/favicons?domain=cooponline.vn&sz=64',
-  'Shopee Mall': 'https://www.google.com/s2/favicons?domain=shopee.vn&sz=64',
-  'Lazada Mall': 'https://www.google.com/s2/favicons?domain=lazada.vn&sz=64',
-  'Tiki': 'https://www.google.com/s2/favicons?domain=tiki.vn&sz=64',
-  'FPT Shop': 'https://www.google.com/s2/favicons?domain=fptshop.com.vn&sz=64',
-  'CellphoneS': 'https://www.google.com/s2/favicons?domain=cellphones.com.vn&sz=64',
-  'GearVN': 'https://www.google.com/s2/favicons?domain=gearvn.com&sz=64',
-  'Thế Giới Di Động': 'https://www.google.com/s2/favicons?domain=thegioididong.com&sz=64',
-  'MyKingdom': 'https://www.google.com/s2/favicons?domain=mykingdom.com.vn&sz=64',
-  'Hasaki': 'https://www.google.com/s2/favicons?domain=hasaki.vn&sz=64',
-  'Guardian': 'https://www.google.com/s2/favicons?domain=guardian.com.vn&sz=64',
-  'Nhà sách Fahasa': 'https://www.google.com/s2/favicons?domain=fahasa.com&sz=64',
-  'Điện Máy Xanh': 'https://www.google.com/s2/favicons?domain=dienmayxanh.com&sz=64'
-};
-
 export const exchangeRates = {
   VND: 1,
-  USD: 0.000039,
-  CNY: 0.00028,
-  EUR: 0.000036,
-  JPY: 0.0061,
-  KRW: 0.054
+  USD: 24500,
+  CNY: 3400,
+  EUR: 26700,
+  JPY: 165,
+  KRW: 18.5
 };
 
-export const currencySymbols = {
-  VND: '₫', USD: '$', CNY: '¥', EUR: '€', JPY: '¥', KRW: '₩'
-};
+export const currencies = [
+  { code: 'VND', label: 'VND' },
+  { code: 'USD', label: 'USD' },
+  { code: 'CNY', label: 'CNY' },
+  { code: 'EUR', label: 'EUR' },
+  { code: 'JPY', label: 'JPY' },
+  { code: 'KRW', label: 'KRW' }
+];
 
 export const products = [
   {
-    id: 'water-lavie-500', name: 'Nước khoáng Lavie 500ml', category: 'Đồ uống', subCategory: 'Nước khoáng', image: img('lavie'),
-    description: 'Nước khoáng đóng chai tiện lợi cho học sinh, sinh viên và văn phòng.', basePrice: 6500, originalPrice: 8000, discountPercent: 19, offerEndTime: future(5), tags: ['nuoc','lavie','water','do uong'],
+    id: 'aquafina-500',
+    name: 'Aquafina 500ml',
+    category: 'Đồ uống',
+    image: '💧',
+    rating: 4.8,
+    reviews: 120,
+    baseline: 7500,
+    needScore: 8.1,
     stores: [
-      { storeName: 'Bách Hóa Xanh', storePrice: 6500, storeUrl: '#'  },
-      { storeName: 'WinMart', storePrice: 7000, storeUrl: '#'  },
-      { storeName: 'Co.op Food', storePrice: 7200, storeUrl: '#'  }
+      { store: 'WinMart', price: 6000, shipping: 0, voucher: 0, trust: 4.7, delivery: 'Trong ngày' },
+      { store: 'Bách hoá XANH', price: 6500, shipping: 0, voucher: 0, trust: 4.6, delivery: 'Trong ngày' },
+      { store: 'Shopee', price: 5900, shipping: 15000, voucher: 6000, trust: 4.5, delivery: '2-3 ngày' }
     ]
   },
-  { id: 'water-aquafina-500', name: 'Nước Aquafina 500ml', category: 'Đồ uống', subCategory: 'Nước tinh khiết', image: img('aquafina'), description: 'Nước tinh khiết phổ biến, dễ mua tại nhiều cửa hàng.', basePrice: 6000, originalPrice: 8000, discountPercent: 25, offerEndTime: future(3), tags: ['nuoc','aquafina','water'], stores: [{storeName:'WinMart',storePrice:6000,storeUrl:'#'},{storeName:'Bách Hóa Xanh',storePrice:6500,storeUrl:'#'},{storeName:'Co.op Food',storePrice:7000,storeUrl:'#'}] },
-  { id: 'coca-can', name: 'Coca-Cola lon 320ml', category: 'Đồ uống', subCategory: 'Nước ngọt', image: img('coca'), description: 'Nước ngọt có gas, phù hợp combo ăn vặt.', basePrice: 9500, originalPrice: 12000, discountPercent: 21, offerEndTime: future(8), tags: ['coca','nuoc ngot','do uong'], stores: [{storeName:'WinMart',storePrice:9500,storeUrl:'#'},{storeName:'Tiki',storePrice:10500,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:11000,storeUrl:'#'}] },
-  { id: 'th-milk', name: 'Sữa TH True Milk 180ml', category: 'Đồ ăn', subCategory: 'Sữa', image: img('milk'), description: 'Sữa hộp nhỏ gọn cho bữa phụ.', basePrice: 8200, originalPrice: 10000, discountPercent: 18, offerEndTime: future(4), tags: ['sua','milk','th true milk'], stores: [{storeName:'Bách Hóa Xanh',storePrice:8200,storeUrl:'#'},{storeName:'WinMart',storePrice:9000,storeUrl:'#'},{storeName:'Co.op Food',storePrice:8800,storeUrl:'#'}] },
-  { id: 'haohao', name: 'Mì Hảo Hảo tôm chua cay', category: 'Đồ ăn', subCategory: 'Mì gói', image: img('noodle'), description: 'Mì gói phổ biến, dễ so sánh giá theo lốc/thùng.', basePrice: 3900, originalPrice: 5000, discountPercent: 22, offerEndTime: future(12), tags: ['mi','hao hao','do an'], stores: [{storeName:'Bách Hóa Xanh',storePrice:3900,storeUrl:'#'},{storeName:'WinMart',storePrice:4500,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:4100,storeUrl:'#'}] },
-  { id: 'oreo', name: 'Bánh Oreo vị socola', category: 'Đồ ăn', subCategory: 'Bánh kẹo', image: img('oreo'), description: 'Bánh quy socola, nhiều mức giá theo gói/combo.', basePrice: 11500, originalPrice: 15000, discountPercent: 23, offerEndTime: future(10), tags: ['oreo','banh','snack'], stores: [{storeName:'WinMart',storePrice:11500,storeUrl:'#'},{storeName:'Bách Hóa Xanh',storePrice:12800,storeUrl:'#'},{storeName:'Tiki',storePrice:12000,storeUrl:'#'}] },
-
-  { id: 'mouse-logitech', name: 'Chuột không dây Logitech M331', category: 'Chuột & phụ kiện', subCategory: 'Chuột văn phòng', image: img('logitech'), description: 'Chuột văn phòng yên tĩnh, pin lâu, dễ dùng.', basePrice: 249000, originalPrice: 329000, discountPercent: 24, offerEndTime: future(2), tags: ['chuot','logitech','chuot van phong','wireless mouse'], stores: [{storeName:'Shopee Mall',storePrice:249000,storeUrl:'#'},{storeName:'Tiki',storePrice:279000,storeUrl:'#'},{storeName:'FPT Shop',storePrice:329000,storeUrl:'#'}] },
-  { id: 'mouse-razer', name: 'Chuột gaming Razer DeathAdder', category: 'Chuột & phụ kiện', subCategory: 'Chuột gaming', image: img('razer'), description: 'Chuột gaming form công thái học, phù hợp chơi game FPS/MOBA.', basePrice: 799000, originalPrice: 1299000, discountPercent: 38, offerEndTime: future(6), tags: ['chuot','gaming','razer','mouse'], stores: [{storeName:'Lazada Mall',storePrice:799000,storeUrl:'#'},{storeName:'CellphoneS',storePrice:990000,storeUrl:'#'},{storeName:'GearVN',storePrice:1090000,storeUrl:'#'}] },
-  { id: 'mouse-rapoo', name: 'Chuột văn phòng Rapoo M100', category: 'Chuột & phụ kiện', subCategory: 'Chuột Bluetooth', image: img('rapoo'), description: 'Chuột Bluetooth/không dây giá tốt cho học tập và văn phòng.', basePrice: 169000, originalPrice: 249000, discountPercent: 32, offerEndTime: future(7), tags: ['chuot','rapoo','bluetooth mouse'], stores: [{storeName:'Shopee Mall',storePrice:169000,storeUrl:'#'},{storeName:'Tiki',storePrice:199000,storeUrl:'#'},{storeName:'FPT Shop',storePrice:249000,storeUrl:'#'}] },
-  { id: 'keyboard-mechanical', name: 'Bàn phím cơ mini 68 phím', category: 'Điện tử', subCategory: 'Bàn phím', image: img('keyboard'), description: 'Bàn phím cơ nhỏ gọn, có đèn nền, phù hợp học tập và gaming.', basePrice: 489000, originalPrice: 690000, discountPercent: 29, offerEndTime: future(9), tags: ['ban phim','keyboard','gaming'], stores: [{storeName:'Shopee Mall',storePrice:489000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:520000,storeUrl:'#'},{storeName:'Tiki',storePrice:590000,storeUrl:'#'}] },
-  { id: 'headphone-jbl', name: 'Tai nghe Bluetooth JBL Tune', category: 'Điện tử', subCategory: 'Tai nghe', image: img('headphone'), description: 'Tai nghe không dây, pin lâu, phù hợp nghe nhạc và học online.', basePrice: 699000, originalPrice: 990000, discountPercent: 29, offerEndTime: future(11), tags: ['tai nghe','bluetooth','jbl'], stores: [{storeName:'CellphoneS',storePrice:699000,storeUrl:'#'},{storeName:'Tiki',storePrice:749000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:720000,storeUrl:'#'}] },
-  { id: 'powerbank-anker', name: 'Sạc dự phòng 10000mAh', category: 'Điện tử', subCategory: 'Sạc dự phòng', image: img('powerbank'), description: 'Pin dự phòng gọn nhẹ, phù hợp đi học, đi làm, đi du lịch.', basePrice: 399000, originalPrice: 550000, discountPercent: 27, offerEndTime: future(16), tags: ['sac du phong','power bank','pin'], stores: [{storeName:'Shopee Mall',storePrice:399000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:430000,storeUrl:'#'},{storeName:'Tiki',storePrice:450000,storeUrl:'#'}] },
-  { id: 'phone-samsung', name: 'Samsung Galaxy A Series', category: 'Điện tử', subCategory: 'Điện thoại', image: img('phone'), description: 'Điện thoại Android tầm trung, nhiều ưu đãi theo cửa hàng.', basePrice: 3990000, originalPrice: 4990000, discountPercent: 20, offerEndTime: future(14), tags: ['dien thoai','samsung','phone'], stores: [{storeName:'Thế Giới Di Động',storePrice:3990000,storeUrl:'#'},{storeName:'FPT Shop',storePrice:4190000,storeUrl:'#'},{storeName:'CellphoneS',storePrice:4090000,storeUrl:'#'}] },
-  { id: 'speaker-bluetooth', name: 'Loa Bluetooth mini chống nước', category: 'Điện tử', subCategory: 'Loa', image: img('speaker'), description: 'Loa mini tiện mang theo, phù hợp học nhóm và du lịch.', basePrice: 299000, originalPrice: 450000, discountPercent: 34, offerEndTime: future(13), tags: ['loa','bluetooth','speaker'], stores: [{storeName:'Shopee Mall',storePrice:299000,storeUrl:'#'},{storeName:'Tiki',storePrice:329000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:315000,storeUrl:'#'}] },
-
-  { id: 'popmart-labubu', name: 'Pop Mart Blind Box', category: 'Đồ chơi', subCategory: 'Blind box', image: img('popmart'), description: 'Đồ chơi sưu tầm bất ngờ, nhiều series hot.', basePrice: 259000, originalPrice: 320000, discountPercent: 19, offerEndTime: future(15), tags: ['do choi','pop mart','blind box'], stores: [{storeName:'MyKingdom',storePrice:259000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:280000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:275000,storeUrl:'#'}] },
-  { id: 'funko-hero', name: 'Funko Pop Hero Figure', category: 'Đồ chơi', subCategory: 'Mô hình', image: img('funko'), description: 'Mô hình sưu tầm phong cách Funko.', basePrice: 349000, originalPrice: 499000, discountPercent: 30, offerEndTime: future(18), tags: ['do choi','funko','figure'], stores: [{storeName:'Tiki',storePrice:349000,storeUrl:'#'},{storeName:'MyKingdom',storePrice:399000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:379000,storeUrl:'#'}] },
-  { id: 'lego-classic', name: 'Lego Classic sáng tạo', category: 'Đồ chơi', subCategory: 'Lego', image: img('lego'), description: 'Bộ xếp hình sáng tạo cho học sinh và gia đình.', basePrice: 599000, originalPrice: 750000, discountPercent: 20, offerEndTime: future(20), tags: ['lego','do choi','xep hinh'], stores: [{storeName:'MyKingdom',storePrice:599000,storeUrl:'#'},{storeName:'Tiki',storePrice:650000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:625000,storeUrl:'#'}] },
-  { id: 'anime-figure', name: 'Mô hình anime mini', category: 'Đồ chơi', subCategory: 'Mô hình anime', image: img('anime'), description: 'Mô hình trang trí bàn học, bàn làm việc.', basePrice: 129000, originalPrice: 199000, discountPercent: 35, offerEndTime: future(22), tags: ['anime','figure','do choi'], stores: [{storeName:'Shopee Mall',storePrice:129000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:150000,storeUrl:'#'},{storeName:'Tiki',storePrice:160000,storeUrl:'#'}] },
-  { id: 'boardgame', name: 'Board Game gia đình', category: 'Đồ chơi', subCategory: 'Board game', image: img('boardgame'), description: 'Trò chơi nhóm giúp giải trí và kết nối.', basePrice: 189000, originalPrice: 260000, discountPercent: 27, offerEndTime: future(17), tags: ['board game','do choi','game'], stores: [{storeName:'Tiki',storePrice:189000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:205000,storeUrl:'#'},{storeName:'MyKingdom',storePrice:250000,storeUrl:'#'}] },
-  { id: 'teddy-bear', name: 'Gấu bông mini', category: 'Đồ chơi', subCategory: 'Gấu bông', image: img('bear'), description: 'Gấu bông mềm, nhiều màu, phù hợp làm quà.', basePrice: 99000, originalPrice: 150000, discountPercent: 34, offerEndTime: future(6), tags: ['gau bong','do choi','gift'], stores: [{storeName:'Shopee Mall',storePrice:99000,storeUrl:'#'},{storeName:'Tiki',storePrice:120000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:110000,storeUrl:'#'}] },
-
-  { id: 'lipstick', name: 'Son dưỡng có màu', category: 'Mỹ phẩm', subCategory: 'Son môi', image: img('lipstick'), description: 'Son dưỡng nhẹ nhàng, phù hợp đi học và đi chơi.', basePrice: 89000, originalPrice: 129000, discountPercent: 31, offerEndTime: future(24), tags: ['son','my pham','lipstick'], stores: [{storeName:'Hasaki',storePrice:89000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:99000,storeUrl:'#'},{storeName:'Guardian',storePrice:120000,storeUrl:'#'}] },
-  { id: 'sunscreen', name: 'Kem chống nắng SPF50', category: 'Mỹ phẩm', subCategory: 'Chống nắng', image: img('sunscreen'), description: 'Chống nắng hằng ngày, phù hợp nhiều loại da.', basePrice: 199000, originalPrice: 290000, discountPercent: 31, offerEndTime: future(5), tags: ['kem chong nang','my pham','spf'], stores: [{storeName:'Hasaki',storePrice:199000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:230000,storeUrl:'#'},{storeName:'Guardian',storePrice:260000,storeUrl:'#'}] },
-  { id: 'cleanser', name: 'Sữa rửa mặt dịu nhẹ', category: 'Mỹ phẩm', subCategory: 'Làm sạch', image: img('cleanser'), description: 'Làm sạch nhẹ, phù hợp da học sinh.', basePrice: 139000, originalPrice: 199000, discountPercent: 30, offerEndTime: future(9), tags: ['sua rua mat','my pham','cleanser'], stores: [{storeName:'Hasaki',storePrice:139000,storeUrl:'#'},{storeName:'Guardian',storePrice:170000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:155000,storeUrl:'#'}] },
-
-  { id: 'notebook', name: 'Vở kẻ ngang 200 trang', category: 'Học tập', subCategory: 'Vở', image: img('notebook'), description: 'Vở dày, giấy sáng, phù hợp học sinh.', basePrice: 18000, originalPrice: 25000, discountPercent: 28, offerEndTime: future(32), tags: ['vo','hoc tap','notebook'], stores: [{storeName:'Nhà sách Fahasa',storePrice:18000,storeUrl:'#'},{storeName:'Tiki',storePrice:22000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:20000,storeUrl:'#'}] },
-  { id: 'pen', name: 'Bút gel mực đen', category: 'Học tập', subCategory: 'Bút viết', image: img('pen'), description: 'Bút gel nét êm, dễ viết ghi chép.', basePrice: 7000, originalPrice: 10000, discountPercent: 30, offerEndTime: future(28), tags: ['but','hoc tap','pen'], stores: [{storeName:'Nhà sách Fahasa',storePrice:7000,storeUrl:'#'},{storeName:'Tiki',storePrice:8500,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:7900,storeUrl:'#'}] },
-  { id: 'casio', name: 'Máy tính Casio học sinh', category: 'Học tập', subCategory: 'Máy tính', image: img('casio'), description: 'Máy tính học sinh phục vụ học tập và thi cử.', basePrice: 439000, originalPrice: 550000, discountPercent: 20, offerEndTime: future(19), tags: ['casio','may tinh','hoc tap'], stores: [{storeName:'Nhà sách Fahasa',storePrice:439000,storeUrl:'#'},{storeName:'Tiki',storePrice:470000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:455000,storeUrl:'#'}] },
-
-  { id: 'study-chair', name: 'Ghế học tập chống gù', category: 'Nội thất', subCategory: 'Ghế', image: img('chair'), description: 'Ghế học tập có thể điều chỉnh độ cao.', basePrice: 899000, originalPrice: 1290000, discountPercent: 30, offerEndTime: future(23), tags: ['ghe','noi that','hoc tap'], stores: [{storeName:'Shopee Mall',storePrice:899000,storeUrl:'#'},{storeName:'Tiki',storePrice:990000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:950000,storeUrl:'#'}] },
-  { id: 'desk-lamp', name: 'Đèn bàn học LED', category: 'Gia dụng', subCategory: 'Đèn', image: img('lamp'), description: 'Đèn LED nhiều chế độ sáng, bảo vệ mắt.', basePrice: 159000, originalPrice: 239000, discountPercent: 33, offerEndTime: future(21), tags: ['den','gia dung','hoc tap'], stores: [{storeName:'Shopee Mall',storePrice:159000,storeUrl:'#'},{storeName:'Tiki',storePrice:190000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:175000,storeUrl:'#'}] },
-  { id: 'rice-cooker', name: 'Nồi cơm điện mini', category: 'Gia dụng', subCategory: 'Nhà bếp', image: img('ricecooker'), description: 'Nồi cơm mini phù hợp ký túc xá và hộ nhỏ.', basePrice: 399000, originalPrice: 590000, discountPercent: 32, offerEndTime: future(27), tags: ['noi com','gia dung','nha bep'], stores: [{storeName:'Điện Máy Xanh',storePrice:399000,storeUrl:'#'},{storeName:'Shopee Mall',storePrice:420000,storeUrl:'#'},{storeName:'Tiki',storePrice:450000,storeUrl:'#'}] },
-  { id: 'mini-fan', name: 'Quạt mini để bàn', category: 'Gia dụng', subCategory: 'Quạt', image: img('fan'), description: 'Quạt mini sạc USB, tiện dùng trên bàn học.', basePrice: 99000, originalPrice: 159000, discountPercent: 38, offerEndTime: future(30), tags: ['quat','gia dung','mini fan'], stores: [{storeName:'Shopee Mall',storePrice:99000,storeUrl:'#'},{storeName:'Lazada Mall',storePrice:120000,storeUrl:'#'},{storeName:'Tiki',storePrice:135000,storeUrl:'#'}] }
+  {
+    id: 'coca-cola-320',
+    name: 'Coca-Cola Lon 320ml',
+    category: 'Đồ uống',
+    image: '🥤',
+    rating: 4.7,
+    reviews: 98,
+    baseline: 10500,
+    needScore: 6.9,
+    stores: [
+      { store: 'Bách hoá XANH', price: 8500, shipping: 0, voucher: 0, trust: 4.7, delivery: 'Trong ngày' },
+      { store: 'WinMart', price: 9000, shipping: 0, voucher: 0, trust: 4.8, delivery: 'Trong ngày' },
+      { store: 'Lazada', price: 7900, shipping: 18000, voucher: 8000, trust: 4.4, delivery: '2 ngày' }
+    ]
+  },
+  {
+    id: 'oreo-137',
+    name: 'Oreo Bánh Quy Kem Vani 137g',
+    category: 'Thực phẩm',
+    image: '🍪',
+    rating: 4.9,
+    reviews: 156,
+    baseline: 23500,
+    needScore: 7.6,
+    stores: [
+      { store: 'Shopee', price: 18000, shipping: 16000, voucher: 12000, trust: 4.8, delivery: '2 ngày' },
+      { store: 'WinMart', price: 21500, shipping: 0, voucher: 0, trust: 4.8, delivery: 'Trong ngày' },
+      { store: 'Tiki', price: 19900, shipping: 14000, voucher: 6000, trust: 4.6, delivery: '1-2 ngày' }
+    ]
+  },
+  {
+    id: 'mouse-m331',
+    name: 'Logitech M331 Silent Plus',
+    category: 'Điện tử',
+    image: '🖱️',
+    rating: 4.8,
+    reviews: 210,
+    baseline: 369000,
+    needScore: 8.7,
+    stores: [
+      { store: 'Lazada', price: 299000, shipping: 0, voucher: 20000, trust: 4.7, delivery: '1-2 ngày' },
+      { store: 'Shopee Mall', price: 315000, shipping: 0, voucher: 25000, trust: 4.8, delivery: '2 ngày' },
+      { store: 'Tiki Trading', price: 329000, shipping: 0, voucher: 15000, trust: 4.9, delivery: '1 ngày' }
+    ]
+  },
+  {
+    id: 'sunplay-70',
+    name: 'Sữa chống nắng Sunplay SPF70 55g',
+    category: 'Mỹ phẩm',
+    image: '🧴',
+    rating: 4.6,
+    reviews: 88,
+    baseline: 125000,
+    needScore: 8.4,
+    stores: [
+      { store: 'Watsons', price: 109000, shipping: 0, voucher: 0, trust: 4.7, delivery: 'Trong ngày' },
+      { store: 'Shopee Mall', price: 99000, shipping: 18000, voucher: 15000, trust: 4.7, delivery: '2-3 ngày' },
+      { store: 'Lazada', price: 105000, shipping: 12000, voucher: 10000, trust: 4.5, delivery: '2 ngày' }
+    ]
+  },
+  {
+    id: 'omachi',
+    name: 'Mì Omachi bò hầm 5 gói',
+    category: 'Thực phẩm',
+    image: '🍜',
+    rating: 4.7,
+    reviews: 145,
+    baseline: 53000,
+    needScore: 7.2,
+    stores: [
+      { store: 'WinMart', price: 47500, shipping: 0, voucher: 0, trust: 4.6, delivery: 'Trong ngày' },
+      { store: 'Bách hoá XANH', price: 48900, shipping: 0, voucher: 0, trust: 4.7, delivery: 'Trong ngày' },
+      { store: 'Shopee', price: 45500, shipping: 15000, voucher: 10000, trust: 4.4, delivery: '2 ngày' }
+    ]
+  }
 ];
 
+export function getBestOffer(product) {
+  return product.stores
+    .map((offer) => ({ ...offer, total: offer.price + offer.shipping - offer.voucher }))
+    .sort((a, b) => a.total - b.total || b.trust - a.trust)[0];
+}
 
-products.forEach((product) => {
-  product.fallbackImage = product.image;
-  product.image = realProductImages[product.id] || product.image;
-  product.stores = product.stores.map((store) => ({
-    ...store,
-    storeUrl: directStoreUrls[product.id]?.[store.storeName] || (store.storeUrl && store.storeUrl !== '#' ? store.storeUrl : storeSearchUrl(store.storeName, product.name))
-  }));
-});
-
-export const categories = ['Tất cả', ...Array.from(new Set(products.map((p) => p.category)))];
-
-export const getBestStore = (product) => [...product.stores].sort((a, b) => a.storePrice - b.storePrice)[0];
-export const getWorstStore = (product) => [...product.stores].sort((a, b) => b.storePrice - a.storePrice)[0];
-export const getSavingAmount = (product) => Math.max(0, getWorstStore(product).storePrice - getBestStore(product).storePrice);
-
-export const getStoreLogo = (storeName) => storeLogos[storeName] || 'https://www.google.com/s2/favicons?domain=google.com&sz=64';
+export function formatCurrency(amount, currency = 'VND') {
+  const rate = exchangeRates[currency] || 1;
+  const converted = amount / rate;
+  if (currency === 'VND') {
+    return `${Math.round(converted).toLocaleString('vi-VN')}đ`;
+  }
+  return `${converted.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} ${currency}`;
+}
