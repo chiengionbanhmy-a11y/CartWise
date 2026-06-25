@@ -325,11 +325,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         <span className="cartbot-flower flower-3">♡</span>
 
         <div className="cartbot-head-layer">
-          <img src="/cartwise-cartbot-v12-handle.png" alt="Cawi CartBot" className="cartbot-img" />
-          <span className="cartbot-eye-mask left" />
-          <span className="cartbot-eye-mask right" />
-          <span className="cartbot-eye-pupil left" />
-          <span className="cartbot-eye-pupil right" />
+          <img src="/cartwise-cartbot-v13-restored.png" alt="Cawi CartBot" className="cartbot-img" />
           <span className="cartbot-sleep-face">
             <i className="left" />
             <i className="right" />
