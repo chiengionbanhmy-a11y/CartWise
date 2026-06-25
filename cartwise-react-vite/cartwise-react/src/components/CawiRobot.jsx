@@ -66,7 +66,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     target: { pupilX: 0, pupilY: 0, headX: 0, headY: 0, headRot: 0 }
   });
 
-  const robotImage = '/cartwise-cartbot-v16-eyefix.png';
 
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
@@ -79,7 +78,60 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
   useEffect(() => {
     showBubble(message, 15000);
-    return () => {
+  
+  const renderRobotVisual = (variant = 'full') => {
+    const mini = variant === 'mini';
+
+    return (
+      <div className={`cawi-robot cawi-robot-${variant} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''}`}>
+        <div className="cawi-robot-head-wrap">
+          <div className="cawi-robot-antenna" aria-hidden="true">
+            <span className="cawi-robot-antenna-stick" />
+            <span className="cawi-robot-antenna-ball" />
+          </div>
+          <div className="cawi-robot-head" aria-hidden="true">
+            <div className="cawi-robot-head-highlight" />
+            <div className="cawi-robot-face">
+              <span className="cawi-robot-brow left" />
+              <span className="cawi-robot-brow right" />
+              <span className="cawi-robot-eye left">
+                <span className="cawi-robot-pupil left" />
+              </span>
+              <span className="cawi-robot-eye right">
+                <span className="cawi-robot-pupil right" />
+              </span>
+              <span className="cawi-robot-cheek left" />
+              <span className="cawi-robot-cheek right" />
+              <span className="cawi-robot-mouth" />
+              <span className="cawi-robot-sleep-eyes" />
+            </div>
+          </div>
+        </div>
+
+        <div className="cawi-robot-body" aria-hidden="true">
+          <div className="cawi-robot-rim" />
+          <div className="cawi-robot-basket">
+            <div className="cawi-robot-basket-icon">
+              <span className="cart-line top" />
+              <span className="cart-line handle" />
+              <span className="cart-line basket" />
+              <span className="cart-wheel left" />
+              <span className="cart-wheel right" />
+            </div>
+          </div>
+          <div className="cawi-robot-base-accent" />
+          <div className="cawi-robot-wheel left"><span /></div>
+          <div className="cawi-robot-wheel right"><span /></div>
+        </div>
+
+        {!mini && (
+          <span className="cawi-robot-sleep-text" aria-hidden="true">zzz</span>
+        )}
+      </div>
+    );
+  };
+
+  return () => {
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       if (clickTimer.current) clearTimeout(clickTimer.current);
       if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
@@ -350,11 +402,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
           <header onMouseDown={startDrag} title="Giữ chuột và kéo để di chuyển khung chat">
             <div className="cartbot-chat-ident">
               <div className="cartbot-mini-avatar">
-                <img src={robotImage} alt="Cawi Robo" className="cartbot-mini-img" />
-                <span className="cartbot-mini-eye-blank left" />
-                <span className="cartbot-mini-eye-blank right" />
-                <span className="cartbot-mini-pupil left" />
-                <span className="cartbot-mini-pupil right" />
+                {renderRobotVisual('mini')}
               </div>
               <div className="cartbot-chat-ident-text">
                 <strong>Cawi Robo</strong>
@@ -420,16 +468,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         <span className="cartbot-flower flower-3">♡</span>
 
         <div className="cartbot-head-layer">
-          <img src={robotImage} alt="Cawi Robo" className="cartbot-img" />
-          <span className="cartbot-eye-blank left" />
-          <span className="cartbot-eye-blank right" />
-          <span className="cartbot-eye-pupil left" />
-          <span className="cartbot-eye-pupil right" />
-          <span className="cartbot-sleep-face">
-            <i className="left" />
-            <i className="right" />
-            <b>zzz</b>
-          </span>
+          {renderRobotVisual('full')}
         </div>
       </div>
     </aside>
