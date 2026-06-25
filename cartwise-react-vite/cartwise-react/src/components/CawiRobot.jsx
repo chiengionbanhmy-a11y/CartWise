@@ -69,7 +69,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   useEffect(() => {
     showBubble(message, 15000);
     return () => bubbleTimer.current && clearTimeout(bubbleTimer.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
 
   useEffect(() => {
@@ -77,14 +76,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
       const rect = robotRef.current?.getBoundingClientRect();
       if (!rect) return;
 
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = Math.max(-1, Math.min(1, (event.clientX - cx) / 170));
-      const dy = Math.max(-1, Math.min(1, (event.clientY - cy) / 150));
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height * 0.34;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 180));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 160));
 
       setPointer({
-        eyeX: dx * 8,
-        eyeY: dy * 5.5,
+        eyeX: dx * 7.5,
+        eyeY: dy * 5,
         head: dx * 5
       });
     }
@@ -260,14 +259,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         <span className="cartbot-flower flower-3">♡</span>
 
         <div className="cartbot-head-layer">
-          <img src="/cartwise-cartbot-v8.png" alt="Cawi CartBot" className="cartbot-img" />
+          <img src="/cartwise-cartbot-v10-twoeyes-handle.png" alt="Cawi CartBot" className="cartbot-img" />
           <span className="cartbot-eye-mask left" />
           <span className="cartbot-eye-mask right" />
           <span className="cartbot-eye-pupil left" />
           <span className="cartbot-eye-pupil right" />
           <span className="cartbot-sleep-face">
-            <i />
-            <i />
+            <i className="left" />
+            <i className="right" />
             <b>zzz</b>
           </span>
         </div>
