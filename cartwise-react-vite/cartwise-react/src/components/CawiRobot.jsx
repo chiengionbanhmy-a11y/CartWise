@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 
 const positionClasses = ['pos-bottom-right', 'pos-middle-right', 'pos-bottom-left'];
 const variantClasses = ['classic', 'orange', 'blue'];
+const SpeechRecognition = typeof window !== 'undefined'
+  ? window.SpeechRecognition || window.webkitSpeechRecognition
+  : null;
 
 function RobotShape({ small = false, mood = 'normal', variant = 'classic' }) {
   return (
@@ -34,6 +37,7 @@ function CawiRobot({ page, message }) {
     { id: 3, type: 'bot', text: 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.' }
   ]);
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const [mood, setMood] = useState('normal');
   const [clickCount, setClickCount] = useState(0);
   const [variantIndex, setVariantIndex] = useState(0);
@@ -41,6 +45,7 @@ function CawiRobot({ page, message }) {
   const chatInputRef = useRef(null);
   const messagesRef = useRef(null);
   const idleTimerRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     function trackEyes(event) {
@@ -68,6 +73,33 @@ function CawiRobot({ page, message }) {
     }, 4500);
     return () => clearInterval(timer);
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!SpeechRecognition) return undefined;
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.addEventListener('result', (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript || '')
+        .join(' ')
+        .trim();
+
+      if (transcript) {
+        setInput((current) => `${current}${current ? ' ' : ''}${transcript}`);
+        requestAnimationFrame(() => chatInputRef.current?.focus());
+      }
+    });
+
+    recognition.addEventListener('end', () => setIsListening(false));
+    recognition.addEventListener('error', () => setIsListening(false));
+    recognitionRef.current = recognition;
+
+    return () => recognition.abort();
+  }, []);
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -142,8 +174,27 @@ function CawiRobot({ page, message }) {
       if (lower.includes('ưu đãi') || lower.includes('sale')) {
         reply = 'Bạn có thể vào mục Flash Sale để xem các ưu đãi nổi bật và sản phẩm đang giảm giá.';
       }
+      if (lower.includes('cần thiết') || lower.includes('nên mua')) {
+        reply = 'Điểm cần thiết nên dựa trên nhu cầu, tần suất sử dụng, ngân sách, sản phẩm thay thế và thời điểm mua; Cawi chỉ hỗ trợ bạn ra quyết định chứ không quyết định thay bạn.';
+      }
       setMessages((current) => [...current, { id: Date.now() + 1, type: 'bot', text: reply }]);
     }, 420);
+  }
+
+  function handleMic() {
+    const recognition = recognitionRef.current;
+    if (!recognition) {
+      alert('Trình duyệt này chưa hỗ trợ nhập giọng nói. Bạn có thể thử trên Chrome hoặc Edge.');
+      return;
+    }
+
+    if (isListening) {
+      recognition.stop();
+      return;
+    }
+
+    setIsListening(true);
+    recognition.start();
   }
 
   function handleKeyDown(event) {
@@ -190,11 +241,13 @@ function CawiRobot({ page, message }) {
 
         <div className="quick-pills" aria-label="Gợi ý câu hỏi nhanh">
           <button type="button" onClick={() => quickAsk('Sản phẩm nào rẻ nhất?')}>Sản phẩm nào rẻ nhất?</button>
+          <button type="button" onClick={() => quickAsk('Có nên mua sản phẩm này không?')}>Có nên mua không?</button>
           <button type="button" onClick={() => quickAsk('Cách đổi tiền tệ?')}>Cách đổi tiền tệ?</button>
-          <button type="button" onClick={() => quickAsk('Ưu đãi hôm nay')}>Ưu đãi hôm nay</button>
         </div>
 
         <form className="cawi-chat-input-shell" onSubmit={sendMessage}>
+          <RobotShape small variant={variant} />
+
           <textarea
             ref={chatInputRef}
             value={input}
@@ -205,10 +258,19 @@ function CawiRobot({ page, message }) {
             aria-label="Nhập câu hỏi của bạn"
           />
 
+          <button className={`cawi-mic-button ${isListening ? 'listening' : ''}`} type="button" onClick={handleMic} aria-label="Nhập bằng giọng nói">
+            <svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false">
+              <path d="M24 5.8c-4.55 0-8.25 3.7-8.25 8.25v11.2c0 4.55 3.7 8.25 8.25 8.25s8.25-3.7 8.25-8.25v-11.2c0-4.55-3.7-8.25-8.25-8.25Z" />
+              <path d="M10.8 23.9v1.35C10.8 32.55 16.7 38.5 24 38.5s13.2-5.95 13.2-13.25V23.9" />
+              <path d="M24 38.5v5.7" />
+              <path d="M17.6 44.2h12.8" />
+            </svg>
+          </button>
+
           <button className="cawi-send-button" type="submit" aria-label="Gửi câu hỏi">
-            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-              <path d="M5 16h19" />
-              <path d="m17 9 7 7-7 7" />
+            <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+              <path d="M18 28V8" />
+              <path d="M10.5 15.5 18 8l7.5 7.5" />
             </svg>
           </button>
         </form>

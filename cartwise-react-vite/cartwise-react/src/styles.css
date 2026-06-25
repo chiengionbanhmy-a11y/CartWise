@@ -735,59 +735,95 @@ h1, h2, h3, p { margin-top: 0; }
   font-size: 13px;
   font-weight: 800;
 }
+/* Ô nhập chat navy + micro mới. Giữ Cawi Robo cũ ở bên trái. */
 .cawi-chat-input-shell {
   flex: 0 0 auto;
-  margin: 0 16px 8px;
-  min-height: 58px;
-  padding: 8px 8px 8px 16px;
-  border-radius: 18px;
-  background: #fff;
-  border: 1px solid rgba(23, 35, 53, .1);
+  margin: 0 14px 8px;
+  min-height: 82px;
+  padding: 12px 14px 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #1b293b, #142032);
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+  gap: 14px;
+  box-shadow:
+    0 12px 30px rgba(12, 21, 35, .18),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
 }
 .cawi-chat-input-shell textarea {
   flex: 1 1 auto;
   min-width: 0;
-  max-height: 96px;
-  min-height: 28px;
+  min-height: 32px;
+  max-height: 116px;
   border: 0;
   outline: 0;
   resize: none;
   background: transparent;
-  color: var(--text);
-  font-size: 14px;
+  color: #eef4fb;
+  font-size: 18px;
   line-height: 1.35;
   padding: 8px 0;
 }
-.cawi-chat-input-shell textarea::placeholder { color: #9aa4b2; }
+.cawi-chat-input-shell textarea::placeholder { color: rgba(238, 244, 251, .75); }
+.cawi-mic-button,
 .cawi-send-button {
   flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
   border: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff7a1a, #ff9f43);
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 20px rgba(255, 122, 26, .24);
+}
+.cawi-mic-button {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .09);
+  transition: transform .16s ease, background .16s ease;
+}
+.cawi-mic-button:hover {
+  background: rgba(255, 255, 255, .16);
+  transform: translateY(-1px);
+}
+.cawi-mic-button svg {
+  width: 39px;
+  height: 39px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 4.35px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .32));
+}
+.cawi-mic-button.listening {
+  background: rgba(255, 255, 255, .22);
+  animation: micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.cawi-send-button {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
   transition: transform .16s ease, box-shadow .16s ease;
 }
 .cawi-send-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 24px rgba(255, 122, 26, .28);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
 }
 .cawi-send-button svg {
-  width: 23px;
-  height: 23px;
+  width: 36px;
+  height: 36px;
   fill: none;
-  stroke: #fff;
-  stroke-width: 3;
+  stroke: var(--navy-2);
+  stroke-width: 3.1px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
 .chat-disclaimer {
   display: block;
   padding: 0 18px 14px;
