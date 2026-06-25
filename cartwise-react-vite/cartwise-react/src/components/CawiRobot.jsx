@@ -178,38 +178,36 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   }, [mode, moving, sleeping]);
 
   useEffect(() => {
-    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
     const handleMouseMove = (event) => {
       if (resizeRef.current) {
         const data = resizeRef.current;
         const dx = event.clientX - data.startX;
         const dy = event.clientY - data.startY;
-        const minW = 360;
-        const minH = 430;
-        const maxW = Math.max(minW, window.innerWidth - 24);
-        const maxH = Math.max(minH, window.innerHeight - 24);
+        const minW = 320;
+        const minH = 360;
 
         let nextX = data.left;
         let nextY = data.top;
         let nextW = data.width;
         let nextH = data.height;
 
-        if (data.corner.includes('right')) nextW = data.width + dx;
-        if (data.corner.includes('left')) {
-          nextW = data.width - dx;
-          nextX = data.left + dx;
-        }
-        if (data.corner.includes('bottom')) nextH = data.height + dy;
-        if (data.corner.includes('top')) {
-          nextH = data.height - dy;
-          nextY = data.top + dy;
+        if (data.corner.includes('right')) {
+          nextW = Math.max(minW, data.width + dx);
         }
 
-        nextW = clamp(nextW, minW, maxW);
-        nextH = clamp(nextH, minH, maxH);
-        nextX = clamp(nextX, 8, window.innerWidth - nextW - 8);
-        nextY = clamp(nextY, 8, window.innerHeight - nextH - 8);
+        if (data.corner.includes('left')) {
+          nextW = Math.max(minW, data.width - dx);
+          nextX = data.left + (data.width - nextW);
+        }
+
+        if (data.corner.includes('bottom')) {
+          nextH = Math.max(minH, data.height + dy);
+        }
+
+        if (data.corner.includes('top')) {
+          nextH = Math.max(minH, data.height - dy);
+          nextY = data.top + (data.height - nextH);
+        }
 
         setChatPosition({ x: nextX, y: nextY });
         setChatSize({ width: nextW, height: nextH });
@@ -217,11 +215,11 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       }
 
       if (!dragRef.current) return;
-      const width = chatSize?.width ?? dragRef.current.width;
-      const height = chatSize?.height ?? dragRef.current.height;
-      const nextX = clamp(event.clientX - dragRef.current.offsetX, 8, window.innerWidth - width - 8);
-      const nextY = clamp(event.clientY - dragRef.current.offsetY, 8, window.innerHeight - height - 8);
-      setChatPosition({ x: nextX, y: nextY });
+
+      setChatPosition({
+        x: event.clientX - dragRef.current.offsetX,
+        y: event.clientY - dragRef.current.offsetY
+      });
     };
 
     const handleMouseUp = () => {
@@ -237,7 +235,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [chatSize]);
+  }, []);
 
   const widgetStyle = useMemo(() => {
     if (mode === 'floating') return { right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
@@ -258,12 +256,22 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   };
 
   const startDrag = (event) => {
+    if (event.button !== 0) return;
     if (event.target.closest('button')) return;
+
     const card = event.currentTarget.closest('.cw22-chat');
     if (!card) return;
+
     const rect = card.getBoundingClientRect();
-    dragRef.current = { offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, width: rect.width, height: rect.height };
+    dragRef.current = {
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      width: rect.width,
+      height: rect.height
+    };
+
     setChatPosition({ x: rect.left, y: rect.top });
+    setChatSize({ width: rect.width, height: rect.height });
     document.body.classList.add('cw22-dragging');
   };
 

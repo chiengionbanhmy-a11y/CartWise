@@ -424,3 +424,141 @@
     height: 116px !important;
   }
 }
+
+
+/* =======================================================
+   v24 — Chat: resize 4 góc + kéo tự do bằng thanh header
+   ======================================================= */
+
+/* Khung chat mặc định nằm dễ nhìn, nhưng sau khi kéo sẽ đi tự do */
+.cw22-chat {
+  overflow: hidden !important;
+  resize: none !important;
+  touch-action: none;
+}
+
+/* Khi đã được kéo, không giới hạn trong màn hình; người dùng kéo lên/xuống tùy ý */
+.cw22-chat[style*="left"] {
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* Chỉ phần header dùng để di chuyển khung chat */
+.cw22-chat header {
+  cursor: grab !important;
+  user-select: none !important;
+}
+
+.cw22-chat header:active {
+  cursor: grabbing !important;
+}
+
+.cw22-chat header * {
+  user-select: none !important;
+}
+
+/* 4 góc kéo resize: rộng hơn, dễ bắt chuột hơn */
+.cw22-resize-handle {
+  position: absolute !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  background: transparent !important;
+  z-index: 20 !important;
+  opacity: .85 !important;
+  padding: 0 !important;
+}
+
+.cw22-resize-handle::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 7px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, .01) !important;
+}
+
+.cw22-resize-handle::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 13px !important;
+  height: 13px !important;
+  border-color: rgba(100, 116, 139, .78) !important;
+  border-style: solid !important;
+  transition: border-color .16s ease, transform .16s ease !important;
+}
+
+.cw22-resize-handle:hover::after {
+  border-color: rgba(251, 146, 60, .95) !important;
+  transform: scale(1.08) !important;
+}
+
+.cw22-resize-handle.top-left {
+  left: 0 !important;
+  top: 0 !important;
+  cursor: nwse-resize !important;
+}
+
+.cw22-resize-handle.top-left::after {
+  left: 10px !important;
+  top: 10px !important;
+  border-width: 2px 0 0 2px !important;
+}
+
+.cw22-resize-handle.top-right {
+  right: 0 !important;
+  top: 0 !important;
+  cursor: nesw-resize !important;
+}
+
+.cw22-resize-handle.top-right::after {
+  right: 10px !important;
+  top: 10px !important;
+  border-width: 2px 2px 0 0 !important;
+}
+
+.cw22-resize-handle.bottom-left {
+  left: 0 !important;
+  bottom: 0 !important;
+  cursor: nesw-resize !important;
+}
+
+.cw22-resize-handle.bottom-left::after {
+  left: 10px !important;
+  bottom: 10px !important;
+  border-width: 0 0 2px 2px !important;
+}
+
+.cw22-resize-handle.bottom-right {
+  right: 0 !important;
+  bottom: 0 !important;
+  cursor: nwse-resize !important;
+}
+
+.cw22-resize-handle.bottom-right::after {
+  right: 10px !important;
+  bottom: 10px !important;
+  border-width: 0 2px 2px 0 !important;
+}
+
+/* Trạng thái kéo */
+.cw22-dragging,
+.cw22-dragging * {
+  user-select: none !important;
+  cursor: grabbing !important;
+}
+
+/* Trạng thái resize */
+.cw22-resizing,
+.cw22-resizing * {
+  user-select: none !important;
+}
+
+/* Giữ phần input/quick không che mất nội dung khi thu nhỏ */
+.cw22-messages {
+  min-height: 120px !important;
+}
+
+.cw22-quick {
+  max-height: 132px !important;
+  overflow-y: auto !important;
+}
