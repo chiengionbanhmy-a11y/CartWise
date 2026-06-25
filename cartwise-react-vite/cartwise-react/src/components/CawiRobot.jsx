@@ -47,6 +47,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   const [themeIndex, setThemeIndex] = useState(Number(localStorage.getItem('cawi-theme') || 0));
   const [pointer, setPointer] = useState({ eyeX: 0, eyeY: 0, head: 0 });
   const [input, setInput] = useState('');
+  const [chatPosition, setChatPosition] = useState(null);
   const [messages, setMessages] = useState([
     { from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }
   ]);
@@ -56,6 +57,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   const clickTimer = useRef(null);
   const bubbleTimer = useRef(null);
   const robotRef = useRef(null);
+  const dragRef = useRef(null);
 
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
@@ -77,7 +79,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
       if (!rect) return;
 
       const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height * 0.34;
+      const centerY = rect.top + rect.height * 0.30;
       const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 180));
       const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 160));
 
@@ -133,6 +135,33 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     };
   }, [mode, moving, sleeping]);
 
+  useEffect(() => {
+    function handleMouseMove(event) {
+      if (!dragRef.current) return;
+      const nextX = event.clientX - dragRef.current.offsetX;
+      const nextY = event.clientY - dragRef.current.offsetY;
+      const maxX = Math.max(8, window.innerWidth - 420);
+      const maxY = Math.max(8, window.innerHeight - 660);
+
+      setChatPosition({
+        x: Math.min(Math.max(8, nextX), maxX),
+        y: Math.min(Math.max(8, nextY), maxY)
+      });
+    }
+
+    function handleMouseUp() {
+      dragRef.current = null;
+      document.body.classList.remove('cartbot-dragging');
+    }
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
   const style = useMemo(() => {
     const vars = {
       '--eye-x': `${pointer.eyeX}px`,
@@ -152,6 +181,24 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
 
     return vars;
   }, [mode, pointer, stopIndex]);
+
+  const chatStyle = chatPosition
+    ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' }
+    : undefined;
+
+  function startDrag(event) {
+    const card = event.currentTarget.closest('.cartbot-chat');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    dragRef.current = {
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top
+    };
+    if (!chatPosition) {
+      setChatPosition({ x: rect.left, y: rect.top });
+    }
+    document.body.classList.add('cartbot-dragging');
+  }
 
   function handleRobotClick(event) {
     event.stopPropagation();
@@ -210,10 +257,11 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
       )}
 
       {chatOpen && (
-        <div className="cartbot-chat" onClick={(event) => event.stopPropagation()}>
-          <header>
+        <div className="cartbot-chat" style={chatStyle} onClick={(event) => event.stopPropagation()}>
+          <header onMouseDown={startDrag} title="Giữ chuột và kéo để di chuyển khung chat">
             <strong>Cawi CartBot</strong>
-            <button type="button" onClick={() => setChatOpen(false)}>×</button>
+            <span>Kéo thanh này để đổi vị trí</span>
+            <button type="button" onMouseDown={(event) => event.stopPropagation()} onClick={() => setChatOpen(false)}>×</button>
           </header>
 
           <div className="cartbot-messages">
@@ -258,17 +306,19 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         <span className="cartbot-flower flower-2">❀</span>
         <span className="cartbot-flower flower-3">♡</span>
 
-        <div className="cartbot-head-layer">
-          <img src="/cartwise-cartbot-v10-twoeyes-handle.png" alt="Cawi CartBot" className="cartbot-img" />
-          <span className="cartbot-eye-mask left" />
-          <span className="cartbot-eye-mask right" />
-          <span className="cartbot-eye-pupil left" />
-          <span className="cartbot-eye-pupil right" />
-          <span className="cartbot-sleep-face">
-            <i className="left" />
-            <i className="right" />
-            <b>zzz</b>
-          </span>
+        <div className="cartbot-avatar-bg">
+          <div className="cartbot-head-layer">
+            <img src="/cartwise-cartbot-v11-handle.png" alt="Cawi CartBot" className="cartbot-img" />
+            <span className="cartbot-eye-mask left" />
+            <span className="cartbot-eye-mask right" />
+            <span className="cartbot-eye-pupil left" />
+            <span className="cartbot-eye-pupil right" />
+            <span className="cartbot-sleep-face">
+              <i className="left" />
+              <i className="right" />
+              <b>zzz</b>
+            </span>
+          </div>
         </div>
       </div>
     </aside>
