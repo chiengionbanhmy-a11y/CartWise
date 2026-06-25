@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-const floatingStops = ['130px', '34vh', 'calc(100vh - 210px)', '48vh'];
+const floatingStops = ['130px', '36vh', 'calc(100vh - 220px)', '52vh'];
 
 const quickQuestions = [
   'Sản phẩm nào rẻ nhất?',
@@ -30,13 +30,13 @@ function getBotReply(text) {
   }
 
   if (q.includes('robot') || q.includes('giúp')) {
-    return 'Mình là Cawi CartBot. Mình hỗ trợ so sánh giá, gợi ý nơi mua, nhắc ưu đãi và giải thích cách dùng CartWise.';
+    return 'Mình là Cawi Robo. Mình hỗ trợ so sánh giá, gợi ý nơi mua, nhắc ưu đãi và giải thích cách dùng CartWise.';
   }
 
   return 'Mình đã hiểu. Bạn có thể hỏi mình về so sánh giá, nơi mua rẻ nhất, đổi tiền tệ, flash sale hoặc cách sử dụng CartWise nhé.';
 }
 
-function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi CartBot!' }) {
+function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi Robo!' }) {
   const [stopIndex, setStopIndex] = useState(1);
   const [moving, setMoving] = useState(false);
   const [sleeping, setSleeping] = useState(false);
@@ -45,7 +45,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   const [bubbleVisible, setBubbleVisible] = useState(true);
   const [bubbleText, setBubbleText] = useState(message);
   const [themeIndex, setThemeIndex] = useState(Number(localStorage.getItem('cawi-theme') || 0));
-  const [pointer, setPointer] = useState({ eyeX: 0, eyeY: 0, head: 0 });
+  const [pointer, setPointer] = useState({ eyeX: 0, eyeY: 0, headX: 0, headY: 0 });
   const [input, setInput] = useState('');
   const [chatPosition, setChatPosition] = useState(null);
   const [messages, setMessages] = useState([
@@ -71,23 +71,25 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
 
   useEffect(() => {
     showBubble(message, 15000);
-    return () => bubbleTimer.current && clearTimeout(bubbleTimer.current);
+    return () => {
+      if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      recognitionRef.current?.stop?.();
+    };
   }, [message]);
 
   useEffect(() => {
     function followMouse(event) {
       const rect = robotRef.current?.getBoundingClientRect();
       if (!rect) return;
-
       const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height * 0.30;
-      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 180));
-      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 160));
-
+      const centerY = rect.top + rect.height * 0.28;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 220));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 180));
       setPointer({
-        eyeX: dx * 7.5,
-        eyeY: dy * 5,
-        head: dx * 5
+        eyeX: dx * 8.5,
+        eyeY: dy * 6,
+        headX: dx * 5.5,
+        headY: dy * 2.5
       });
     }
 
@@ -99,7 +101,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     function markActivity() {
       lastActivity.current = Date.now();
       setMoving(false);
-
       if (sleeping) {
         setSleeping(false);
         showBubble('Bạn đã quay lại rồi ư? Mình sẵn sàng hỗ trợ tiếp nè!', 5000);
@@ -126,7 +127,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         setMoving(true);
         setStopIndex((prev) => (prev + 1) % floatingStops.length);
         lastMove.current = now;
-        setTimeout(() => setMoving(false), 2300);
+        setTimeout(() => setMoving(false), 2200);
       }
     }, 1000);
 
@@ -162,13 +163,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     const vars = {
       '--eye-x': `${pointer.eyeX}px`,
       '--eye-y': `${pointer.eyeY}px`,
-      '--head-rot': `${pointer.head}deg`
+      '--head-x': `${pointer.headX}px`,
+      '--head-y': `${pointer.headY}px`
     };
 
     if (mode === 'floating') {
       return {
         ...vars,
-        right: '22px',
+        right: '24px',
         top: floatingStops[stopIndex],
         bottom: 'auto',
         left: 'auto'
@@ -201,7 +203,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     if (clickTimer.current) {
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
-
       const next = (themeIndex + 1) % 5;
       setThemeIndex(next);
       localStorage.setItem('cawi-theme', String(next));
@@ -219,10 +220,8 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
   function sendMessage(text) {
     const clean = text.trim();
     if (!clean) return;
-
     setMessages((prev) => [...prev, { from: 'user', text: clean }]);
     setInput('');
-
     setTimeout(() => {
       setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
     }, 450);
@@ -250,12 +249,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
     recognition.start();
   }
 
+  const robotImage = '/cartwise-cartbot-v14-harmonic.png';
+
   return (
     <aside
       ref={robotRef}
       className={`cartbot-widget cartbot-${mode} theme-${themeIndex} ${moving ? 'is-moving' : ''} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''} ${chatOpen ? 'chat-open' : ''}`}
       style={style}
-      aria-label="Cawi CartBot"
+      aria-label="Cawi Robo"
     >
       {bubbleVisible && !chatOpen && (
         <div className="cartbot-bubble">
@@ -276,8 +277,17 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
       {chatOpen && (
         <div className="cartbot-chat" style={chatStyle} onClick={(event) => event.stopPropagation()}>
           <header onMouseDown={startDrag} title="Giữ chuột và kéo để di chuyển khung chat">
-            <strong>Cawi CartBot</strong>
-            <span>Kéo thanh này để đổi vị trí</span>
+            <div className="cartbot-chat-ident">
+              <div className="cartbot-mini-avatar">
+                <img src={robotImage} alt="Cawi Robo" className="cartbot-mini-img" />
+                <span className="cartbot-mini-pupil left"><span /></span>
+                <span className="cartbot-mini-pupil right"><span /></span>
+              </div>
+              <div>
+                <strong>Cawi Robo</strong>
+                <span><i />Đang hoạt động</span>
+              </div>
+            </div>
             <button type="button" onMouseDown={(event) => event.stopPropagation()} onClick={() => setChatOpen(false)}>×</button>
           </header>
 
@@ -307,8 +317,18 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
               onChange={(event) => setInput(event.target.value)}
               placeholder="Nhập câu hỏi của bạn..."
             />
-            <button type="button" className="cartbot-mic" onClick={startVoiceInput} aria-label="Nhập bằng giọng nói">🎙</button>
-            <button type="submit" className="cartbot-send" aria-label="Gửi tin nhắn">↑</button>
+            <button type="button" className="cartbot-mic" onClick={startVoiceInput} aria-label="Nhập bằng giọng nói">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+                <path d="M19 10a7 7 0 0 1-14 0" />
+                <path d="M12 19v3" />
+              </svg>
+            </button>
+            <button type="submit" className="cartbot-send" aria-label="Gửi tin nhắn">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 3a1 1 0 0 1 .707.293l6 6a1 1 0 0 1-1.414 1.414L13 6.414V20a1 1 0 1 1-2 0V6.414l-4.293 4.293A1 1 0 1 1 5.293 9.293l6-6A1 1 0 0 1 12 3Z"/>
+              </svg>
+            </button>
           </form>
         </div>
       )}
@@ -325,7 +345,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi C
         <span className="cartbot-flower flower-3">♡</span>
 
         <div className="cartbot-head-layer">
-          <img src="/cartwise-cartbot-v13-restored.png" alt="Cawi CartBot" className="cartbot-img" />
+          <img src={robotImage} alt="Cawi Robo" className="cartbot-img" />
+          <span className="cartbot-eye-pupil left"><span /></span>
+          <span className="cartbot-eye-pupil right"><span /></span>
           <span className="cartbot-sleep-face">
             <i className="left" />
             <i className="right" />
