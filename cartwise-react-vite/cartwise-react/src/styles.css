@@ -4685,3 +4685,533 @@ main {
   .cawi-robot-mouth { top: 40px; }
   .cawi-robot-body { left: 17px; bottom: 8px; width: 76px; height: 58px; }
 }
+
+
+/* =======================================================
+   v19 — Cawi Robo: đầu tròn + thân xe đẩy bằng code
+   ======================================================= */
+.cartbot-widget {
+  --cawi-primary: #258bff;
+  --cawi-primary-dark: #0c66d8;
+  --cawi-shell: #f4f8ff;
+  --cawi-shell-edge: #dbeafe;
+  --cawi-face: #121a28;
+  --cawi-accent: #ff895f;
+  --cawi-wheel: #1e7eea;
+  --cawi-wheel-dark: #1f2937;
+}
+
+.cartbot-widget.theme-1 {
+  --cawi-primary: #ff7f6b;
+  --cawi-primary-dark: #ed5f4d;
+  --cawi-shell: #fff3f0;
+  --cawi-shell-edge: #ffd9d1;
+  --cawi-accent: #37a2ff;
+  --cawi-wheel: #ff6b55;
+}
+
+.cartbot-widget.theme-2 {
+  --cawi-primary: #28c76f;
+  --cawi-primary-dark: #16a358;
+  --cawi-shell: #f0fff6;
+  --cawi-shell-edge: #d3f8e1;
+  --cawi-accent: #ff9b63;
+  --cawi-wheel: #20b862;
+}
+
+.cartbot-widget.theme-3 {
+  --cawi-primary: #8b7cff;
+  --cawi-primary-dark: #6a5dea;
+  --cawi-shell: #f5f3ff;
+  --cawi-shell-edge: #e2dcff;
+  --cawi-accent: #ff9478;
+  --cawi-wheel: #7464f4;
+}
+
+.cartbot-widget.theme-4 {
+  --cawi-primary: #f5b642;
+  --cawi-primary-dark: #d99011;
+  --cawi-shell: #fff8e8;
+  --cawi-shell-edge: #f9eac1;
+  --cawi-accent: #3b9cff;
+  --cawi-wheel: #d89413;
+}
+
+.cartbot-avatar {
+  width: 142px !important;
+  height: 178px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.cartbot-mini-avatar {
+  width: 62px !important;
+  height: 76px !important;
+  flex: 0 0 62px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.cartbot-head-layer {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+
+.cawi-cart-robo {
+  position: relative;
+  width: 142px;
+  height: 178px;
+  filter: drop-shadow(0 16px 28px rgba(15,23,42,.18));
+  user-select: none;
+}
+
+.cawi-cart-robo-mini {
+  width: 62px;
+  height: 76px;
+  filter: none;
+}
+
+.cawi-cart-robo-head-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 142px;
+  height: 100px;
+  transform: translate(var(--head-x, 0px), var(--head-y, 0px)) rotate(var(--head-rot, 0deg));
+  transform-origin: 50% 58%;
+  transition: transform .018s linear;
+  z-index: 4;
+}
+
+.cawi-cart-robo-antenna {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 6;
+}
+
+.cawi-cart-robo-antenna-stick {
+  width: 5px;
+  height: 13px;
+  border-radius: 999px;
+  background: #1f2937;
+}
+
+.cawi-cart-robo-antenna-ball {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #8bd3ff 0 25%, var(--cawi-primary) 54%, var(--cawi-primary-dark) 100%);
+  border: 2px solid rgba(255,255,255,.68);
+}
+
+.cawi-cart-robo-head {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 110px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, #ffffff 0 12%, var(--cawi-shell) 30%, var(--cawi-shell-edge) 100%);
+  border: 3px solid rgba(139, 170, 215, .35);
+  box-shadow: inset 0 -7px 18px rgba(37,139,255,.12);
+}
+
+.cawi-cart-robo-head::before,
+.cawi-cart-robo-head::after {
+  content: '';
+  position: absolute;
+  top: 38px;
+  width: 14px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--cawi-primary), var(--cawi-primary-dark));
+  border: 2px solid rgba(255,255,255,.55);
+}
+
+.cawi-cart-robo-head::before {
+  left: -7px;
+}
+
+.cawi-cart-robo-head::after {
+  right: -7px;
+}
+
+.cawi-cart-robo-face {
+  position: absolute;
+  left: 16px;
+  top: 22px;
+  width: 78px;
+  height: 54px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(255,255,255,.18) 0 8%, transparent 10%),
+    linear-gradient(180deg, #172132 0%, var(--cawi-face) 100%);
+  overflow: hidden;
+}
+
+.cawi-cart-robo-brow {
+  position: absolute;
+  top: 8px;
+  width: 16px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--cawi-accent);
+}
+
+.cawi-cart-robo-brow.left {
+  left: 17px;
+  transform: rotate(-10deg);
+}
+
+.cawi-cart-robo-brow.right {
+  right: 17px;
+  transform: rotate(10deg);
+}
+
+.cawi-cart-robo-eye {
+  position: absolute;
+  top: 18px;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 -2px 0 rgba(162,177,201,.28);
+}
+
+.cawi-cart-robo-eye.left {
+  left: 16px;
+}
+
+.cawi-cart-robo-eye.right {
+  right: 16px;
+}
+
+.cawi-cart-robo-pupil {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(255,255,255,.98) 0 18%, transparent 19% 100%),
+    #030712;
+  transform: translate(var(--pupil-x, 0px), var(--pupil-y, 0px));
+  transition: transform .018s linear;
+}
+
+.cawi-cart-robo-cheek {
+  position: absolute;
+  top: 38px;
+  width: 14px;
+  height: 9px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,166,188,.9), rgba(255,166,188,.06) 75%, transparent);
+}
+
+.cawi-cart-robo-cheek.left {
+  left: 13px;
+}
+
+.cawi-cart-robo-cheek.right {
+  right: 13px;
+}
+
+.cawi-cart-robo-mouth {
+  position: absolute;
+  left: 50%;
+  top: 39px;
+  width: 22px;
+  height: 10px;
+  margin-left: -11px;
+  border-bottom: 4px solid #59e6c5;
+  border-radius: 0 0 16px 16px;
+}
+
+.cawi-cart-robo-sleep-eyes,
+.cawi-cart-robo-sleep-text {
+  display: none;
+}
+
+.is-sleeping .cawi-cart-robo-eye,
+.is-sleeping .cawi-cart-robo-brow,
+.is-sleeping .cawi-cart-robo-mouth,
+.is-sleeping .cawi-cart-robo-cheek {
+  opacity: 0;
+}
+
+.is-sleeping .cawi-cart-robo-sleep-eyes {
+  display: block;
+}
+
+.is-sleeping .cawi-cart-robo-sleep-eyes::before,
+.is-sleeping .cawi-cart-robo-sleep-eyes::after {
+  content: '';
+  position: absolute;
+  top: 27px;
+  width: 18px;
+  height: 9px;
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+}
+
+.is-sleeping .cawi-cart-robo-sleep-eyes::before {
+  left: 16px;
+}
+
+.is-sleeping .cawi-cart-robo-sleep-eyes::after {
+  right: 16px;
+}
+
+.is-sleeping .cawi-cart-robo-sleep-text {
+  display: block;
+  position: absolute;
+  right: -5px;
+  top: 5px;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.cawi-cart-robo-cart {
+  position: absolute;
+  left: 17px;
+  bottom: 10px;
+  width: 108px;
+  height: 88px;
+  z-index: 2;
+}
+
+.cawi-cart-robo-cart-rim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7fc0ff, var(--cawi-primary));
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.09);
+  z-index: 3;
+}
+
+.cawi-cart-robo-cart-body {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 13px;
+  bottom: 15px;
+  border-radius: 0 0 24px 24px;
+  background: linear-gradient(180deg, var(--cawi-shell) 0%, #ffffff 45%, var(--cawi-shell-edge) 100%);
+  border: 3px solid rgba(139,170,215,.34);
+  overflow: hidden;
+}
+
+.basket-hole {
+  position: absolute;
+  width: 17px;
+  height: 16px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, var(--cawi-primary), var(--cawi-primary-dark));
+  box-shadow: inset 0 2px 1px rgba(255,255,255,.22), inset 0 -2px 2px rgba(0,0,0,.08);
+}
+
+.basket-hole.h1 { left: 17px; top: 17px; }
+.basket-hole.h2 { left: 38px; top: 17px; }
+.basket-hole.h3 { left: 59px; top: 17px; }
+.basket-hole.h4 { left: 23px; top: 38px; }
+.basket-hole.h5 { left: 45px; top: 38px; }
+.basket-hole.h6 { left: 67px; top: 38px; }
+
+.cawi-cart-robo-bottom-bar {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  bottom: 14px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cawi-accent);
+}
+
+.cawi-cart-robo-wheel {
+  position: absolute;
+  bottom: 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: var(--cawi-wheel-dark);
+  box-shadow: inset 0 -2px 0 rgba(255,255,255,.12);
+}
+
+.cawi-cart-robo-wheel.left {
+  left: 14px;
+}
+
+.cawi-cart-robo-wheel.right {
+  right: 14px;
+}
+
+.cawi-cart-robo-wheel i {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #91d5ff 0 22%, var(--cawi-wheel) 56%, var(--cawi-primary-dark) 100%);
+}
+
+.cawi-cart-robo-mini .cawi-cart-robo-head-wrap {
+  width: 62px;
+  height: 43px;
+}
+
+.cawi-cart-robo-mini .cawi-cart-robo-antenna-stick { width: 3px; height: 6px; }
+.cawi-cart-robo-mini .cawi-cart-robo-antenna-ball { width: 8px; height: 8px; border-width: 1px; }
+.cawi-cart-robo-mini .cawi-cart-robo-head {
+  left: 7px;
+  top: 6px;
+  width: 48px;
+  height: 40px;
+  border-width: 2px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-head::before,
+.cawi-cart-robo-mini .cawi-cart-robo-head::after {
+  top: 16px;
+  width: 6px;
+  height: 12px;
+  border-width: 1px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-head::before { left: -3px; }
+.cawi-cart-robo-mini .cawi-cart-robo-head::after { right: -3px; }
+.cawi-cart-robo-mini .cawi-cart-robo-face {
+  left: 7px;
+  top: 9px;
+  width: 34px;
+  height: 24px;
+  border-radius: 12px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-brow {
+  top: 4px;
+  width: 7px;
+  height: 2px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-brow.left { left: 7px; }
+.cawi-cart-robo-mini .cawi-cart-robo-brow.right { right: 7px; }
+.cawi-cart-robo-mini .cawi-cart-robo-eye {
+  top: 8px;
+  width: 10px;
+  height: 10px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-eye.left { left: 6px; }
+.cawi-cart-robo-mini .cawi-cart-robo-eye.right { right: 6px; }
+.cawi-cart-robo-mini .cawi-cart-robo-pupil {
+  left: 3px;
+  top: 3px;
+  width: 5px;
+  height: 5px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-cheek { top: 17px; width: 6px; height: 4px; }
+.cawi-cart-robo-mini .cawi-cart-robo-cheek.left { left: 6px; }
+.cawi-cart-robo-mini .cawi-cart-robo-cheek.right { right: 6px; }
+.cawi-cart-robo-mini .cawi-cart-robo-mouth {
+  top: 17px;
+  width: 10px;
+  height: 5px;
+  margin-left: -5px;
+  border-bottom-width: 2px;
+}
+
+.cawi-cart-robo-mini .cawi-cart-robo-cart {
+  left: 7px;
+  bottom: 3px;
+  width: 48px;
+  height: 39px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-cart-rim { height: 8px; }
+.cawi-cart-robo-mini .cawi-cart-robo-cart-body {
+  left: 4px;
+  right: 4px;
+  top: 6px;
+  bottom: 7px;
+  border-width: 2px;
+  border-radius: 0 0 10px 10px;
+}
+.cawi-cart-robo-mini .basket-hole {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+.cawi-cart-robo-mini .basket-hole.h1 { left: 8px; top: 7px; }
+.cawi-cart-robo-mini .basket-hole.h2 { left: 17px; top: 7px; }
+.cawi-cart-robo-mini .basket-hole.h3 { left: 26px; top: 7px; }
+.cawi-cart-robo-mini .basket-hole.h4 { left: 10px; top: 16px; }
+.cawi-cart-robo-mini .basket-hole.h5 { left: 20px; top: 16px; }
+.cawi-cart-robo-mini .basket-hole.h6 { left: 30px; top: 16px; }
+.cawi-cart-robo-mini .cawi-cart-robo-bottom-bar {
+  left: 16px;
+  right: 16px;
+  bottom: 6px;
+  height: 4px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-wheel {
+  width: 10px;
+  height: 10px;
+}
+.cawi-cart-robo-mini .cawi-cart-robo-wheel.left { left: 7px; }
+.cawi-cart-robo-mini .cawi-cart-robo-wheel.right { right: 7px; }
+.cawi-cart-robo-mini .cawi-cart-robo-wheel i { inset: 2px; }
+
+.cartbot-status {
+  background: #22c55e !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  width: fit-content !important;
+}
+
+.cartbot-status i {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.18) !important;
+}
+
+.cartbot-send,
+.cartbot-mic {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.cartbot-send svg,
+.cartbot-mic svg {
+  display: block !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.cartbot-send svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+@media (max-width: 720px) {
+  .cartbot-avatar {
+    width: 112px !important;
+    height: 142px !important;
+  }
+  .cawi-cart-robo {
+    width: 112px;
+    height: 142px;
+    transform: scale(.82);
+    transform-origin: top right;
+  }
+}

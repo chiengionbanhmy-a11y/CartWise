@@ -66,7 +66,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     target: { pupilX: 0, pupilY: 0, headX: 0, headY: 0, headRot: 0 }
   });
 
-
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
     setBubbleVisible(true);
@@ -76,63 +75,60 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     }
   };
 
-  const renderRobotVisual = (variant = 'full') => {
+  function renderRobotVisual(variant = 'full') {
     const mini = variant === 'mini';
 
     return (
-      <div className={`cawi-robot cawi-robot-${variant} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''}`}>
-        <div className="cawi-robot-head-wrap">
-          <div className="cawi-robot-antenna" aria-hidden="true">
-            <span className="cawi-robot-antenna-stick" />
-            <span className="cawi-robot-antenna-ball" />
+      <div className={`cawi-cart-robo cawi-cart-robo-${variant} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''}`}>
+        <div className="cawi-cart-robo-head-wrap">
+          <div className="cawi-cart-robo-antenna" aria-hidden="true">
+            <span className="cawi-cart-robo-antenna-stick" />
+            <span className="cawi-cart-robo-antenna-ball" />
           </div>
-          <div className="cawi-robot-head" aria-hidden="true">
-            <div className="cawi-robot-head-highlight" />
-            <div className="cawi-robot-face">
-              <span className="cawi-robot-brow left" />
-              <span className="cawi-robot-brow right" />
-              <span className="cawi-robot-eye left">
-                <span className="cawi-robot-pupil left" />
+
+          <div className="cawi-cart-robo-head" aria-hidden="true">
+            <div className="cawi-cart-robo-face">
+              <span className="cawi-cart-robo-brow left" />
+              <span className="cawi-cart-robo-brow right" />
+
+              <span className="cawi-cart-robo-eye left">
+                <span className="cawi-cart-robo-pupil" />
               </span>
-              <span className="cawi-robot-eye right">
-                <span className="cawi-robot-pupil right" />
+              <span className="cawi-cart-robo-eye right">
+                <span className="cawi-cart-robo-pupil" />
               </span>
-              <span className="cawi-robot-cheek left" />
-              <span className="cawi-robot-cheek right" />
-              <span className="cawi-robot-mouth" />
-              <span className="cawi-robot-sleep-eyes" />
+
+              <span className="cawi-cart-robo-cheek left" />
+              <span className="cawi-cart-robo-cheek right" />
+              <span className="cawi-cart-robo-mouth" />
+              <span className="cawi-cart-robo-sleep-eyes" />
             </div>
           </div>
         </div>
 
-        <div className="cawi-robot-body" aria-hidden="true">
-          <div className="cawi-robot-rim" />
-          <div className="cawi-robot-basket">
-            <div className="cawi-robot-basket-icon">
-              <span className="cart-line top" />
-              <span className="cart-line handle" />
-              <span className="cart-line basket" />
-              <span className="cart-wheel left" />
-              <span className="cart-wheel right" />
-            </div>
+        <div className="cawi-cart-robo-cart" aria-hidden="true">
+          <div className="cawi-cart-robo-cart-rim" />
+          <div className="cawi-cart-robo-cart-body">
+            <span className="basket-hole h1" />
+            <span className="basket-hole h2" />
+            <span className="basket-hole h3" />
+            <span className="basket-hole h4" />
+            <span className="basket-hole h5" />
+            <span className="basket-hole h6" />
           </div>
-          <div className="cawi-robot-base-accent" />
-          <div className="cawi-robot-wheel left"><span /></div>
-          <div className="cawi-robot-wheel right"><span /></div>
+          <span className="cawi-cart-robo-bottom-bar" />
+          <span className="cawi-cart-robo-wheel left"><i /></span>
+          <span className="cawi-cart-robo-wheel right"><i /></span>
         </div>
 
-        {!mini && (
-          <span className="cawi-robot-sleep-text" aria-hidden="true">zzz</span>
-        )}
+        {!mini && <span className="cawi-cart-robo-sleep-text" aria-hidden="true">zzz</span>}
       </div>
     );
-  };
+  }
 
   useEffect(() => {
     showBubble(message, 15000);
-  
-
-  return () => {
+    return () => {
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
       if (clickTimer.current) clearTimeout(clickTimer.current);
       if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
@@ -165,8 +161,6 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       root.style.setProperty('--head-y', `${state.headY}px`);
       root.style.setProperty('--head-rot', `${state.headRot}deg`);
     };
-
-    applyVars(followRef.current.current);
 
     const animate = () => {
       const data = followRef.current;
@@ -201,16 +195,16 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       if (!rect) return;
 
       const faceCenterX = rect.left + rect.width * 0.5;
-      const faceCenterY = rect.top + rect.height * 0.32;
-      const dx = Math.max(-1, Math.min(1, (event.clientX - faceCenterX) / 140));
+      const faceCenterY = rect.top + rect.height * 0.28;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - faceCenterX) / 135));
       const dy = Math.max(-1, Math.min(1, (event.clientY - faceCenterY) / 115));
 
       followRef.current.target = {
-        pupilX: dx * 4.6,
-        pupilY: dy * 3.8,
-        headX: dx * 2.2,
-        headY: dy * 1.6,
-        headRot: dx * 6.4
+        pupilX: dx * 4.2,
+        pupilY: dy * 3.5,
+        headX: dx * 2,
+        headY: dy * 1.4,
+        headRot: dx * 5.8
       };
 
       if (!followRef.current.rafId) {
@@ -218,6 +212,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       }
     };
 
+    applyVars(followRef.current.current);
     window.addEventListener('mousemove', onMouseMove, { passive: true });
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
