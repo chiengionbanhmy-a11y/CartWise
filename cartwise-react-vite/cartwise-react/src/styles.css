@@ -5215,3 +5215,69 @@ main {
     transform-origin: top right;
   }
 }
+
+/* =======================================================
+   v22 layout fixes: fixed top nav + no top gap + safer page spacing
+   ======================================================= */
+html,
+body,
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100%;
+}
+
+.app-shell {
+  padding-top: 86px !important;
+}
+
+.navbar,
+.navbar-minimal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  z-index: 3200 !important;
+  border-radius: 0 0 28px 28px !important;
+  background: rgba(255,255,255,.96) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 12px 34px rgba(15,23,42,.10) !important;
+}
+
+main {
+  padding-top: 22px !important;
+}
+
+.promo-stack {
+  top: 110px !important;
+}
+
+.modal-backdrop {
+  z-index: 3400 !important;
+}
+
+.product-backdrop {
+  padding-top: 96px !important;
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding-top: 156px !important;
+  }
+
+  .navbar,
+  .navbar-minimal {
+    border-radius: 0 0 22px 22px !important;
+  }
+
+  .promo-stack {
+    top: 170px !important;
+  }
+
+  .product-backdrop {
+    padding-top: 158px !important;
+  }
+}
