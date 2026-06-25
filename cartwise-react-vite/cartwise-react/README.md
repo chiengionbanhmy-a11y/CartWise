@@ -1,26 +1,27 @@
-# CartWise v13 - Navy Chat Input + Cawi Robo cũ
+# CartWise v13 - Navy Chat + Cawi Robo cũ (Vercel fixed)
 
-Bản này được tạo theo yêu cầu:
+Bản này đã được làm sạch để deploy lên Vercel:
 
-- Giữ robot dạng Cawi Robo cũ.
-- Giữ hiệu ứng mắt robot nhìn theo chuột.
-- Giữ logic click robot 3 lần đổi màu/biến thể như bản cũ.
-- Giữ logic robot tự đổi vị trí sau 10 giây không tương tác như bản cũ.
-- Nâng cấp ô nhập chat thành giao diện navy giống mẫu mới.
-- Thêm nút micro rõ hơn, hỗ trợ Web Speech API để chuyển giọng nói thành văn bản trên trình duyệt hỗ trợ như Chrome/Edge.
-- Nút gửi đổi thành nút tròn trắng với mũi tên hướng lên.
+- Không kèm `node_modules`.
+- Không kèm `dist`.
+- Không kèm `package-lock.json` cũ để tránh lỗi registry khi `npm install` trên Vercel.
+- Có `.npmrc` ép dùng registry public của npm.
+- Có `vercel.json` đặt sẵn cấu hình deploy.
 
-## Chạy thử
+## Deploy Vercel
+
+Upload toàn bộ thư mục đã giải nén, không upload file zip trực tiếp.
+
+Cấu hình nếu Vercel hỏi:
+
+- Framework Preset: Vite
+- Install Command: npm install
+- Build Command: npm run build
+- Output Directory: dist
+
+## Chạy local
 
 ```bash
 npm install
 npm run dev
 ```
-
-## Build
-
-```bash
-npm run build
-```
-
-Bản này đã được build thử thành công.
