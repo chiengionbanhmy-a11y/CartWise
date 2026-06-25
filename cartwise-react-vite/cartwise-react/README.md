@@ -1,44 +1,60 @@
-# CartWise v13.1 - Chat input + Robot update
+# CartWise Demo Website
 
-Bản này được tích hợp theo yêu cầu mới:
+Đây là bản web demo CartWise bằng React + Vite, dễ chỉnh sửa và có thể deploy lên Vercel/Netlify để lấy link web thật.
 
-- Giữ cấu trúc React + Vite của bản CartWise v13.
-- Nâng cấp ô nhập chat theo hình mới: nền navy bo tròn dài, robot mini bên trái, placeholder “Nhập câu hỏi của bạn...”, micro rõ hơn, nút gửi tròn trắng mũi tên hướng lên.
-- Khôi phục robot về form cũ, bỏ quai cầm/handle hoàn toàn.
-- Giữ phần thân dưới robot kiểu cũ: thân bo tròn, lõi cam, 2 bánh xe.
-- Giữ hiệu ứng mắt robot nhìn theo chuột.
-- Chat panel vẫn có thể kéo thả bằng header và resize bằng góc cửa sổ.
-- Có Web Speech API để micro chuyển giọng nói thành văn bản trên trình duyệt hỗ trợ như Chrome/Edge.
+## Tính năng có sẵn
 
-## Cách chạy
+- Trang chủ có tìm kiếm sản phẩm.
+- Flash Sale dạng tab hàng ngang.
+- Điểm bán có nút “Xem”, mở sản phẩm theo nhóm.
+- Popup chi tiết/so sánh sản phẩm có ảnh, bảng giá, nơi rẻ nhất, dòng “Tiết kiệm lên tới...”, đếm ngược ưu đãi.
+- Quy đổi tiền tệ nhanh trong chi tiết sản phẩm: VND, USD, CNY, EUR, JPY, KRW.
+- Cawi Robo: mascot riêng bằng CSS, nhìn theo chuột, click 3 lần đổi ngoại hình, tự đổi vị trí sau 10 giây không tương tác.
+- Phần “Về chúng tôi” có tab: Tổng quan, Đội ngũ, Liên hệ, Robot CartWise.
+- Cài đặt tài khoản: đổi tên, avatar, ngôn ngữ, đơn vị tiền tệ; yêu cầu đăng nhập demo trước khi chỉnh.
+- Popup quảng cáo khi vừa vào trang.
+
+## Cách chạy trên máy
 
 ```bash
 npm install
 npm run dev
 ```
 
-Sau đó mở link Vite hiện ra trong terminal, thường là:
+Sau đó mở link Vite hiển thị trong terminal, thường là:
 
 ```bash
 http://localhost:5173
 ```
 
-## File đã chỉnh chính
+## Cách sửa nhanh
 
-- `src/components/CawiRobot.jsx`
-- `src/styles.css`, các phần:
-  - `.cawi-chat-input-shell`
-  - `.cawi-mic-button`
-  - `.cawi-send-button`
-  - `.cawi-shape`, `.mini-cawi`
-  - `.cawi-lower-body-old`
+- Sửa sản phẩm: `src/data/products.js`
+- Sửa tỷ giá: `src/data/products.js`, biến `exchangeRates`
+- Sửa robot: `src/components/CawiRobot.jsx` và CSS phần `.cawi` trong `src/styles.css`
+- Sửa chi tiết sản phẩm: `src/components/ProductModal.jsx`
+- Sửa cài đặt: `src/components/SettingsPanel.jsx`
+- Sửa trang chủ: `src/pages/Home.jsx`
+- Sửa Flash Sale: `src/pages/FlashSale.jsx`
+- Sửa Điểm bán: `src/pages/Stores.jsx`
+- Sửa Về chúng tôi: `src/pages/About.jsx`
 
-## Ghi chú triển khai
+## Cách deploy để có link web thật bằng Vercel
 
-Trong `CawiRobot.jsx`, phần robot có comment rõ:
+1. Tạo tài khoản tại Vercel.
+2. Tạo GitHub repository và upload toàn bộ thư mục này lên.
+3. Vào Vercel → Add New Project → chọn repository CartWise.
+4. Giữ lệnh build mặc định:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+5. Bấm Deploy.
+6. Vercel sẽ tạo link web thật dạng `https://ten-du-an.vercel.app`.
 
-```jsx
-{/* Robot bản cũ: đã bỏ hoàn toàn quai cầm/handle, giữ phần thân dưới cũ. */}
-```
+## Cách deploy bằng Netlify
 
-Trong CSS cũng có comment rõ vùng robot và input để bạn dễ chỉnh tiếp.
+1. Vào Netlify.
+2. Chọn Add new site → Import from Git.
+3. Chọn repository CartWise.
+4. Build command: `npm run build`.
+5. Publish directory: `dist`.
+6. Bấm Deploy.

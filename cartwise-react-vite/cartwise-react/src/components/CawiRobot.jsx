@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const positionClasses = ['pos-bottom-right', 'pos-middle-right', 'pos-bottom-left'];
+const variantClasses = ['classic', 'orange', 'blue'];
 
-function RobotShape({ small = false, mood = 'normal' }) {
+function RobotShape({ small = false, mood = 'normal', variant = 'classic' }) {
   return (
-    <span className={`${small ? 'mini-cawi' : 'cawi-shape'} ${mood}`} aria-hidden="true">
-      {/* Robot bản cũ: đã bỏ hoàn toàn quai cầm/handle, giữ phần thân dưới cũ. */}
+    <span className={`${small ? 'mini-cawi' : 'cawi-shape'} ${mood} ${variant}`} aria-hidden="true">
+      <span className="cawi-handle" />
       <span className="cawi-antenna" />
       <span className="cawi-ear cawi-ear-left" />
       <span className="cawi-ear cawi-ear-right" />
@@ -15,7 +16,7 @@ function RobotShape({ small = false, mood = 'normal' }) {
           <span className="cawi-eye"><span /></span>
         </span>
       </span>
-      <span className="cawi-lower-body-old">
+      <span className="cawi-cart-body">
         <span className="cawi-core" />
         <span className="cawi-wheel cawi-wheel-left" />
         <span className="cawi-wheel cawi-wheel-right" />
@@ -28,19 +29,18 @@ function RobotShape({ small = false, mood = 'normal' }) {
 function CawiRobot({ page, message }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: 'Chào bạn! 👋 Mình là Cawi CartBot. Mình có thể giúp bạn so sánh giá, kiểm tra phí ship/voucher và cân nhắc mức độ cần thiết trước khi mua.' }
+    { id: 1, type: 'bot', text: 'Chào bạn! 👋 Mình là Cawi CartBot, trợ lý mua sắm thông minh của bạn. Mình có thể giúp gì cho bạn hôm nay?' },
+    { id: 2, type: 'user', text: 'Cách đổi tiền tệ?' },
+    { id: 3, type: 'bot', text: 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.' }
   ]);
   const [input, setInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
   const [mood, setMood] = useState('normal');
   const [clickCount, setClickCount] = useState(0);
-  const [panelPosition, setPanelPosition] = useState(null);
+  const [variantIndex, setVariantIndex] = useState(0);
+  const [positionIndex, setPositionIndex] = useState(0);
   const chatInputRef = useRef(null);
   const messagesRef = useRef(null);
-  const panelRef = useRef(null);
-  const headerRef = useRef(null);
-  const recognitionRef = useRef(null);
-  const dragRef = useRef({ active: false, offsetX: 0, offsetY: 0 });
+  const idleTimerRef = useRef(null);
 
   useEffect(() => {
     function trackEyes(event) {
@@ -70,28 +70,6 @@ function CawiRobot({ page, message }) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!SpeechRecognition) return;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'vi-VN';
-    recognition.interimResults = false;
-    recognition.continuous = false;
-
-    recognition.addEventListener('result', (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0]?.transcript || '')
-        .join(' ')
-        .trim();
-      if (transcript) {
-        setInput((current) => `${current}${current ? ' ' : ''}${transcript}`);
-        requestAnimationFrame(() => chatInputRef.current?.focus());
-      }
-    });
-
-    recognition.addEventListener('end', () => setIsListening(false));
-    recognitionRef.current = recognition;
-  }, []);
-
-  useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
@@ -99,52 +77,30 @@ function CawiRobot({ page, message }) {
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => chatInputRef.current?.focus(), 50);
+      setTimeout(() => chatInputRef.current?.focus(), 80);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    const header = headerRef.current;
-    const panel = panelRef.current;
-    if (!header || !panel) return;
+    const resetIdleTimer = () => {
+      window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(() => {
+        if (!isOpen) {
+          setPositionIndex((index) => (index + 1) % positionClasses.length);
+        }
+      }, 10000);
+    };
 
-    function startDrag(event) {
-      if (event.target.closest('button')) return;
-      const rect = panel.getBoundingClientRect();
-      dragRef.current = {
-        active: true,
-        offsetX: event.clientX - rect.left,
-        offsetY: event.clientY - rect.top
-      };
-      setPanelPosition({ left: rect.left, top: rect.top });
-      header.setPointerCapture(event.pointerId);
-    }
-
-    function moveDrag(event) {
-      if (!dragRef.current.active) return;
-      setPanelPosition({
-        left: event.clientX - dragRef.current.offsetX,
-        top: event.clientY - dragRef.current.offsetY
-      });
-    }
-
-    function endDrag(event) {
-      dragRef.current.active = false;
-      if (header.hasPointerCapture(event.pointerId)) {
-        header.releasePointerCapture(event.pointerId);
-      }
-    }
-
-    header.addEventListener('pointerdown', startDrag);
-    header.addEventListener('pointermove', moveDrag);
-    header.addEventListener('pointerup', endDrag);
-    header.addEventListener('pointercancel', endDrag);
+    resetIdleTimer();
+    window.addEventListener('pointermove', resetIdleTimer);
+    window.addEventListener('keydown', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer, { passive: true });
 
     return () => {
-      header.removeEventListener('pointerdown', startDrag);
-      header.removeEventListener('pointermove', moveDrag);
-      header.removeEventListener('pointerup', endDrag);
-      header.removeEventListener('pointercancel', endDrag);
+      window.clearTimeout(idleTimerRef.current);
+      window.removeEventListener('pointermove', resetIdleTimer);
+      window.removeEventListener('keydown', resetIdleTimer);
+      window.removeEventListener('scroll', resetIdleTimer);
     };
   }, [isOpen]);
 
@@ -154,7 +110,8 @@ function CawiRobot({ page, message }) {
     setClickCount((count) => {
       const next = count + 1;
       if (next % 3 === 0) {
-        setMood((currentMood) => currentMood === 'wave' ? 'normal' : 'wave');
+        setVariantIndex((index) => (index + 1) % variantClasses.length);
+        setMood('wave');
       }
       return next;
     });
@@ -175,34 +132,18 @@ function CawiRobot({ page, message }) {
 
     window.setTimeout(() => {
       const lower = text.toLowerCase();
-      let reply = 'Mình đã nhận câu hỏi. Ở bản demo, Cawi sẽ giải thích cách so sánh giá, phí ship, voucher và mức độ phù hợp trước khi mua.';
+      let reply = 'Mình đã nhận câu hỏi. Ở bản demo, Cawi sẽ hỗ trợ bạn so sánh giá, kiểm tra ưu đãi và tìm nơi mua phù hợp hơn.';
       if (lower.includes('rẻ') || lower.includes('giá')) {
-        reply = 'Mình sẽ ưu tiên tổng chi phí thực trả: giá sản phẩm + phí ship - voucher, rồi mới xét độ tin cậy và thời gian giao hàng.';
-      }
-      if (lower.includes('cần thiết') || lower.includes('nên mua')) {
-        reply = 'Điểm cần thiết nên dựa trên câu trả lời của bạn: nhu cầu, tần suất dùng, ngân sách, sản phẩm thay thế và độ khẩn cấp, không để AI tự phán đoán chủ quan.';
+        reply = 'Mình sẽ so sánh giá từ các nơi bán, sau đó gợi ý lựa chọn có tổng chi phí hợp lý nhất.';
       }
       if (lower.includes('tiền tệ') || lower.includes('đổi tiền')) {
-        reply = 'Khi mở chi tiết sản phẩm, bạn có thể đổi nhanh VND, USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
+        reply = 'Khi mở chi tiết sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
+      }
+      if (lower.includes('ưu đãi') || lower.includes('sale')) {
+        reply = 'Bạn có thể vào mục Flash Sale để xem các ưu đãi nổi bật và sản phẩm đang giảm giá.';
       }
       setMessages((current) => [...current, { id: Date.now() + 1, type: 'bot', text: reply }]);
     }, 420);
-  }
-
-  function handleMic() {
-    const recognition = recognitionRef.current;
-    if (!recognition) {
-      alert('Trình duyệt này chưa hỗ trợ nhập giọng nói. Bạn có thể thử trên Chrome hoặc Edge.');
-      return;
-    }
-
-    if (isListening) {
-      recognition.stop();
-      return;
-    }
-
-    setIsListening(true);
-    recognition.start();
   }
 
   function handleKeyDown(event) {
@@ -212,20 +153,21 @@ function CawiRobot({ page, message }) {
     }
   }
 
-  const panelStyle = panelPosition ? { left: panelPosition.left, top: panelPosition.top, right: 'auto', bottom: 'auto' } : undefined;
+  const positionClass = positionClasses[positionIndex];
+  const variant = variantClasses[variantIndex];
 
   return (
-    <div className={`cawi-widget ${isOpen ? 'open' : ''}`}>
+    <div className={`cawi-widget ${isOpen ? 'open' : ''} ${positionClass}`}>
       {!isOpen && <div className="cawi-bubble">{message}</div>}
 
       <button className="cawi-button" type="button" onClick={toggleChat} aria-label="Mở Cawi CartBot">
-        <RobotShape mood={mood} />
+        <RobotShape mood={mood} variant={variant} />
       </button>
 
-      <section ref={panelRef} className={`cawi-chat ${isOpen ? 'is-open' : ''}`} style={panelStyle} aria-hidden={!isOpen} aria-label="Cawi CartBot">
-        <header ref={headerRef} className="cawi-chat-header">
+      <section className={`cawi-chat ${isOpen ? 'is-open' : ''}`} aria-hidden={!isOpen} aria-label="Cawi CartBot">
+        <header className="cawi-chat-header">
           <div className="chat-title-row">
-            <RobotShape small />
+            <RobotShape small variant={variant} />
             <div>
               <strong>Cawi CartBot</strong>
               <span><i /> Đang hoạt động</span>
@@ -240,7 +182,7 @@ function CawiRobot({ page, message }) {
         <div ref={messagesRef} className="cawi-chat-messages">
           {messages.map((msg) => (
             <div key={msg.id} className={`cawi-message-row ${msg.type}`}>
-              {msg.type === 'bot' && <RobotShape small />}
+              {msg.type === 'bot' && <RobotShape small variant={variant} />}
               <p>{msg.text}</p>
             </div>
           ))}
@@ -248,13 +190,11 @@ function CawiRobot({ page, message }) {
 
         <div className="quick-pills" aria-label="Gợi ý câu hỏi nhanh">
           <button type="button" onClick={() => quickAsk('Sản phẩm nào rẻ nhất?')}>Sản phẩm nào rẻ nhất?</button>
-          <button type="button" onClick={() => quickAsk('Có nên mua sản phẩm này không?')}>Có nên mua không?</button>
           <button type="button" onClick={() => quickAsk('Cách đổi tiền tệ?')}>Cách đổi tiền tệ?</button>
+          <button type="button" onClick={() => quickAsk('Ưu đãi hôm nay')}>Ưu đãi hôm nay</button>
         </div>
 
         <form className="cawi-chat-input-shell" onSubmit={sendMessage}>
-          <RobotShape small />
-
           <textarea
             ref={chatInputRef}
             value={input}
@@ -265,19 +205,10 @@ function CawiRobot({ page, message }) {
             aria-label="Nhập câu hỏi của bạn"
           />
 
-          <button className={`cawi-mic-button ${isListening ? 'listening' : ''}`} type="button" onClick={handleMic} aria-label="Nhập bằng giọng nói">
-            <svg viewBox="0 0 48 48" role="img" aria-hidden="true" focusable="false">
-              <path d="M24 5.8c-4.55 0-8.25 3.7-8.25 8.25v11.2c0 4.55 3.7 8.25 8.25 8.25s8.25-3.7 8.25-8.25v-11.2c0-4.55-3.7-8.25-8.25-8.25Z" />
-              <path d="M10.8 23.9v1.35C10.8 32.55 16.7 38.5 24 38.5s13.2-5.95 13.2-13.25V23.9" />
-              <path d="M24 38.5v5.7" />
-              <path d="M17.6 44.2h12.8" />
-            </svg>
-          </button>
-
           <button className="cawi-send-button" type="submit" aria-label="Gửi câu hỏi">
-            <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
-              <path d="M18 28V8" />
-              <path d="M10.5 15.5 18 8l7.5 7.5" />
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <path d="M5 16h19" />
+              <path d="m17 9 7 7-7 7" />
             </svg>
           </button>
         </form>

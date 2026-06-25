@@ -443,7 +443,11 @@ h1, h2, h3, p { margin-top: 0; }
   right: 28px;
   bottom: 24px;
   z-index: 2400;
+  transition: right .45s ease, left .45s ease, top .45s ease, bottom .45s ease;
 }
+.cawi-widget.pos-bottom-right { right: 28px; bottom: 24px; left: auto; top: auto; }
+.cawi-widget.pos-middle-right { right: 28px; top: 46%; bottom: auto; left: auto; }
+.cawi-widget.pos-bottom-left { left: 300px; bottom: 24px; right: auto; top: auto; }
 .cawi-button {
   position: relative;
   border: 0;
@@ -454,6 +458,7 @@ h1, h2, h3, p { margin-top: 0; }
   filter: drop-shadow(0 18px 28px rgba(15, 23, 42, .2));
   z-index: 2;
 }
+.cawi-button:hover .cawi-shape { transform: translateY(-4px); }
 .cawi-bubble {
   position: absolute;
   right: 105px;
@@ -468,26 +473,46 @@ h1, h2, h3, p { margin-top: 0; }
   font-size: 14px;
   line-height: 1.35;
 }
+.pos-bottom-left .cawi-bubble {
+  left: 104px;
+  right: auto;
+  border-radius: 18px 18px 18px 4px;
+}
 
 .cawi-shape, .mini-cawi {
   --eye-x: 0px;
   --eye-y: 0px;
+  --accent: #ff7a1a;
+  --accent-2: #ffbe72;
   position: relative;
   display: inline-block;
-  width: 106px;
-  height: 116px;
+  width: 112px;
+  height: 122px;
   isolation: isolate;
+  transition: transform .2s ease;
 }
-.mini-cawi { width: 48px; height: 48px; transform: none; flex: 0 0 auto; }
+.mini-cawi { width: 46px; height: 46px; transform: none; flex: 0 0 auto; }
+.cawi-shape.orange { --accent: #ff7a1a; --accent-2: #ffbe72; }
+.cawi-shape.blue, .mini-cawi.blue { --accent: #38bdf8; --accent-2: #bae6fd; }
 
-/* Không có quai cầm/handle trong robot bản này. */
+.cawi-handle {
+  position: absolute;
+  left: 6px;
+  top: 22px;
+  width: 100px;
+  height: 58px;
+  border: 7px solid rgba(202, 228, 246, .95);
+  border-bottom: 0;
+  border-radius: 34px 34px 0 0;
+  z-index: 1;
+}
 .cawi-head {
   position: absolute;
-  left: 16px;
-  top: 20px;
-  width: 74px;
-  height: 62px;
-  border-radius: 25px;
+  left: 18px;
+  top: 26px;
+  width: 76px;
+  height: 64px;
+  border-radius: 26px;
   background: linear-gradient(180deg, #ffffff 0%, #eff7ff 100%);
   border: 1px solid rgba(64, 111, 167, .12);
   box-shadow:
@@ -498,8 +523,8 @@ h1, h2, h3, p { margin-top: 0; }
 .cawi-face {
   position: absolute;
   left: 12px;
-  top: 17px;
-  width: 50px;
+  top: 18px;
+  width: 52px;
   height: 28px;
   border-radius: 15px;
   background: linear-gradient(180deg, #1d2c42, #111c2d);
@@ -527,8 +552,8 @@ h1, h2, h3, p { margin-top: 0; }
 }
 .cawi-antenna {
   position: absolute;
-  left: 51px;
-  top: 6px;
+  left: 54px;
+  top: 8px;
   width: 4px;
   height: 20px;
   border-radius: 999px;
@@ -550,7 +575,7 @@ h1, h2, h3, p { margin-top: 0; }
 }
 .cawi-ear {
   position: absolute;
-  top: 43px;
+  top: 50px;
   width: 13px;
   height: 24px;
   border-radius: 12px;
@@ -558,15 +583,13 @@ h1, h2, h3, p { margin-top: 0; }
   border: 1px solid rgba(64, 111, 167, .12);
   z-index: 2;
 }
-.cawi-ear-left { left: 5px; }
-.cawi-ear-right { right: 5px; }
-
-/* Phần thân dưới cũ được giữ lại: thân bo tròn + lõi cam + 2 bánh xe. */
-.cawi-lower-body-old {
+.cawi-ear-left { left: 7px; }
+.cawi-ear-right { right: 7px; }
+.cawi-cart-body {
   position: absolute;
-  left: 20px;
-  top: 73px;
-  width: 66px;
+  left: 22px;
+  top: 80px;
+  width: 68px;
   height: 34px;
   border-radius: 13px 13px 18px 18px;
   background: linear-gradient(180deg, #ecf7ff 0%, #d8edf9 100%);
@@ -578,11 +601,11 @@ h1, h2, h3, p { margin-top: 0; }
   position: absolute;
   left: 50%;
   top: 10px;
-  width: 28px;
+  width: 30px;
   height: 10px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: linear-gradient(90deg, #ff7a1a, #ffbe72);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 .cawi-wheel {
   position: absolute;
@@ -598,8 +621,8 @@ h1, h2, h3, p { margin-top: 0; }
 .cawi-wheel-right { right: 10px; }
 .cawi-shadow {
   position: absolute;
-  left: 20px;
-  right: 20px;
+  left: 18px;
+  right: 18px;
   bottom: 0;
   height: 10px;
   border-radius: 50%;
@@ -611,16 +634,17 @@ h1, h2, h3, p { margin-top: 0; }
 .cawi-shape.blink .cawi-eye { height: 3px; }
 @keyframes cawiFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-.mini-cawi .cawi-antenna { left: 23px; top: 3px; width: 2px; height: 11px; }
-.mini-cawi .cawi-antenna::after { width: 7px; height: 7px; border-width: 2px; top: -5px; }
-.mini-cawi .cawi-head { left: 6px; top: 12px; width: 36px; height: 30px; border-radius: 13px; }
+.mini-cawi .cawi-handle { display: none; }
+.mini-cawi .cawi-antenna { left: 22px; top: 2px; width: 2px; height: 10px; }
+.mini-cawi .cawi-antenna::after { width: 6px; height: 6px; border-width: 2px; top: -5px; }
+.mini-cawi .cawi-head { left: 5px; top: 12px; width: 36px; height: 30px; border-radius: 13px; }
 .mini-cawi .cawi-face { left: 6px; top: 9px; width: 24px; height: 14px; border-radius: 9px; gap: 6px; }
 .mini-cawi .cawi-eye { width: 4.5px; height: 4.5px; }
 .mini-cawi .cawi-eye span { display: none; }
 .mini-cawi .cawi-ear { top: 22px; width: 7px; height: 13px; }
 .mini-cawi .cawi-ear-left { left: 1px; }
 .mini-cawi .cawi-ear-right { right: 1px; }
-.mini-cawi .cawi-lower-body-old { left: 9px; top: 38px; width: 30px; height: 15px; border-radius: 7px; }
+.mini-cawi .cawi-cart-body { left: 8px; top: 38px; width: 30px; height: 15px; border-radius: 7px; }
 .mini-cawi .cawi-core { top: 5px; width: 13px; height: 5px; }
 .mini-cawi .cawi-wheel { width: 7px; height: 7px; bottom: -4px; border-width: 2px; }
 .mini-cawi .cawi-wheel-left { left: 5px; }
@@ -630,19 +654,15 @@ h1, h2, h3, p { margin-top: 0; }
 .cawi-chat {
   position: fixed;
   right: 28px;
-  bottom: 148px;
-  width: min(540px, calc(100vw - 56px));
-  height: 610px;
-  min-width: 360px;
-  min-height: 420px;
-  max-height: calc(100vh - 40px);
+  bottom: 150px;
+  width: min(420px, calc(100vw - 56px));
+  height: min(570px, calc(100vh - 184px));
   border-radius: 30px;
-  background: rgba(255, 253, 249, .96);
-  border: 1px solid rgba(23, 35, 53, .12);
-  box-shadow: 0 28px 70px rgba(15, 23, 42, .24);
+  background: rgba(255, 253, 249, .98);
+  border: 1px solid rgba(23, 35, 53, .1);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, .22);
   backdrop-filter: blur(16px);
-  overflow: auto;
-  resize: both;
+  overflow: hidden;
   display: none;
 }
 .cawi-chat.is-open { display: flex; flex-direction: column; }
@@ -650,16 +670,13 @@ h1, h2, h3, p { margin-top: 0; }
   min-height: 78px;
   padding: 14px 16px;
   border-radius: 30px 30px 0 0;
-  background: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.92);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  cursor: grab;
-  user-select: none;
 }
-.cawi-chat-header:active { cursor: grabbing; }
 .chat-title-row { display: flex; align-items: center; gap: 10px; }
 .chat-title-row strong { display: block; font-size: 16px; }
 .chat-title-row span { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
@@ -682,7 +699,7 @@ h1, h2, h3, p { margin-top: 0; }
   gap: 12px;
   overflow: auto;
 }
-.cawi-message-row { display: flex; align-items: flex-end; gap: 9px; max-width: 88%; }
+.cawi-message-row { display: flex; align-items: flex-end; gap: 9px; max-width: 90%; }
 .cawi-message-row.user { align-self: flex-end; justify-content: flex-end; }
 .cawi-message-row p {
   margin: 0;
@@ -718,87 +735,56 @@ h1, h2, h3, p { margin-top: 0; }
   font-size: 13px;
   font-weight: 800;
 }
-
-/* Input chat mới theo hình bạn chọn: nền navy, robot trái, micro rõ, nút gửi tròn trắng. */
 .cawi-chat-input-shell {
   flex: 0 0 auto;
-  margin: 0 14px 8px;
-  min-height: 82px;
-  padding: 12px 14px 12px 18px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #1b293b, #142032);
+  margin: 0 16px 8px;
+  min-height: 58px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(23, 35, 53, .1);
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow:
-    0 12px 30px rgba(12, 21, 35, .18),
-    inset 0 1px 0 rgba(255, 255, 255, .06);
+  gap: 10px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
 }
 .cawi-chat-input-shell textarea {
   flex: 1 1 auto;
   min-width: 0;
-  max-height: 116px;
-  min-height: 32px;
+  max-height: 96px;
+  min-height: 28px;
   border: 0;
   outline: 0;
   resize: none;
   background: transparent;
-  color: #eef4fb;
-  font-size: 18px;
+  color: var(--text);
+  font-size: 14px;
   line-height: 1.35;
   padding: 8px 0;
 }
-.cawi-chat-input-shell textarea::placeholder { color: rgba(238, 244, 251, .75); }
-.cawi-mic-button, .cawi-send-button {
+.cawi-chat-input-shell textarea::placeholder { color: #9aa4b2; }
+.cawi-send-button {
   flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
   border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff7a1a, #ff9f43);
   display: grid;
   place-items: center;
-}
-.cawi-mic-button {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .09);
-  transition: transform .16s ease, background .16s ease;
-}
-.cawi-mic-button:hover {
-  background: rgba(255, 255, 255, .16);
-  transform: translateY(-1px);
-}
-.cawi-mic-button svg {
-  width: 39px;
-  height: 39px;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 4.35;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .32));
-}
-.cawi-mic-button.listening {
-  background: rgba(255, 255, 255, .22);
-  animation: micPulse 1s ease-in-out infinite;
-}
-@keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-.cawi-send-button {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .16);
+  box-shadow: 0 10px 20px rgba(255, 122, 26, .24);
   transition: transform .16s ease, box-shadow .16s ease;
 }
 .cawi-send-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
+  box-shadow: 0 14px 24px rgba(255, 122, 26, .28);
 }
 .cawi-send-button svg {
-  width: 36px;
-  height: 36px;
+  width: 23px;
+  height: 23px;
   fill: none;
-  stroke: var(--navy-2);
-  stroke-width: 3.1;
+  stroke: #fff;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
