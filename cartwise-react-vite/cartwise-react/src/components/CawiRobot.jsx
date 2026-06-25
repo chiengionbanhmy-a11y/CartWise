@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-const floatingStops = ['130px', '36vh', 'calc(100vh - 220px)', '52vh'];
+const floatingStops = ['112px', '30vh', '54vh', 'calc(100vh - 250px)'];
 
 const quickQuestions = [
   'Sản phẩm nào rẻ nhất?',
@@ -22,7 +22,7 @@ function getBotReply(text) {
   }
 
   if (q.includes('mua') || q.includes('link') || q.includes('cửa hàng')) {
-    return 'Bạn bấm “Mua ở đây” ở từng điểm bán. CartWise sẽ mở trang mua hoặc trang tìm kiếm chính thức của cửa hàng đó.';
+    return 'Bạn bấm “Mua ở đây” ở từng điểm bán. CartWise sẽ mở link tới trang sản phẩm hoặc trang mua chính thức phù hợp.';
   }
 
   if (q.includes('ưu đãi') || q.includes('sale') || q.includes('flash')) {
@@ -44,21 +44,29 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [chatOpen, setChatOpen] = useState(false);
   const [bubbleVisible, setBubbleVisible] = useState(true);
   const [bubbleText, setBubbleText] = useState(message);
-  const [themeIndex, setThemeIndex] = useState(Number(localStorage.getItem('cawi-theme') || 0));
-  const [pointer, setPointer] = useState({ eyeX: 0, eyeY: 0, headX: 0, headY: 0 });
+  const [themeIndex, setThemeIndex] = useState(() => Number(localStorage.getItem('cawi-theme') || 0));
   const [input, setInput] = useState('');
   const [chatPosition, setChatPosition] = useState(null);
   const [messages, setMessages] = useState([
     { from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }
   ]);
 
-  const lastActivity = useRef(Date.now());
-  const lastMove = useRef(Date.now());
-  const clickTimer = useRef(null);
-  const bubbleTimer = useRef(null);
+  const rootRef = useRef(null);
   const robotRef = useRef(null);
+  const bubbleTimer = useRef(null);
+  const clickTimer = useRef(null);
   const dragRef = useRef(null);
   const recognitionRef = useRef(null);
+  const moveTimeoutRef = useRef(null);
+  const lastActivity = useRef(Date.now());
+  const lastMove = useRef(Date.now());
+  const followRef = useRef({
+    rafId: 0,
+    current: { pupilX: 0, pupilY: 0, headX: 0, headY: 0, headRot: 0 },
+    target: { pupilX: 0, pupilY: 0, headX: 0, headY: 0, headRot: 0 }
+  });
+
+  const robotImage = '/cartwise-cartbot-v15-clean.png';
 
   const showBubble = (text, duration = 15000) => {
     setBubbleText(text);
@@ -73,39 +81,107 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     showBubble(message, 15000);
     return () => {
       if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+      if (clickTimer.current) clearTimeout(clickTimer.current);
+      if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
       recognitionRef.current?.stop?.();
     };
   }, [message]);
 
   useEffect(() => {
-    function followMouse(event) {
-      const rect = robotRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height * 0.28;
-      const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 220));
-      const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 180));
-      setPointer({
-        eyeX: dx * 8.5,
-        eyeY: dy * 6,
-        headX: dx * 5.5,
-        headY: dy * 2.5
-      });
-    }
+    const onThemeSync = (event) => {
+      const nextTheme = Number(event?.detail?.theme ?? localStorage.getItem('cawi-theme') ?? 0);
+      setThemeIndex(Number.isNaN(nextTheme) ? 0 : nextTheme);
+    };
 
-    window.addEventListener('mousemove', followMouse, { passive: true });
-    return () => window.removeEventListener('mousemove', followMouse);
+    window.addEventListener('cawi-theme-sync', onThemeSync);
+    window.addEventListener('storage', onThemeSync);
+    return () => {
+      window.removeEventListener('cawi-theme-sync', onThemeSync);
+      window.removeEventListener('storage', onThemeSync);
+    };
   }, []);
 
   useEffect(() => {
-    function markActivity() {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const applyVars = (state) => {
+      root.style.setProperty('--pupil-x', `${state.pupilX}px`);
+      root.style.setProperty('--pupil-y', `${state.pupilY}px`);
+      root.style.setProperty('--head-x', `${state.headX}px`);
+      root.style.setProperty('--head-y', `${state.headY}px`);
+      root.style.setProperty('--head-rot', `${state.headRot}deg`);
+    };
+
+    applyVars(followRef.current.current);
+
+    const animate = () => {
+      const data = followRef.current;
+      const c = data.current;
+      const t = data.target;
+      const ease = 0.28;
+
+      c.pupilX += (t.pupilX - c.pupilX) * ease;
+      c.pupilY += (t.pupilY - c.pupilY) * ease;
+      c.headX += (t.headX - c.headX) * ease;
+      c.headY += (t.headY - c.headY) * ease;
+      c.headRot += (t.headRot - c.headRot) * ease;
+
+      applyVars(c);
+
+      const delta =
+        Math.abs(t.pupilX - c.pupilX) +
+        Math.abs(t.pupilY - c.pupilY) +
+        Math.abs(t.headX - c.headX) +
+        Math.abs(t.headY - c.headY) +
+        Math.abs(t.headRot - c.headRot);
+
+      if (delta > 0.04) {
+        data.rafId = window.requestAnimationFrame(animate);
+      } else {
+        data.rafId = 0;
+      }
+    };
+
+    const onMouseMove = (event) => {
+      const rect = robotRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const faceCenterX = rect.left + rect.width * 0.5;
+      const faceCenterY = rect.top + rect.height * 0.32;
+      const dx = Math.max(-1, Math.min(1, (event.clientX - faceCenterX) / 190));
+      const dy = Math.max(-1, Math.min(1, (event.clientY - faceCenterY) / 150));
+
+      followRef.current.target = {
+        pupilX: dx * 3.8,
+        pupilY: dy * 3.2,
+        headX: dx * 1.8,
+        headY: dy * 1.2,
+        headRot: dx * 5.2
+      };
+
+      if (!followRef.current.rafId) {
+        followRef.current.rafId = window.requestAnimationFrame(animate);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      if (followRef.current.rafId) cancelAnimationFrame(followRef.current.rafId);
+    };
+  }, []);
+
+  useEffect(() => {
+    const markActivity = () => {
       lastActivity.current = Date.now();
+      if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
       setMoving(false);
       if (sleeping) {
         setSleeping(false);
         showBubble('Bạn đã quay lại rồi ư? Mình sẵn sàng hỗ trợ tiếp nè!', 5000);
       }
-    }
+    };
 
     const events = ['mousemove', 'mousedown', 'scroll', 'keydown', 'touchstart', 'input'];
     events.forEach((eventName) => window.addEventListener(eventName, markActivity, { passive: true }));
@@ -127,7 +203,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         setMoving(true);
         setStopIndex((prev) => (prev + 1) % floatingStops.length);
         lastMove.current = now;
-        setTimeout(() => setMoving(false), 2200);
+        moveTimeoutRef.current = setTimeout(() => setMoving(false), 2000);
       }
     }, 1000);
 
@@ -138,18 +214,18 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   }, [mode, moving, sleeping]);
 
   useEffect(() => {
-    function handleMouseMove(event) {
+    const handleMouseMove = (event) => {
       if (!dragRef.current) return;
       setChatPosition({
         x: event.clientX - dragRef.current.offsetX,
         y: event.clientY - dragRef.current.offsetY
       });
-    }
+    };
 
-    function handleMouseUp() {
+    const handleMouseUp = () => {
       dragRef.current = null;
       document.body.classList.remove('cartbot-dragging');
-    }
+    };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
@@ -159,17 +235,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
   }, []);
 
-  const style = useMemo(() => {
-    const vars = {
-      '--eye-x': `${pointer.eyeX}px`,
-      '--eye-y': `${pointer.eyeY}px`,
-      '--head-x': `${pointer.headX}px`,
-      '--head-y': `${pointer.headY}px`
-    };
-
+  const widgetStyle = useMemo(() => {
     if (mode === 'floating') {
       return {
-        ...vars,
         right: '24px',
         top: floatingStops[stopIndex],
         bottom: 'auto',
@@ -177,14 +245,22 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       };
     }
 
-    return vars;
-  }, [mode, pointer, stopIndex]);
+    return undefined;
+  }, [mode, stopIndex]);
 
   const chatStyle = chatPosition
     ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' }
     : undefined;
 
-  function startDrag(event) {
+  const toggleTheme = () => {
+    const next = (themeIndex + 1) % 5;
+    setThemeIndex(next);
+    localStorage.setItem('cawi-theme', String(next));
+    window.dispatchEvent(new CustomEvent('cawi-theme-sync', { detail: { theme: next } }));
+    showBubble('Mình vừa đổi màu rồi đó ✨', 3500);
+  };
+
+  const startDrag = (event) => {
     if (event.target.closest('button')) return;
     const card = event.currentTarget.closest('.cartbot-chat');
     if (!card) return;
@@ -195,18 +271,15 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
     setChatPosition({ x: rect.left, y: rect.top });
     document.body.classList.add('cartbot-dragging');
-  }
+  };
 
-  function handleRobotClick(event) {
+  const handleRobotClick = (event) => {
     event.stopPropagation();
 
     if (clickTimer.current) {
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
-      const next = (themeIndex + 1) % 5;
-      setThemeIndex(next);
-      localStorage.setItem('cawi-theme', String(next));
-      showBubble('Mình vừa đổi màu rồi đó ✨', 3500);
+      toggleTheme();
       return;
     }
 
@@ -214,20 +287,20 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       setChatOpen((open) => !open);
       setBubbleVisible(false);
       clickTimer.current = null;
-    }, 260);
-  }
+    }, 240);
+  };
 
-  function sendMessage(text) {
+  const sendMessage = (text) => {
     const clean = text.trim();
     if (!clean) return;
     setMessages((prev) => [...prev, { from: 'user', text: clean }]);
     setInput('');
     setTimeout(() => {
       setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
-    }, 450);
-  }
+    }, 420);
+  };
 
-  function startVoiceInput() {
+  const startVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setInput((prev) => prev || 'Trình duyệt này chưa hỗ trợ nhập bằng giọng nói.');
@@ -247,15 +320,13 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
     recognitionRef.current = recognition;
     recognition.start();
-  }
-
-  const robotImage = '/cartwise-cartbot-v14-harmonic.png';
+  };
 
   return (
     <aside
-      ref={robotRef}
+      ref={rootRef}
       className={`cartbot-widget cartbot-${mode} theme-${themeIndex} ${moving ? 'is-moving' : ''} ${sleeping ? 'is-sleeping' : ''} ${hovered ? 'is-hovered' : ''} ${chatOpen ? 'chat-open' : ''}`}
-      style={style}
+      style={widgetStyle}
       aria-label="Cawi Robo"
     >
       {bubbleVisible && !chatOpen && (
@@ -280,12 +351,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
             <div className="cartbot-chat-ident">
               <div className="cartbot-mini-avatar">
                 <img src={robotImage} alt="Cawi Robo" className="cartbot-mini-img" />
-                <span className="cartbot-mini-pupil left"><span /></span>
-                <span className="cartbot-mini-pupil right"><span /></span>
+                <span className="cartbot-mini-eye-blank left" />
+                <span className="cartbot-mini-eye-blank right" />
+                <span className="cartbot-mini-pupil left" />
+                <span className="cartbot-mini-pupil right" />
               </div>
-              <div>
+              <div className="cartbot-chat-ident-text">
                 <strong>Cawi Robo</strong>
-                <span><i />Đang hoạt động</span>
+                <span className="cartbot-status"><i />Đang hoạt động</span>
               </div>
             </div>
             <button type="button" onMouseDown={(event) => event.stopPropagation()} onClick={() => setChatOpen(false)}>×</button>
@@ -321,7 +394,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
                 <path d="M19 10a7 7 0 0 1-14 0" />
-                <path d="M12 19v3" />
+                <path d="M12 19v2" />
               </svg>
             </button>
             <button type="submit" className="cartbot-send" aria-label="Gửi tin nhắn">
@@ -334,6 +407,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       )}
 
       <div
+        ref={robotRef}
         className="cartbot-avatar"
         onClick={handleRobotClick}
         onMouseEnter={() => setHovered(true)}
@@ -346,8 +420,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
         <div className="cartbot-head-layer">
           <img src={robotImage} alt="Cawi Robo" className="cartbot-img" />
-          <span className="cartbot-eye-pupil left"><span /></span>
-          <span className="cartbot-eye-pupil right"><span /></span>
+          <span className="cartbot-eye-blank left" />
+          <span className="cartbot-eye-blank right" />
+          <span className="cartbot-eye-pupil left" />
+          <span className="cartbot-eye-pupil right" />
           <span className="cartbot-sleep-face">
             <i className="left" />
             <i className="right" />

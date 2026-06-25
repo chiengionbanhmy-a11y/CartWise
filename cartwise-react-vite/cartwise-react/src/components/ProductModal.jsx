@@ -57,7 +57,13 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
             </div>
           </section>
 
-          <section className="modal-info-panel">
+          <section className="modal-info-panel has-advisor">
+            <div className="modal-advisor-slot">
+              <CawiRobot
+                mode="modal"
+                message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
+              />
+            </div>
             <span className="category-chip">{product.category} · {product.subCategory}</span>
             <h2>{product.name}</h2>
             <p>{product.description}</p>
@@ -88,13 +94,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
               })}
             </div>
           </section>
-        </div>
-
-        <div className="modal-robot-area">
-          <CawiRobot
-            mode="modal"
-            message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
-          />
         </div>
       </div>
     </div>
