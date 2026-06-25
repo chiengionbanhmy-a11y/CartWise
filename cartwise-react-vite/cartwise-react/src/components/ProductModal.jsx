@@ -92,7 +92,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
 
         <div className="modal-robot-area">
           <CawiRobot
-            mode="inline"
+            mode="modal"
             message={saving > 0 ? `Bạn có thể tiết kiệm lên tới ${formatCurrency(saving, localCurrency)} tại ${best.storeName}!` : `Mình thấy ${best.storeName} đang có giá tốt nhất.`}
           />
         </div>

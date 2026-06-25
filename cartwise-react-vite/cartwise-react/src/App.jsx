@@ -86,11 +86,13 @@ function App() {
 
       <PromoPopup onNavigate={navigate} />
 
-      <CawiRobot
-        mode="floating"
-        page={page}
-        message={page === 'stores' ? 'Mình sẽ giúp bạn tìm nơi bán rẻ nhất!' : page === 'flash' ? 'Có nhiều deal hot đang chờ bạn đó!' : page === 'about' ? 'Tìm hiểu thêm về mình trong tab Robot CartWise nhé!' : 'Chào bạn, mình là Cawi Robo!'}
-      />
+      {!selectedProduct && (
+        <CawiRobot
+          mode="floating"
+          page={page}
+          message={page === 'stores' ? 'Mình sẽ giúp bạn tìm nơi bán rẻ nhất!' : page === 'flash' ? 'Có nhiều deal hot đang chờ bạn đó!' : page === 'about' ? 'Tìm hiểu thêm về mình trong tab Robot CartWise nhé!' : 'Chào bạn, mình là Cawi CartBot!'}
+        />
+      )}
 
       {selectedProduct && (
         <ProductModal
