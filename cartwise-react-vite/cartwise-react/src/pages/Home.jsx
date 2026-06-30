@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, Mic, Camera, ScanLine } from 'lucide-react';
+import { Search, Mic, ScanLine } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import { categories } from '../data/products.js';
 
@@ -47,9 +47,6 @@ function Home({ appState, onOpenProduct, onNavigate }) {
               <button className="shell-icon-btn" aria-label="Tìm bằng giọng nói" onClick={() => stubFeature('Tìm kiếm bằng giọng nói')}>
                 <Mic size={22} />
               </button>
-              <button className="shell-icon-btn" aria-label="Tải ảnh / chụp ảnh" onClick={() => stubFeature('Tải ảnh / chụp ảnh')}>
-                <Camera size={22} />
-              </button>
               <button className="shell-icon-btn highlight" aria-label="Tìm kiếm" onClick={() => stubFeature('Tìm kiếm')}>
                 <Search size={22} />
               </button>
@@ -68,9 +65,9 @@ function Home({ appState, onOpenProduct, onNavigate }) {
         </div>
 
         <div className="hero-stats-strip">
-          <div><strong>300+</strong><span>Sản phẩm demo</span></div>
-          <div><strong>15+</strong><span>Điểm bán so sánh</span></div>
-          <div><strong>1 click</strong><span>Đi đến nơi mua</span></div>
+          <div><strong>2/mục</strong><span>Sản phẩm đại diện</span></div>
+          <div><strong>6</strong><span>Điểm bán mỗi sản phẩm</span></div>
+          <div><strong>Giá thật</strong><span>Tính tổng chi phí</span></div>
         </div>
 
         <div className="hero-cta-row">
@@ -83,7 +80,7 @@ function Home({ appState, onOpenProduct, onNavigate }) {
         <div className="section-heading center">
           <span className="eyebrow">Gợi ý nổi bật</span>
           <h2>Những sản phẩm được xem nhiều hôm nay</h2>
-          <p>Giao diện tối giản, rõ ràng và mở link mua trực tiếp sang nơi bán tương ứng.</p>
+          <p>Giao diện sang trọng, rõ ràng và tập trung vào tổng tiền thật sự phải trả.</p>
         </div>
         <div className="product-grid">
           {topProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
