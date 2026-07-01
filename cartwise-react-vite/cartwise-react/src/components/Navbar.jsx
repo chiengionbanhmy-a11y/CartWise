@@ -13,7 +13,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
         <img src="/cartwise-logo-icon-v4.png" alt="CartWise logo" className="brand-logo-image" />
         <span>
           <strong>CartWise</strong>
-          <small className="brand-slogan"><span>Smart cart,</span><span>smart decisions.</span></small>
+          <small className="brand-slogan">Smart cart, smart decisions.</small>
         </span>
       </button>
 
@@ -35,7 +35,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
             <button className="primary small auth-trigger" onClick={onOpenRegister}>Đăng ký</button>
           </>
         )}
-        <button className="ghost settings-trigger" onClick={onOpenSettings}>{t.settings}</button>
+        <button className="ghost settings-trigger gear-trigger" onClick={onOpenSettings} aria-label="Cài đặt">⚙️</button>
       </div>
     </header>
   );

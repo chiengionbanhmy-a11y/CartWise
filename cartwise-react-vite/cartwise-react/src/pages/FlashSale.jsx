@@ -1,23 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
-import { categoryGroups } from '../data/products.js';
 
 function FlashSale({ appState, onOpenProduct }) {
   const { products, currency } = appState;
-  const [active, setActive] = useState(categoryGroups[0] || 'Đồ điện tử');
-  const saleProducts = useMemo(() => products.filter((p) => p.category === active), [products, active]);
+  const saleProducts = useMemo(() => {
+    const chosen = products.filter((p) => p.flashSaleToday).slice(0, 2);
+    const fallback = chosen.length ? chosen : products.slice(0, 2);
+    return fallback.map((p) => ({ ...p, discountPercent: 49, flashSaleToday: true }));
+  }, [products]);
 
   return (
-    <section className="section-block page-block">
+    <section className="section-block page-block flash-page-v30">
       <div className="section-heading center">
-        <span className="eyebrow">Deal hot trong ngày</span>
+        <span className="eyebrow">Deal hot hôm nay</span>
         <h1>Flash Sale CartWise</h1>
-        <p>Mỗi nhóm có 2 sản phẩm đại diện để so sánh nhanh tổng chi phí dự kiến.</p>
+        <p>Hôm nay CartWise chỉ chọn 1–2 sản phẩm giảm sâu để bạn không bị rối khi so sánh.</p>
       </div>
-      <div className="category-tabs scroll-tabs big-tabs">
-        {categoryGroups.map((tab) => <button key={tab} className={active === tab ? 'tab active' : 'tab'} onClick={() => setActive(tab)}>{tab}</button>)}
+      <div className="flash-alert-v30">
+        <b>Giảm 49%</b>
+        <span>Flash sale hôm nay chỉ áp dụng cho một số sản phẩm nổi bật.</span>
       </div>
-      <div className="product-grid reveal">
+      <div className="product-grid reveal flash-grid-v30">
         {saleProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}
       </div>
     </section>

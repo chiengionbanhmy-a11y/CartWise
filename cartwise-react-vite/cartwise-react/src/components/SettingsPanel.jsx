@@ -8,31 +8,27 @@ function SettingsPanel({ profile, language, currency, onClose, onSave }) {
   const [draftProfile, setDraftProfile] = useState(profile);
   const [draftLanguage, setDraftLanguage] = useState(language);
   const [draftCurrency, setDraftCurrency] = useState(currency);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  function requestSave() {
-    setConfirmOpen(true);
-  }
+  const [fromCurrency, setFromCurrency] = useState('VND');
 
   function confirmSave() {
     onSave({ profile: draftProfile, language: draftLanguage, currency: draftCurrency });
-    setConfirmOpen(false);
     onClose();
   }
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="settings-panel">
+      <div className="settings-panel v30-settings-panel">
         <button className="close-btn" onClick={onClose}>×</button>
-        <h2>Cài đặt tài khoản</h2>
-        <p className="muted">Thay đổi hồ sơ, ngôn ngữ và đơn vị tiền tệ. Thay đổi chỉ áp dụng sau khi bạn xác nhận.</p>
+        <h2>⚙️ Cài đặt CartWise</h2>
+        <p className="muted">Các mục được sắp xếp theo thứ tự: Hồ sơ, ngôn ngữ, đơn vị tiền tệ và xác nhận thay đổi.</p>
 
-        <section className="setting-section">
-          <h3>Thay đổi hồ sơ</h3>
+        <section className="setting-section profile-first-section">
+          <h3>Hồ sơ</h3>
+          <p className="setting-help">Bạn cần đăng ký hoặc đăng nhập để CartWise hiển thị tên đăng nhập và ảnh đại diện.</p>
           <div className="profile-editor">
             <div className="avatar-preview">{draftProfile.avatar}</div>
             <div>
-              <label>Tên hiển thị</label>
+              <label>Tên đăng nhập</label>
               <input value={draftProfile.name} onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })} />
               <div className="avatar-grid">
                 {avatarChoices.map((a) => <button key={a} className={draftProfile.avatar === a ? 'choice active' : 'choice'} onClick={() => setDraftProfile({ ...draftProfile, avatar: a })}>{a}</button>)}
@@ -42,38 +38,39 @@ function SettingsPanel({ profile, language, currency, onClose, onSave }) {
         </section>
 
         <section className="setting-section">
-          <h3>Ngôn ngữ hiển thị</h3>
-          <div className="choice-grid">
+          <h3>Ngôn ngữ</h3>
+          <div className="choice-grid language-grid-v30">
             {languages.map((lang) => (
               <button key={lang.code} className={draftLanguage === lang.code ? 'choice active' : 'choice'} onClick={() => setDraftLanguage(lang.code)}>{lang.label}</button>
             ))}
           </div>
         </section>
 
-        <section className="setting-section">
+        <section className="setting-section currency-converter-section">
           <h3>Đơn vị tiền tệ hiển thị</h3>
-          <div className="choice-grid currency-grid">
-            {currencies.map((cur) => <button key={cur} className={draftCurrency === cur ? 'choice active' : 'choice'} onClick={() => setDraftCurrency(cur)}>{cur}</button>)}
-          </div>
-        </section>
-
-        <div className="settings-actions">
-          <button className="ghost" onClick={onClose}>Hủy</button>
-          <button className="primary" onClick={requestSave}>Lưu thay đổi</button>
-        </div>
-
-        {confirmOpen && (
-          <div className="confirm-box">
+          <div className="currency-convert-table">
             <div>
-              <h3>Bạn có chắc chắn muốn lưu các thay đổi này không?</h3>
-              <p>Sau khi xác nhận, hồ sơ, ngôn ngữ và tiền tệ hiển thị sẽ được cập nhật.</p>
-              <div className="confirm-actions">
-                <button className="ghost" onClick={() => setConfirmOpen(false)}>Không</button>
-                <button className="primary" onClick={confirmSave}>Có</button>
-              </div>
+              <label>Tiền tệ đổi ra</label>
+              <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+                <option value="" disabled>Ấn vào đây</option>
+                {currencies.map((cur) => <option key={cur} value={cur}>{cur}</option>)}
+              </select>
+            </div>
+            <div>
+              <label>Tiền tệ được đổi ra</label>
+              <select value={draftCurrency} onChange={(e) => setDraftCurrency(e.target.value)}>
+                <option value="" disabled>Ấn vào đây</option>
+                {currencies.map((cur) => <option key={cur} value={cur}>{cur}</option>)}
+              </select>
             </div>
           </div>
-        )}
+          <small>CartWise sẽ dùng đơn vị ở ô “Tiền tệ được đổi ra” để hiển thị giá trên website.</small>
+        </section>
+
+        <div className="settings-actions confirm-change-row">
+          <button className="ghost" onClick={onClose}>Hủy</button>
+          <button className="primary" onClick={confirmSave}>Xác nhận thay đổi</button>
+        </div>
       </div>
     </div>
   );

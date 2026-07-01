@@ -8,22 +8,30 @@ const tabs = [
   { id: 'robot', label: 'Robot CartWise' }
 ];
 
+const teamMembers = [
+  { name: 'Nhật Linh', role: 'Leader / Product Direction' },
+  { name: 'Lê Minh', role: 'Research & Data' },
+  { name: 'Hà An', role: 'An là mặt trời nhỏ' },
+  { name: 'Hữu', role: 'Technology Support' },
+  { name: 'Đức', role: 'Design & Testing' }
+];
+
 const content = {
   overview: {
     title: 'CartWise là gì?',
-    body: 'CartWise là website so sánh giá thông minh giúp người dùng tìm sản phẩm, xem nơi bán rẻ hơn và nhận gợi ý mua sắm nhanh chóng.'
+    body: 'CartWise là website so sánh giá thông minh giúp người dùng tìm sản phẩm, xem nơi bán tiết kiệm hơn và ước tính tổng chi phí dự kiến trước khi mua.'
   },
   team: {
     title: 'Đội ngũ phát triển',
-    body: 'CartWise được xây dựng bởi nhóm học sinh yêu thích AI, thiết kế sản phẩm và kinh doanh số. Mỗi thành viên phụ trách nghiên cứu khách hàng, sản phẩm, thiết kế, dữ liệu và truyền thông.'
+    body: 'CartWise được xây dựng bởi 5 thành viên cùng phụ trách nghiên cứu khách hàng, sản phẩm, thiết kế, dữ liệu và truyền thông.'
   },
   contact: {
     title: 'Liên hệ',
-    body: 'Bạn có thể liên hệ nhóm CartWise để góp ý sản phẩm, đề xuất điểm bán hoặc hợp tác phát triển dữ liệu so sánh giá.'
+    body: 'Trần Nguyễn Nhật Linh - Leader of CartWise. Bạn có thể liên hệ để góp ý sản phẩm, đề xuất điểm bán hoặc hợp tác phát triển dữ liệu so sánh giá.'
   },
   robot: {
     title: 'Cawi Robo - trợ lý mua sắm của CartWise',
-    body: 'Cawi Robo là mascot độc quyền của CartWise. Robot hỗ trợ tư vấn sản phẩm, nhắc ưu đãi, gợi ý nơi bán rẻ nhất, nhìn theo chuột để tạo cảm giác tương tác và có thể đổi ngoại hình khi người dùng click nhiều lần.'
+    body: 'Cawi Robo là mascot độc quyền của CartWise. Robot hỗ trợ tư vấn sản phẩm, nhắc ưu đãi, gợi ý nơi bán rẻ hơn, nhìn theo chuột và có thể kéo thả vị trí trên màn hình.'
   }
 };
 
@@ -35,7 +43,7 @@ function About() {
       <div className="section-heading center">
         <span className="eyebrow">About CartWise</span>
         <h1>Về chúng tôi</h1>
-        <p>Mọi tab đều có trạng thái active rõ ràng để người dùng biết đang xem mục nào.</p>
+        <p>CartWise hướng tới một trải nghiệm so sánh giá rõ ràng, đáng tin cậy và dễ dùng.</p>
       </div>
       <div className="about-tabs">
         {tabs.map((tab) => <button key={tab.id} className={active === tab.id ? 'about-tab active' : 'about-tab'} onClick={() => setActive(tab.id)}>{tab.label}</button>)}
@@ -45,12 +53,22 @@ function About() {
           <span className="category-chip">{tabs.find((t) => t.id === active)?.label}</span>
           <h2>{data.title}</h2>
           <p>{data.body}</p>
+          {active === 'team' && (
+            <div className="team-grid-v30">
+              {teamMembers.map((member) => (
+                <article key={member.name} className="team-card-v30">
+                  <strong>{member.name}</strong>
+                  <span>{member.role}</span>
+                </article>
+              ))}
+            </div>
+          )}
           {active === 'robot' && (
             <ul className="feature-list">
               <li>Tư vấn sản phẩm khi mở so sánh giá.</li>
-              <li>Nhắc nơi bán rẻ nhất và số tiền tiết kiệm.</li>
+              <li>Nhắc nơi bán có tổng chi phí dự kiến thấp nhất.</li>
               <li>Mắt và đầu nhìn theo con trỏ chuột.</li>
-              <li>Click 3 lần để đổi ngoại hình robot.</li>
+              <li>Có thể kéo thả Cawi Robo sang vị trí khác trên màn hình.</li>
             </ul>
           )}
         </div>

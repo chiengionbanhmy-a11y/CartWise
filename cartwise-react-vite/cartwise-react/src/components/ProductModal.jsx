@@ -1,50 +1,104 @@
 import { useEffect, useMemo, useState } from 'react';
 import CawiRobot from './CawiRobot.jsx';
-import { formatCurrency } from '../data/currency.js';
+import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from '../data/currency.js';
 import { getStoreLogo } from '../data/products.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const comparableStores = ['Shopee', 'Lazada', 'Tiki'];
 
-function getCountdown(endTime) {
-  const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
-  const total = Math.floor(diff / 1000);
-  const h = String(Math.floor(total / 3600)).padStart(2, '0');
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-  const s = String(total % 60).padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
-
 function getBasicTotal(row) {
   return Math.max(0, Number(row.storePrice || 0) + Number(row.shippingFee || 0));
 }
 
+function cleanNumber(value) {
+  const normalized = String(value ?? '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+  const parts = normalized.split('.');
+  if (parts.length <= 2) return normalized;
+  return `${parts[0]}.${parts.slice(1).join('')}`;
+}
+
 function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
-  const [countdown, setCountdown] = useState(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
   const [voucherByStore, setVoucherByStore] = useState({});
 
   useEffect(() => {
-    setCountdown(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
     setVoucherByStore({});
   }, [product]);
-
-  useEffect(() => {
-    if (!product.offerEndTime) return;
-    const timer = setInterval(() => setCountdown(getCountdown(product.offerEndTime)), 1000);
-    return () => clearInterval(timer);
-  }, [product.offerEndTime]);
 
   function selectCurrency(cur) {
     setLocalCurrency(cur);
     onCurrencyChange?.(cur);
   }
 
-  function updateVoucher(storeName, value) {
+  function toggleVoucherChooser(storeName) {
     setVoucherByStore((prev) => ({
       ...prev,
-      [storeName]: value === '' ? '' : Math.max(0, Number(value || 0))
+      [storeName]: {
+        ...(prev[storeName] || {}),
+        open: !prev[storeName]?.open
+      }
     }));
+  }
+
+  function chooseVoucherMode(storeName, mode) {
+    setVoucherByStore((prev) => ({
+      ...prev,
+      [storeName]: {
+        ...(prev[storeName] || {}),
+        mode,
+        open: false,
+        inputValue: '',
+        inputCurrency: localCurrency,
+        amountVnd: 0,
+        percent: 0
+      }
+    }));
+  }
+
+  function updateVoucherValue(storeName, value) {
+    const cleaned = cleanNumber(value);
+    setVoucherByStore((prev) => {
+      const current = prev[storeName] || { mode: 'amount' };
+      const numeric = Number(cleaned || 0);
+
+      if (current.mode === 'percent') {
+        return {
+          ...prev,
+          [storeName]: {
+            ...current,
+            inputValue: cleaned,
+            percent: Math.min(100, Math.max(0, numeric))
+          }
+        };
+      }
+
+      return {
+        ...prev,
+        [storeName]: {
+          ...current,
+          mode: 'amount',
+          inputValue: cleaned,
+          inputCurrency: localCurrency,
+          amountVnd: Math.max(0, toVndAmount(numeric, localCurrency))
+        }
+      };
+    });
+  }
+
+  function getVoucherInputValue(entry) {
+    if (!entry?.mode) return '';
+    if (entry.mode === 'percent') return entry.inputValue ?? '';
+    if (entry.inputCurrency === localCurrency) return entry.inputValue ?? '';
+    if (!entry.amountVnd) return '';
+    return formatInputNumber(convertCurrency(entry.amountVnd, localCurrency), localCurrency).replace(/,/g, '');
+  }
+
+  function getVoucherDiscountVnd(entry, basicTotal) {
+    if (!entry?.mode) return 0;
+    if (entry.mode === 'percent') {
+      return Math.min(basicTotal, Math.max(0, basicTotal * Number(entry.percent || 0) / 100));
+    }
+    return Math.min(basicTotal, Math.max(0, Number(entry.amountVnd || 0)));
   }
 
   const rows = useMemo(() => {
@@ -54,18 +108,19 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
 
     return onlineRows.map((store) => {
       const basicTotal = getBasicTotal(store);
-      const rawVoucher = voucherByStore[store.storeName];
-      const hasVoucher = rawVoucher !== undefined && rawVoucher !== '' && Number(rawVoucher) > 0;
-      const voucher = hasVoucher ? Number(rawVoucher) : 0;
+      const voucherEntry = voucherByStore[store.storeName];
+      const voucherDiscount = getVoucherDiscountVnd(voucherEntry, basicTotal);
+      const hasVoucher = Boolean(voucherEntry?.mode && voucherDiscount > 0);
       return {
         ...store,
         basicTotal,
-        voucher,
+        voucherEntry,
+        voucherDiscount,
         hasVoucher,
-        afterVoucher: hasVoucher ? Math.max(0, basicTotal - voucher) : null
+        afterVoucher: hasVoucher ? Math.max(0, basicTotal - voucherDiscount) : null
       };
     });
-  }, [product, voucherByStore]);
+  }, [product, voucherByStore, localCurrency]);
 
   const bestBasic = useMemo(() => [...rows].sort((a, b) => a.basicTotal - b.basicTotal)[0], [rows]);
   const personalizedRows = useMemo(() => rows.filter((row) => row.hasVoucher), [rows]);
@@ -81,9 +136,9 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
 
   return (
     <div className="modal-backdrop product-backdrop" role="dialog" aria-modal="true">
-      <div className="product-modal premium-modal expected-cost-modal">
+      <div className="product-modal premium-modal expected-cost-modal v30-modal">
         <button className="close-btn" onClick={onClose}>×</button>
-        <div className="modal-grid premium-modal-grid expected-cost-grid">
+        <div className="modal-grid premium-modal-grid expected-cost-grid v30-expected-grid">
           <section className="modal-image-panel premium-image-panel expected-product-card">
             <span className="expected-card-label">Sản phẩm đang so sánh</span>
             <img
@@ -109,144 +164,128 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                   <button key={cur} className={localCurrency === cur ? 'choice active' : 'choice'} onClick={() => selectCurrency(cur)}>{cur}</button>
                 ))}
               </div>
-              <small>Quy đổi tham khảo từ VNĐ.</small>
+              <small>Voucher dạng giảm tiền sẽ được hiểu theo đúng đơn vị tiền tệ bạn đang chọn.</small>
             </div>
           </section>
 
-          <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel">
+          <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel v30-cost-panel">
             <div className="modal-advisor-slot">
               <CawiRobot
                 mode="modal"
-                message="Đừng chỉ nhìn giá ban đầu — hãy xem tổng tiền dự kiến cần trả sau phí vận chuyển."
+                message="Mình sẽ giúp bạn so sánh tổng chi phí dự kiến một cách công bằng!"
               />
             </div>
 
             <span className="category-chip">Tính năng chính của CartWise</span>
             <h2>So sánh tổng chi phí dự kiến</h2>
-            <p className="expected-lead">
-              Đừng chỉ nhìn giá ban đầu — hãy xem tổng tiền thật sự có thể phải trả sau khi cộng phí vận chuyển.
-            </p>
 
-            <div className="expected-explain-box">
-              CartWise không chỉ so sánh giá niêm yết, mà còn giúp bạn ước tính tổng chi phí cần trả sau khi cộng phí vận chuyển. Vì voucher có thể khác nhau theo từng tài khoản, CartWise tách riêng phần so sánh công bằng và phần tùy chỉnh theo voucher cá nhân của bạn.
-            </div>
-
-            <div className="best-price-box expected-hero-box">
+            <div className="best-price-box expected-hero-box v30-best-box">
               <span>Tổng chi phí dự kiến thấp nhất</span>
               <strong>{bestBasic ? formatCurrency(bestBasic.basicTotal, localCurrency) : '—'}</strong>
               <p>{basicConclusion}</p>
-              {countdown && <div className="countdown">Ưu đãi tham khảo: <b>{countdown}</b></div>}
             </div>
 
-            <div className="expected-section-title">
-              <span>Phần 1</span>
-              <h3>So sánh công bằng</h3>
-              <p>Bảng này so sánh theo cùng điều kiện cơ bản, chưa tính voucher cá nhân vì ưu đãi có thể khác nhau theo từng tài khoản.</p>
-            </div>
-
-            <div className="expected-table-wrap">
-              <div className="expected-table fair-table">
-                <div className="expected-row expected-head">
-                  <span>Nền tảng</span>
-                  <span>Giá sản phẩm</span>
-                  <span>Phí vận chuyển ước tính</span>
-                  <span>Tổng chi phí cơ bản</span>
-                  <span>Trạng thái đề xuất</span>
+            <div className="expected-workspace">
+              <section className="expected-pane fair-pane">
+                <div className="expected-section-title compact-title">
+                  <span>Phần 1</span>
+                  <h3>So sánh công bằng</h3>
+                  <p>Chưa tính voucher cá nhân để tránh làm sai lệch kết quả chính.</p>
                 </div>
-                {rows.map((row) => {
-                  const isBest = row.storeName === bestBasic?.storeName;
-                  const status = isBest ? 'Tốt nhất' : row.basicTotal === bestBasic?.basicTotal ? 'Tốt' : 'Cao hơn';
-                  return (
-                    <div className={isBest ? 'expected-row best-basic' : 'expected-row'} key={row.storeName}>
-                      <span className="expected-store-cell">
-                        <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
-                        <b>{row.storeName}</b>
-                        {isBest && <i>Tổng dự kiến thấp nhất</i>}
-                      </span>
-                      <span>{formatCurrency(row.storePrice, localCurrency)}</span>
-                      <span>{formatCurrency(row.shippingFee, localCurrency)}</span>
-                      <strong>{formatCurrency(row.basicTotal, localCurrency)}</strong>
-                      <span className={status === 'Tốt nhất' ? 'status-pill best' : 'status-pill'}>{status}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            <div className="formula-box expected-formula">
-              <b>Công thức:</b> Tổng chi phí cơ bản = Giá sản phẩm + Phí vận chuyển ước tính
-            </div>
-
-            <div className="expected-section-title personal-title">
-              <span>Phần 2</span>
-              <h3>Tùy chỉnh theo tài khoản của bạn</h3>
-              <p>Nhập voucher thủ công nếu bạn đang có mã giảm giá ở từng nền tảng.</p>
-            </div>
-
-            <div className="voucher-card-grid">
-              {rows.map((row) => (
-                <article className="voucher-card" key={`voucher-${row.storeName}`}>
-                  <div className="voucher-card-head">
-                    <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
-                    <div>
-                      <b>Voucher {row.storeName}</b>
-                      <span>Tổng cơ bản: {formatCurrency(row.basicTotal, localCurrency)}</span>
-                    </div>
-                  </div>
-                  <label>
-                    Nhập số tiền giảm
-                    <input
-                      type="number"
-                      min="0"
-                      inputMode="numeric"
-                      placeholder="Ví dụ: 25000"
-                      value={voucherByStore[row.storeName] ?? ''}
-                      onChange={(event) => updateVoucher(row.storeName, event.target.value)}
-                    />
-                  </label>
-                  <div className="voucher-result">
-                    <span>Voucher cá nhân</span>
-                    <b>{row.hasVoucher ? formatCurrency(row.voucher, localCurrency) : 'Chưa có dữ liệu voucher'}</b>
-                  </div>
-                  <div className="voucher-result total">
-                    <span>Tổng sau voucher</span>
-                    <strong>{row.hasVoucher ? formatCurrency(row.afterVoucher, localCurrency) : 'Chưa xác định'}</strong>
-                  </div>
-                  <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>
-                </article>
-              ))}
-            </div>
-
-            <div className="expected-table-wrap personalized-wrap">
-              <div className="expected-table personalized-table">
-                <div className="expected-row expected-head">
-                  <span>Nền tảng</span>
-                  <span>Tổng cơ bản</span>
-                  <span>Voucher cá nhân</span>
-                  <span>Tổng sau voucher</span>
+                <div className="compact-fair-list">
+                  {rows.map((row) => {
+                    const isBest = row.storeName === bestBasic?.storeName;
+                    const status = isBest ? 'Tốt nhất' : row.basicTotal === bestBasic?.basicTotal ? 'Tốt' : 'Cao hơn';
+                    return (
+                      <article className={isBest ? 'fair-cost-card best-basic' : 'fair-cost-card'} key={row.storeName}>
+                        <div className="fair-cost-head">
+                          <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
+                          <div>
+                            <b>{row.storeName}</b>
+                            <span className={status === 'Tốt nhất' ? 'status-pill best' : 'status-pill'}>{status}</span>
+                          </div>
+                        </div>
+                        <dl>
+                          <div><dt>Giá</dt><dd>{formatCurrency(row.storePrice, localCurrency)}</dd></div>
+                          <div><dt>Ship</dt><dd>{formatCurrency(row.shippingFee, localCurrency)}</dd></div>
+                          <div className="total-line"><dt>Tổng</dt><dd>{formatCurrency(row.basicTotal, localCurrency)}</dd></div>
+                        </dl>
+                        <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>
+                      </article>
+                    );
+                  })}
                 </div>
-                {rows.map((row) => (
-                  <div className={bestPersonalized?.storeName === row.storeName ? 'expected-row best-personal' : 'expected-row'} key={`personal-${row.storeName}`}>
-                    <span className="expected-store-cell">
-                      <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
-                      <b>{row.storeName}</b>
-                      {bestPersonalized?.storeName === row.storeName && <i>Theo voucher của bạn</i>}
-                    </span>
-                    <span>{formatCurrency(row.basicTotal, localCurrency)}</span>
-                    <span>{row.hasVoucher ? formatCurrency(row.voucher, localCurrency) : 'Chưa có dữ liệu'}</span>
-                    <strong>{row.hasVoucher ? formatCurrency(row.afterVoucher, localCurrency) : 'Chưa xác định'}</strong>
-                  </div>
-                ))}
-              </div>
+
+                <div className="formula-box expected-formula compact-formula">
+                  <b>Công thức:</b> Tổng cơ bản = Giá sản phẩm + Phí vận chuyển ước tính
+                </div>
+              </section>
+
+              <section className="expected-pane personal-pane">
+                <div className="expected-section-title compact-title">
+                  <span>Phần 2</span>
+                  <h3>Tùy chỉnh theo tài khoản của bạn</h3>
+                  <p>Chọn giảm tiền hoặc giảm %, rồi nhập mức giảm bạn đang có.</p>
+                </div>
+
+                <div className="voucher-card-grid compact-voucher-grid">
+                  {rows.map((row) => {
+                    const entry = row.voucherEntry || {};
+                    const inputValue = getVoucherInputValue(entry);
+                    return (
+                      <article className="voucher-card compact-voucher-card" key={`voucher-${row.storeName}`}>
+                        <div className="voucher-card-head">
+                          <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
+                          <div>
+                            <b>{row.storeName}</b>
+                            <span>Tổng cơ bản: {formatCurrency(row.basicTotal, localCurrency)}</span>
+                          </div>
+                        </div>
+
+                        <div className="voucher-picker">
+                          <button type="button" className="voucher-mode-trigger" onClick={() => toggleVoucherChooser(row.storeName)}>
+                            {entry.mode === 'amount' ? `Giảm tiền (${localCurrency})` : entry.mode === 'percent' ? 'Giảm %' : 'Hãy chọn giảm % hay tiền'}
+                          </button>
+                          {entry.open && (
+                            <div className="voucher-mode-menu">
+                              <button type="button" onClick={() => chooseVoucherMode(row.storeName, 'amount')}>Giảm tiền</button>
+                              <button type="button" onClick={() => chooseVoucherMode(row.storeName, 'percent')}>Giảm %</button>
+                            </div>
+                          )}
+                        </div>
+
+                        {entry.mode && (
+                          <label className="voucher-value-field">
+                            <span>{entry.mode === 'amount' ? `Nhập số tiền giảm bằng ${localCurrency}` : 'Nhập phần trăm giảm'}</span>
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder={entry.mode === 'amount' ? (localCurrency === 'VND' ? 'Ví dụ: 10000 hoặc 20000' : 'Ví dụ: 3 hoặc 5') : 'Ví dụ: 15 hoặc 20'}
+                              value={inputValue}
+                              onChange={(event) => updateVoucherValue(row.storeName, event.target.value)}
+                            />
+                          </label>
+                        )}
+
+                        <div className="voucher-result total compact-result">
+                          <span>Tổng sau tùy chỉnh</span>
+                          <strong>{row.hasVoucher ? formatCurrency(row.afterVoucher, localCurrency) : 'Chưa có dữ liệu voucher'}</strong>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
             </div>
 
-            <div className="expected-conclusion-card">
-              <b>Kết luận dự kiến</b>
+            <div className="expected-conclusion-card attention-card">
+              <div className="attention-heading"><span>CHÚ Ý</span><b>Kết luận dự kiến</b></div>
               <p>{personalConclusion}</p>
             </div>
 
-            <p className="final-price-note expected-note">
-              Kết quả sau voucher chỉ phản ánh dữ liệu bạn đã nhập. Nếu bạn có voucher ở nền tảng khác, kết quả có thể thay đổi. CartWise không cam kết giá chính xác tuyệt đối vì phí vận chuyển, voucher cá nhân và chính sách từng nền tảng có thể thay đổi theo tài khoản và vị trí giao hàng.
+            <p className="final-price-note expected-note compact-note">
+              Kết quả chỉ là dự kiến. Voucher bạn nhập sẽ được tính theo đơn vị tiền tệ đang chọn; nếu tài khoản hoặc nền tảng khác có voucher riêng, kết quả có thể thay đổi.
             </p>
           </section>
         </div>

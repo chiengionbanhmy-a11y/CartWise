@@ -41,6 +41,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [input, setInput] = useState('');
   const [chatPosition, setChatPosition] = useState(null);
   const [chatSize, setChatSize] = useState(null);
+  const [robotPosition, setRobotPosition] = useState(null);
   const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }]);
 
   const rootRef = useRef(null);
@@ -49,6 +50,8 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const clickTimer = useRef(null);
   const dragRef = useRef(null);
   const resizeRef = useRef(null);
+  const robotDragRef = useRef(null);
+  const robotWasDraggedRef = useRef(false);
   const recognitionRef = useRef(null);
   const moveTimeoutRef = useRef(null);
   const lastActivity = useRef(Date.now());
@@ -179,15 +182,25 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
   useEffect(() => {
     const handleMouseMove = (event) => {
+      if (robotDragRef.current) {
+        const data = robotDragRef.current;
+        const moved = Math.abs(event.clientX - data.startX) + Math.abs(event.clientY - data.startY) > 4;
+        data.moved = data.moved || moved;
+        setRobotPosition({
+          x: event.clientX - data.offsetX,
+          y: event.clientY - data.offsetY
+        });
+        return;
+      }
+
       if (resizeRef.current) {
         const data = resizeRef.current;
         const minW = 320;
         const minH = 360;
 
-        // v29: Giữ chuột ở 1 góc bất kỳ.
+        // Giữ chuột ở 1 góc bất kỳ.
         // Kéo chuột LÊN = phóng to khung chat.
         // Kéo chuột XUỐNG = thu nhỏ khung chat.
-        // Cả chiều rộng và chiều cao cùng thay đổi để người dùng không phải kéo đúng hướng chéo.
         const growAmount = data.startY - event.clientY;
         const nextW = Math.max(minW, data.width + growAmount * 1.2);
         const nextH = Math.max(minH, data.height + growAmount * 1.05);
@@ -211,10 +224,16 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
 
     const handleMouseUp = () => {
+      if (robotDragRef.current?.moved) {
+        robotWasDraggedRef.current = true;
+        setTimeout(() => { robotWasDraggedRef.current = false; }, 0);
+      }
+      robotDragRef.current = null;
       dragRef.current = null;
       resizeRef.current = null;
       document.body.classList.remove('cw22-dragging');
       document.body.classList.remove('cw22-resizing');
+      document.body.classList.remove('cw22-robot-dragging');
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -226,9 +245,12 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   }, []);
 
   const widgetStyle = useMemo(() => {
-    if (mode === 'floating') return { right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
+    if (mode === 'floating') {
+      if (robotPosition) return { left: `${robotPosition.x}px`, top: `${robotPosition.y}px`, right: 'auto', bottom: 'auto' };
+      return { right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
+    }
     return undefined;
-  }, [mode, stopIndex]);
+  }, [mode, stopIndex, robotPosition]);
 
   const chatStyle = {
     ...(chatPosition ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' } : {}),
@@ -285,8 +307,29 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     document.body.classList.add('cw22-resizing');
   };
 
+  const startRobotDrag = (event) => {
+    if (mode !== 'floating' || event.button !== 0) return;
+    if (event.target.closest('button')) return;
+    const root = rootRef.current;
+    if (!root) return;
+    const rect = root.getBoundingClientRect();
+    robotDragRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      moved: false
+    };
+    setRobotPosition({ x: rect.left, y: rect.top });
+    document.body.classList.add('cw22-robot-dragging');
+  };
+
   const handleRobotClick = (event) => {
     event.stopPropagation();
+    if (robotWasDraggedRef.current) {
+      robotWasDraggedRef.current = false;
+      return;
+    }
     if (clickTimer.current) {
       clearTimeout(clickTimer.current);
       clickTimer.current = null;
@@ -402,7 +445,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         </div>
       )}
 
-      <div ref={robotRef} className="cw22-avatar" onClick={handleRobotClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} title="Click 1 lần để mở chat, click 2 lần để đổi màu">
+      <div ref={robotRef} className="cw22-avatar" onMouseDown={startRobotDrag} onClick={handleRobotClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} title="Kéo thả để đổi vị trí. Click 1 lần để mở chat, click 2 lần để đổi màu">
         <span className="cw22-pink-glow" />
         <span className="cw22-fx fx1">✿</span><span className="cw22-fx fx2">❤</span><span className="cw22-fx fx3">❀</span><span className="cw22-fx fx4">♡</span>
         {renderRobot(false)}

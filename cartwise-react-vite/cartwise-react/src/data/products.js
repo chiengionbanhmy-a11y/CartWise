@@ -107,7 +107,7 @@ const offlineByCategory = (category, base) => {
   ];
 };
 
-const product = ({ id, name, category, subCategory, image, description, basePrice, originalPrice, discountPercent, offerHours, tags }) => ({
+const product = ({ id, name, category, subCategory, image, description, basePrice, originalPrice, discountPercent, offerHours, tags, flashSaleToday = false }) => ({
   id,
   name,
   category,
@@ -120,6 +120,7 @@ const product = ({ id, name, category, subCategory, image, description, basePric
   discountPercent,
   offerEndTime: future(offerHours),
   tags,
+  flashSaleToday,
   stores: [...onlineStores(basePrice), ...offlineByCategory(category, basePrice)]
 });
 
@@ -154,6 +155,7 @@ export const products = [
     originalPrice: 369000,
     discountPercent: 22,
     offerHours: 12,
+    flashSaleToday: true,
     tags: ['chuột', 'logitech', 'đồ điện tử', 'laptop', 'máy tính']
   }),
   product({
@@ -180,6 +182,7 @@ export const products = [
     originalPrice: 299000,
     discountPercent: 27,
     offerHours: 8,
+    flashSaleToday: true,
     tags: ['kem chống nắng', 'mỹ phẩm', 'spf']
   }),
   product({

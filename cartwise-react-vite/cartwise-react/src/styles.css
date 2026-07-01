@@ -6316,3 +6316,412 @@ option {
 .hero-title-stacked .hero-title-accent {
   display: block !important;
 }
+
+/* =======================================================
+   v30 — expected cost refinements, settings, flash sale, team
+   ======================================================= */
+
+.brand-slogan {
+  display: inline !important;
+  flex-direction: row !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+.gear-trigger {
+  width: 46px !important;
+  height: 46px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 22px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+}
+
+.v30-modal {
+  width: min(1280px, 100%) !important;
+}
+
+.v30-expected-grid {
+  grid-template-columns: 330px 1fr !important;
+  gap: 22px !important;
+}
+
+.v30-cost-panel > .expected-lead,
+.v30-cost-panel > .expected-explain-box,
+.expected-lead,
+.expected-explain-box {
+  display: none !important;
+}
+
+.v30-best-box {
+  margin: 14px 0 18px !important;
+  padding: 16px 18px !important;
+  border-radius: 24px !important;
+}
+
+.expected-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.expected-pane {
+  min-width: 0;
+  height: 100%;
+  padding: 16px;
+  border: 1px solid rgba(201, 150, 62, .16);
+  border-radius: 24px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 14px 34px rgba(29, 36, 51, .07);
+}
+
+.compact-title {
+  margin: 0 0 12px !important;
+}
+
+.compact-title h3 {
+  font-size: 21px !important;
+  margin-bottom: 4px !important;
+}
+
+.compact-title p {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  margin-bottom: 0 !important;
+}
+
+.compact-fair-list,
+.compact-voucher-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.fair-cost-card {
+  background: white;
+  border: 1px solid rgba(226, 232, 240, .92);
+  border-radius: 20px;
+  padding: 13px;
+}
+
+.fair-cost-card.best-basic {
+  border-color: rgba(22, 163, 74, .45);
+  background: linear-gradient(135deg, #f0fdf4, #ffffff 64%);
+  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, .14);
+}
+
+.fair-cost-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.fair-cost-head img {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.fair-cost-head > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fair-cost-card dl {
+  margin: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.fair-cost-card dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fair-cost-card dt {
+  color: #6c7280;
+  font-weight: 700;
+}
+
+.fair-cost-card dd {
+  margin: 0;
+  font-weight: 800;
+  color: #1d2433;
+}
+
+.fair-cost-card .total-line {
+  padding-top: 7px;
+  border-top: 1px dashed rgba(100,116,139,.26);
+}
+
+.fair-cost-card .total-line dd {
+  color: #166534;
+  font-size: 18px;
+}
+
+.fair-cost-card .buy-link {
+  margin-top: 10px;
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.compact-formula {
+  margin-top: 10px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+}
+
+.compact-voucher-card {
+  padding: 13px !important;
+  border-radius: 20px !important;
+}
+
+.voucher-picker {
+  position: relative;
+  margin: 10px 0;
+}
+
+.voucher-mode-trigger {
+  width: 100%;
+  border: 1px solid rgba(201, 150, 62, .22);
+  background: #fffaf0;
+  color: #1d2433;
+  border-radius: 15px;
+  padding: 12px 13px;
+  text-align: left;
+  font-weight: 900;
+}
+
+.voucher-mode-trigger::after {
+  content: '⌄';
+  float: right;
+  color: #b98322;
+}
+
+.voucher-mode-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(201, 150, 62, .18);
+  background: white;
+  box-shadow: 0 18px 36px rgba(29,36,51,.14);
+}
+
+.voucher-mode-menu button {
+  border: 0;
+  border-radius: 13px;
+  background: #f8fafc;
+  padding: 10px;
+  font-weight: 900;
+}
+
+.voucher-mode-menu button:hover {
+  background: #ffedd5;
+}
+
+.voucher-value-field {
+  display: grid;
+  gap: 7px;
+  margin-top: 8px;
+  color: #334155;
+  font-weight: 800;
+}
+
+.voucher-value-field input {
+  width: 100%;
+  border: 1px solid rgba(226,232,240,.95);
+  border-radius: 15px;
+  padding: 12px 13px;
+  font-weight: 900;
+  background: white;
+}
+
+.compact-result {
+  margin-top: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 15px !important;
+}
+
+.personalized-wrap,
+.personalized-table {
+  display: none !important;
+}
+
+.attention-card {
+  margin-top: 16px !important;
+  border-color: rgba(220, 38, 38, .28) !important;
+  background: linear-gradient(135deg, #fef2f2, #fff7ed) !important;
+  box-shadow: 0 16px 38px rgba(220, 38, 38, .10) !important;
+}
+
+.attention-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.attention-heading span {
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid rgba(220,38,38,.22);
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-weight: 1000;
+  letter-spacing: .06em;
+}
+
+.attention-heading b {
+  color: #7f1d1d;
+  font-size: 18px;
+}
+
+.compact-note {
+  margin-top: 12px !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.flash-page-v30 .section-heading h1 {
+  color: #7f1d1d;
+}
+
+.flash-alert-v30 {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #fee2e2, #fff7ed);
+  border: 1px solid rgba(239, 68, 68, .22);
+  color: #7f1d1d;
+  box-shadow: 0 16px 34px rgba(239, 68, 68, .12);
+}
+
+.flash-alert-v30 b {
+  background: #dc2626;
+  color: white;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 1000;
+}
+
+.flash-grid-v30 {
+  max-width: 620px;
+  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.v30-settings-panel .setting-section {
+  border: 1px solid rgba(201, 150, 62, .14);
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(255,255,255,.72);
+  margin: 14px 0;
+}
+
+.setting-help {
+  margin-bottom: 14px !important;
+  color: #6c7280;
+}
+
+.language-grid-v30 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.currency-convert-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.currency-convert-table label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 900;
+  color: #1d2433;
+}
+
+.currency-convert-table select {
+  width: 100%;
+  border: 1px solid rgba(226,232,240,.95);
+  border-radius: 17px;
+  background: white;
+  padding: 13px 14px;
+  font-weight: 900;
+  color: #1d2433;
+}
+
+.confirm-change-row {
+  border-top: 1px solid rgba(201, 150, 62, .18);
+  padding-top: 18px;
+}
+
+.team-grid-v30 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.team-card-v30 {
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(201,150,62,.16);
+  background: white;
+  box-shadow: 0 12px 26px rgba(29,36,51,.07);
+}
+
+.team-card-v30 strong {
+  display: block;
+  font-size: 18px;
+  color: #1d2433;
+}
+
+.team-card-v30 span {
+  color: #6c7280;
+  font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .v30-expected-grid,
+  .expected-workspace {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .flash-grid-v30,
+  .language-grid-v30,
+  .currency-convert-table,
+  .team-grid-v30 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .brand-slogan {
+    white-space: normal !important;
+  }
+}
