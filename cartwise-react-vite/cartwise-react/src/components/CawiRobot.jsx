@@ -184,17 +184,18 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         const minW = 320;
         const minH = 360;
 
-        // v25: Giữ chuột ở BẤT KỲ 1 góc nào cũng có thể phóng to/thu nhỏ cả chiều ngang và chiều dọc.
-        // Kéo ra xa tâm khung chat = phóng to. Kéo gần tâm = thu nhỏ.
-        // Không giới hạn vị trí/kích thước tối đa, chỉ giữ kích thước tối thiểu để khung chat không bị vỡ.
-        const distanceX = Math.abs(event.clientX - data.centerX);
-        const distanceY = Math.abs(event.clientY - data.centerY);
+        // v29: Giữ chuột ở 1 góc bất kỳ.
+        // Kéo chuột LÊN = phóng to khung chat.
+        // Kéo chuột XUỐNG = thu nhỏ khung chat.
+        // Cả chiều rộng và chiều cao cùng thay đổi để người dùng không phải kéo đúng hướng chéo.
+        const growAmount = data.startY - event.clientY;
+        const nextW = Math.max(minW, data.width + growAmount * 1.2);
+        const nextH = Math.max(minH, data.height + growAmount * 1.05);
 
-        const nextW = Math.max(minW, distanceX * 2);
-        const nextH = Math.max(minH, distanceY * 2);
-
-        const nextX = data.centerX - nextW / 2;
-        const nextY = data.centerY - nextH / 2;
+        const centerX = data.left + data.width / 2;
+        const centerY = data.top + data.height / 2;
+        const nextX = centerX - nextW / 2;
+        const nextY = centerY - nextH / 2;
 
         setChatPosition({ x: nextX, y: nextY });
         setChatSize({ width: nextW, height: nextH });
@@ -394,10 +395,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 18V6" /><path d="M7 11l5-5 5 5" /></svg>
             </button>
           </form>
-          <button className="cw22-resize-handle top-left" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-left', event)} />
-          <button className="cw22-resize-handle top-right" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-right', event)} />
-          <button className="cw22-resize-handle bottom-left" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-left', event)} />
-          <button className="cw22-resize-handle bottom-right" type="button" aria-label="Kéo để đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-right', event)} />
+          <button className="cw22-resize-handle top-left" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('top-left', event)} />
+          <button className="cw22-resize-handle top-right" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('top-right', event)} />
+          <button className="cw22-resize-handle bottom-left" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('bottom-left', event)} />
+          <button className="cw22-resize-handle bottom-right" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('bottom-right', event)} />
         </div>
       )}
 

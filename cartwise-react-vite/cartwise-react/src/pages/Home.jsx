@@ -30,9 +30,9 @@ function Home({ appState, onOpenProduct, onNavigate }) {
           <span>Mua sắm thông minh hơn mỗi ngày</span>
         </div>
 
-        <h1 className="hero-title-center">
-          <span className="hero-title-dark">Smart Cart, </span>
-          <span className="hero-title-accent">Smart Decisions</span>
+        <h1 className="hero-title-center hero-title-stacked">
+          <span className="hero-title-dark">Smart Cart,</span>
+          <span className="hero-title-accent">Smart Decisions.</span>
         </h1>
 
         <div className="browser-search-row">

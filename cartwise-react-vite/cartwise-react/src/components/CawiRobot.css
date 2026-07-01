@@ -590,3 +590,28 @@
 .cw22-resizing .cw22-chat {
   box-shadow: 0 30px 76px rgba(15,23,42,.22), 0 0 0 2px rgba(251,146,60,.18) !important;
 }
+
+
+/* =======================================================
+   v29 — Cawi chat resize behavior + Times New Roman
+   ======================================================= */
+.cw22-widget,
+.cw22-widget * {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+/* 1 góc bất kỳ: kéo lên để phóng to, kéo xuống để thu nhỏ */
+.cw22-resize-handle.top-left,
+.cw22-resize-handle.top-right,
+.cw22-resize-handle.bottom-left,
+.cw22-resize-handle.bottom-right {
+  cursor: ns-resize !important;
+}
+
+.cw22-resize-handle::after {
+  border-color: rgba(71, 85, 105, .82) !important;
+}
+
+.cw22-resizing .cw22-chat {
+  box-shadow: 0 32px 82px rgba(15,23,42,.24), 0 0 0 2px rgba(34,197,94,.20) !important;
+}

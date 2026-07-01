@@ -6279,3 +6279,40 @@ main {
     grid-template-columns: 200px 150px 170px 170px;
   }
 }
+
+
+/* =======================================================
+   v29 — Typography + stacked slogan
+   ======================================================= */
+html,
+body,
+#root,
+#root *,
+button,
+input,
+textarea,
+select,
+option {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+.brand-slogan {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
+  line-height: 1.05 !important;
+}
+
+.hero-title-stacked {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0.04em !important;
+  line-height: 0.94 !important;
+}
+
+.hero-title-stacked .hero-title-dark,
+.hero-title-stacked .hero-title-accent {
+  display: block !important;
+}

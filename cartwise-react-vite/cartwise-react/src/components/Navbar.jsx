@@ -13,7 +13,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
         <img src="/cartwise-logo-icon-v4.png" alt="CartWise logo" className="brand-logo-image" />
         <span>
           <strong>CartWise</strong>
-          <small>Smart cart, smart decisions</small>
+          <small className="brand-slogan"><span>Smart cart,</span><span>smart decisions.</span></small>
         </span>
       </button>
 
