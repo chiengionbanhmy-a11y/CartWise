@@ -5728,3 +5728,117 @@ main {
     width: auto !important;
   }
 }
+
+/* =======================================================
+   v27 — Shopee account demo + chỉ giữ bảng So sánh giá thật
+   ======================================================= */
+.shopee-account-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  margin: 18px 0 10px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(255,244,235,.92));
+  border: 1px solid rgba(238, 107, 47, .24);
+  box-shadow: 0 16px 38px rgba(29,36,51,.08);
+}
+
+.shopee-account-card.connected {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255, 218, 197, .84), transparent 35%),
+    linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,249,242,.94));
+  border-color: rgba(238, 107, 47, .38);
+}
+
+.shopee-account-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.shopee-account-left img {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  padding: 8px;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(29,36,51,.10);
+  flex: 0 0 auto;
+}
+
+.shopee-account-left div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.shopee-account-left b {
+  color: #182033;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.shopee-account-left span,
+.shopee-account-left small,
+.shopee-demo-note {
+  color: var(--premium-muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.shopee-account-left small {
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #1f2937;
+  color: #fff7e6;
+  font-weight: 900;
+}
+
+.shopee-account-card button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #ee4d2d, #ff8a4c);
+  color: #fff;
+  font-weight: 950;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 12px 24px rgba(238, 77, 45, .22);
+}
+
+.shopee-account-card.connected button {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 12px 24px rgba(34, 197, 94, .20);
+}
+
+.shopee-demo-note {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(31,41,55,.08);
+}
+
+.row-data-note {
+  display: block;
+  grid-column: 2;
+  color: #9a3412;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+@media (max-width: 720px) {
+  .shopee-account-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shopee-account-card button {
+    width: 100%;
+  }
+}

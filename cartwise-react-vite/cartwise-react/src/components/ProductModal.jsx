@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import CawiRobot from './CawiRobot.jsx';
 import { formatCurrency } from '../data/currency.js';
-import { getBestFinalStore, getFinalCost, getStoreLogo } from '../data/products.js';
+import { getBestFinalStore, getStoreLogo } from '../data/products.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
-const accountOptions = ['Chưa có tài khoản', 'Đã có tài khoản', 'Đã có voucher cá nhân'];
+const accountOptions = ['Chưa có tài khoản', 'Đã có tài khoản', 'Đã có voucher cá nhân', 'Đã liên kết Shopee'];
 
 function getCountdown(endTime) {
   const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
@@ -23,10 +23,12 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
   const [countdown, setCountdown] = useState(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
   const [offers, setOffers] = useState(() => product.stores.map((s) => ({ ...s })));
+  const [shopeeConnected, setShopeeConnected] = useState(() => product.id === 'mouse-logitech');
 
   useEffect(() => {
     setOffers(product.stores.map((s) => ({ ...s })));
     setCountdown(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
+    setShopeeConnected(product.id === 'mouse-logitech');
   }, [product]);
 
   useEffect(() => {
@@ -48,11 +50,14 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
     }));
   }
 
-  const rows = useMemo(() => offers.map((offer, index) => ({ ...offer, index, finalCost: calculateFinal(offer) })), [offers]);
+  const rows = useMemo(() => offers.map((offer, index) => {
+    const linkedShopee = shopeeConnected && offer.storeName === 'Shopee';
+    const hydratedOffer = linkedShopee ? { ...offer, accountStatus: 'Đã liên kết Shopee' } : offer;
+    return { ...hydratedOffer, index, finalCost: calculateFinal(hydratedOffer) };
+  }), [offers, shopeeConnected]);
   const bestFinal = useMemo(() => [...rows].sort((a, b) => a.finalCost - b.finalCost)[0], [rows]);
   const originalBest = useMemo(() => getBestFinalStore(product), [product]);
-  const onlineRows = rows.filter((r) => r.channel === 'online');
-  const offlineRows = rows.filter((r) => r.channel === 'offline');
+  const shopeeRow = rows.find((r) => r.storeName === 'Shopee');
   const hasNoAccount = rows.some((r) => r.accountStatus === 'Chưa có tài khoản');
 
   return (
@@ -104,42 +109,28 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
               <span>CartWise tính cả phí vận chuyển, mã giảm giá và hoàn xu để ước tính tổng tiền thật sự phải trả.</span>
             </div>
 
-            <h3>So sánh mua online và mua trực tiếp</h3>
-            <div className="purchase-channel-grid">
-              <div className="purchase-channel-card online">
-                <div className="channel-head">
-                  <span>Mua online</span>
-                  <small>Shopee · Tiki · Lazada</small>
+            <div className={shopeeConnected ? 'shopee-account-card connected' : 'shopee-account-card'}>
+              <div className="shopee-account-left">
+                <img src={getStoreLogo('Shopee')} alt="Shopee" />
+                <div>
+                  <b>Liên kết tài khoản Shopee</b>
+                  <span>
+                    {shopeeConnected
+                      ? 'Đã liên kết Shopee với CartWise trong bản demo. Hàng Shopee sẽ dùng dữ liệu phí/voucher đã cấu hình.'
+                      : 'Kết nối Shopee để CartWise ước tính phí vận chuyển, voucher và tổng chi phí sát hơn.'}
+                  </span>
+                  {shopeeConnected && shopeeRow && (
+                    <small>Tổng Shopee hiện tại: {formatCurrency(shopeeRow.finalCost, localCurrency)}</small>
+                  )}
                 </div>
-                {onlineRows.map((row) => (
-                  <a className={row.index === bestFinal?.index ? 'channel-store best' : 'channel-store'} key={row.storeName} href={row.storeUrl} target="_blank" rel="noreferrer">
-                    <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
-                    <div>
-                      <b>{row.storeName}</b>
-                      <span>Giá niêm yết {formatCurrency(row.storePrice, localCurrency)}</span>
-                    </div>
-                    <strong>{formatCurrency(row.finalCost, localCurrency)}</strong>
-                  </a>
-                ))}
               </div>
-
-              <div className="purchase-channel-card offline">
-                <div className="channel-head">
-                  <span>Mua trực tiếp</span>
-                  <small>Cửa hàng / siêu thị</small>
-                </div>
-                {offlineRows.map((row) => (
-                  <a className={row.index === bestFinal?.index ? 'channel-store best' : 'channel-store'} key={row.storeName} href={row.storeUrl} target="_blank" rel="noreferrer">
-                    <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
-                    <div>
-                      <b>{row.storeName}</b>
-                      <span>Giá niêm yết {formatCurrency(row.storePrice, localCurrency)}</span>
-                    </div>
-                    <strong>{formatCurrency(row.finalCost, localCurrency)}</strong>
-                  </a>
-                ))}
-              </div>
+              <button type="button" onClick={() => setShopeeConnected((prev) => !prev)}>
+                {shopeeConnected ? 'Đã liên kết' : 'Liên kết Shopee'}
+              </button>
             </div>
+            <p className="shopee-demo-note">
+              Lưu ý: bản demo chưa đăng nhập Shopee thật. Để lấy phí vận chuyển, voucher cá nhân và điều kiện tài khoản theo thời gian thực, CartWise cần tích hợp API/đăng nhập hợp lệ từ Shopee.
+            </p>
 
             <h3>So sánh giá thật sau cùng</h3>
             <div className="final-price-panel">
@@ -161,8 +152,9 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                       <span className="final-store-cell">
                         <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
                         <b>{row.storeName}</b>
-                        <em>{row.channel === 'online' ? 'Online' : 'Trực tiếp'}</em>
+                        <em>{row.accountStatus === 'Đã liên kết Shopee' ? 'Đã liên kết' : 'Dữ liệu so sánh'}</em>
                         {isBest && <i>Giá thật thấp nhất</i>}
+                        {row.dataNote && <small className="row-data-note">{row.dataNote}</small>}
                       </span>
                       <span>{formatCurrency(row.storePrice, localCurrency)}</span>
                       <label>

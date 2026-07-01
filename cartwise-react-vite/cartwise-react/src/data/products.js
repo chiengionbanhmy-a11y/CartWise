@@ -4,6 +4,9 @@ const future = (hours) => Date.now() + hours * 60 * 60 * 1000;
 
 const encode = (text) => encodeURIComponent(text);
 
+const SHOPEE_LOGITECH_M331_URL = 'https://shopee.vn/Chu%E1%BB%99t-kh%C3%B4ng-d%C3%A2y-Logitech-M331-1000-DPI-Pin-24-th%C3%A1ng-K%E1%BA%BFt-n%E1%BB%91i-10m-B%E1%BA%A3o-h%C3%A0nh-12-th%C3%A1ng-i.1256164758.24680442740?extraParams=%7B%22display_model_id%22%3A245820218328%2C%22model_selection_logic%22%3A3%7D&sp_atk=3a2855f8-ad07-4741-9958-e8401744390c&xptdk=3a2855f8-ad07-4741-9958-e8401744390c';
+
+
 const storeDomains = {
   'Shopee': 'shopee.vn',
   'Tiki': 'tiki.vn',
@@ -301,11 +304,68 @@ export const products = [
   })
 ];
 
+const applyLogitechM331ShopeeDemo = (productItem, store) => {
+  if (productItem.id !== 'mouse-logitech') return store;
+
+  const demoStores = {
+    'Shopee': {
+      storePrice: 334400,
+      shippingFee: 0,
+      publicDiscount: 6688,
+      cashback: 0,
+      accountStatus: 'Đã có tài khoản',
+      storeUrl: SHOPEE_LOGITECH_M331_URL,
+      dataNote: 'Giá sau voucher Shopee: 327.712đ'
+    },
+    'Tiki': {
+      storePrice: 349000,
+      shippingFee: 12000,
+      publicDiscount: 15000,
+      cashback: 3000,
+      accountStatus: 'Đã có tài khoản'
+    },
+    'Lazada': {
+      storePrice: 359000,
+      shippingFee: 18000,
+      publicDiscount: 20000,
+      cashback: 5000,
+      accountStatus: 'Đã có voucher cá nhân'
+    },
+    'FPT Shop': {
+      storePrice: 369000,
+      shippingFee: 0,
+      publicDiscount: 20000,
+      cashback: 0,
+      accountStatus: 'Đã có tài khoản'
+    },
+    'CellphoneS': {
+      storePrice: 359000,
+      shippingFee: 0,
+      publicDiscount: 12000,
+      cashback: 0,
+      accountStatus: 'Đã có tài khoản'
+    },
+    'Thế Giới Di Động': {
+      storePrice: 379000,
+      shippingFee: 0,
+      publicDiscount: 25000,
+      cashback: 0,
+      accountStatus: 'Đã có voucher cá nhân'
+    }
+  };
+
+  const override = demoStores[store.storeName];
+  return override ? { ...store, ...override } : store;
+};
+
 products.forEach((p) => {
-  p.stores = p.stores.map((store) => ({
-    ...store,
-    storeUrl: storeSearchUrl(store.storeName, p.name)
-  }));
+  p.stores = p.stores.map((store) => {
+    const withUrl = {
+      ...store,
+      storeUrl: storeSearchUrl(store.storeName, p.name)
+    };
+    return applyLogitechM331ShopeeDemo(p, withUrl);
+  });
 });
 
 export const categories = ['Tất cả', ...Array.from(new Set(products.map((p) => p.category)))];
