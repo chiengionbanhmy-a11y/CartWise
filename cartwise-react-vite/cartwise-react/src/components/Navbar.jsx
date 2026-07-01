@@ -1,3 +1,5 @@
+import { Settings } from 'lucide-react';
+
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout }) {
   const { page, t, user, profile } = appState;
   const navs = [
@@ -11,9 +13,9 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
     <header className="navbar navbar-minimal">
       <button className="brand" onClick={() => onNavigate('home')} aria-label="CartWise Home">
         <img src="/cartwise-logo-icon-v4.png" alt="CartWise logo" className="brand-logo-image" />
-        <span>
+        <span className="brand-copy-row">
           <strong>CartWise</strong>
-          <small className="brand-slogan">Smart cart, smart decisions.</small>
+          <small className="brand-slogan brand-slogan-inline">Smart cart, smart decisions.</small>
         </span>
       </button>
 
@@ -35,7 +37,9 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
             <button className="primary small auth-trigger" onClick={onOpenRegister}>Đăng ký</button>
           </>
         )}
-        <button className="ghost settings-trigger gear-trigger" onClick={onOpenSettings} aria-label="Cài đặt">⚙️</button>
+        <button className="ios-gear-button" onClick={onOpenSettings} aria-label="Cài đặt">
+          <Settings size={23} strokeWidth={2.35} />
+        </button>
       </div>
     </header>
   );

@@ -4,6 +4,7 @@ import PromoPopup from './components/PromoPopup.jsx';
 import CawiRobot from './components/CawiRobot.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
+import SetupWizard from './components/SetupWizard.jsx';
 import LoginModal from './components/LoginModal.jsx';
 import Home from './pages/Home.jsx';
 import FlashSale from './pages/FlashSale.jsx';
@@ -14,11 +15,13 @@ import { translations } from './data/i18n.js';
 
 const savedSettings = JSON.parse(localStorage.getItem('cartwise-settings') || '{}');
 const savedUser = JSON.parse(localStorage.getItem('cartwise-user') || 'null');
+const setupComplete = localStorage.getItem('cartwise-setup-complete') === 'yes';
 
 function App() {
   const [page, setPage] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(!setupComplete);
   const [authMode, setAuthMode] = useState(null);
   const [user, setUser] = useState(savedUser);
   const [profile, setProfile] = useState(savedSettings.profile || { name: savedUser?.name || 'Người dùng CartWise', avatar: 'CW' });
@@ -50,11 +53,6 @@ function App() {
   }
 
   function openSettings() {
-    if (!user) {
-      alert('Bạn cần đăng nhập hoặc đăng ký trước khi chỉnh sửa hồ sơ và cài đặt.');
-      setAuthMode('login');
-      return;
-    }
     setSettingsOpen(true);
   }
 
@@ -64,6 +62,15 @@ function App() {
     setCurrency(next.currency);
     const payload = { profile: next.profile, language: next.language, currency: next.currency };
     localStorage.setItem('cartwise-settings', JSON.stringify(payload));
+  }
+
+  function confirmInitialSetup(next) {
+    const nextProfile = savedSettings.profile || profile;
+    setLanguage(next.language);
+    setCurrency(next.currency);
+    localStorage.setItem('cartwise-settings', JSON.stringify({ profile: nextProfile, language: next.language, currency: next.currency }));
+    localStorage.setItem('cartwise-setup-complete', 'yes');
+    setSetupOpen(false);
   }
 
   return (
@@ -105,11 +112,22 @@ function App() {
 
       {settingsOpen && (
         <SettingsPanel
+          user={user}
           profile={profile}
           language={language}
           currency={currency}
           onClose={() => setSettingsOpen(false)}
           onSave={saveSettings}
+          onOpenLogin={() => { setSettingsOpen(false); setAuthMode('login'); }}
+          onOpenRegister={() => { setSettingsOpen(false); setAuthMode('register'); }}
+        />
+      )}
+
+      {setupOpen && (
+        <SetupWizard
+          initialLanguage={language}
+          initialCurrency={currency}
+          onConfirm={confirmInitialSetup}
         />
       )}
 
