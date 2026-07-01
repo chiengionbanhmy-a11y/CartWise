@@ -12,7 +12,7 @@ function FlashSale({ appState, onOpenProduct }) {
       <div className="section-heading center">
         <span className="eyebrow">Deal hot trong ngày</span>
         <h1>Flash Sale CartWise</h1>
-        <p>Mỗi nhóm có 2 sản phẩm đại diện để so sánh nhanh giá thật sau cùng.</p>
+        <p>Mỗi nhóm có 2 sản phẩm đại diện để so sánh nhanh tổng chi phí dự kiến.</p>
       </div>
       <div className="category-tabs scroll-tabs big-tabs">
         {categoryGroups.map((tab) => <button key={tab} className={active === tab ? 'tab active' : 'tab'} onClick={() => setActive(tab)}>{tab}</button>)}

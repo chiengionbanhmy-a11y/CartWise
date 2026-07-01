@@ -21,7 +21,7 @@ const themes = [
 
 function getBotReply(text) {
   const q = text.toLowerCase();
-  if (q.includes('rẻ') || q.includes('giá') || q.includes('so sánh')) return 'Bạn hãy bấm “So sánh” ở sản phẩm. Mình sẽ chỉ ra nơi bán rẻ nhất, mức tiết kiệm và link mua trực tiếp.';
+  if (q.includes('rẻ') || q.includes('giá') || q.includes('so sánh')) return 'Bạn hãy bấm “So sánh tổng chi phí” ở sản phẩm. Mình sẽ giúp xem nền tảng nào có tổng chi phí dự kiến thấp nhất sau khi cộng phí vận chuyển.';
   if (q.includes('tiền') || q.includes('usd') || q.includes('vnd') || q.includes('quy đổi')) return 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
   if (q.includes('mua') || q.includes('link') || q.includes('cửa hàng')) return 'Bạn bấm “Mua ở đây” ở từng điểm bán. CartWise sẽ mở link tới trang mua chính thức phù hợp.';
   if (q.includes('ưu đãi') || q.includes('sale') || q.includes('flash')) return 'Bạn vào mục Flash Sale để xem các sản phẩm đang giảm giá và đồng hồ đếm ngược ưu đãi.';

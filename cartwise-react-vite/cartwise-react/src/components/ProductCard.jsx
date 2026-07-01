@@ -20,12 +20,12 @@ function ProductCard({ product, currency = 'VND', onOpenProduct }) {
         <h3>{product.name}</h3>
         <p>{product.description}</p>
         <div className="price-row final-card-price">
-          <small>Giá thật sau cùng từ</small>
+          <small>Tổng chi phí dự kiến từ</small>
           <strong>{formatCurrency(getFinalCost(bestFinal), currency)}</strong>
           {product.originalPrice && <span>{formatCurrency(product.originalPrice, currency)}</span>}
         </div>
-        <div className="store-line">Tiết kiệm nhất tại <b>{bestFinal.storeName}</b></div>
-        <button className="primary full" onClick={() => onOpenProduct(product)}>So sánh giá thật</button>
+        <div className="store-line">Dự kiến tốt nhất tại <b>{bestFinal.storeName}</b></div>
+        <button className="primary full" onClick={() => onOpenProduct(product)}>So sánh tổng chi phí</button>
       </div>
       {product.discountPercent > 0 && <span className="discount-badge">-{product.discountPercent}%</span>}
     </article>

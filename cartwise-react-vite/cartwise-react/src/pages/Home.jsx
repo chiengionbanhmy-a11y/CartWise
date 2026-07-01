@@ -67,7 +67,7 @@ function Home({ appState, onOpenProduct, onNavigate }) {
         <div className="hero-stats-strip">
           <div><strong>2/mục</strong><span>Sản phẩm đại diện</span></div>
           <div><strong>6</strong><span>Điểm bán mỗi sản phẩm</span></div>
-          <div><strong>Giá thật</strong><span>Tính tổng chi phí</span></div>
+          <div><strong>Dự kiến</strong><span>So sánh chi phí</span></div>
         </div>
 
         <div className="hero-cta-row">
@@ -80,7 +80,7 @@ function Home({ appState, onOpenProduct, onNavigate }) {
         <div className="section-heading center">
           <span className="eyebrow">Gợi ý nổi bật</span>
           <h2>Những sản phẩm được xem nhiều hôm nay</h2>
-          <p>Giao diện sang trọng, rõ ràng và tập trung vào tổng tiền thật sự phải trả.</p>
+          <p>Giao diện sang trọng, rõ ràng và tập trung vào tổng chi phí dự kiến cần trả.</p>
         </div>
         <div className="product-grid">
           {topProducts.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />)}

@@ -12,7 +12,7 @@ function Stores({ appState, onOpenProduct }) {
       <div className="section-heading center">
         <span className="eyebrow">Điểm bán</span>
         <h1>So sánh theo từng nhóm sản phẩm</h1>
-        <p>Mỗi nhóm chỉ giữ 2 sản phẩm đại diện để demo rõ tính năng “So sánh giá thật sau cùng”.</p>
+        <p>Mỗi nhóm chỉ giữ 2 sản phẩm đại diện để demo rõ tính năng “So sánh tổng chi phí dự kiến”.</p>
       </div>
       <div className="store-group-grid">
         {categoryGroups.map((g) => (
@@ -25,7 +25,7 @@ function Stores({ appState, onOpenProduct }) {
       </div>
       <div className="section-heading compact">
         <h2>Đang xem: {openGroup}</h2>
-        <p>Bấm “So sánh” để xem giá online, trực tiếp và giá thật sau cùng.</p>
+        <p>Bấm “So sánh” để xem tổng chi phí dự kiến.</p>
       </div>
       <div className="product-grid">
         {list.length ? list.map((p) => <ProductCard key={p.id} product={p} currency={currency} onOpenProduct={onOpenProduct} />) : <p className="empty-state">Nhóm này chưa có dữ liệu.</p>}

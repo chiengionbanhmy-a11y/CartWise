@@ -4,9 +4,6 @@ const future = (hours) => Date.now() + hours * 60 * 60 * 1000;
 
 const encode = (text) => encodeURIComponent(text);
 
-const SHOPEE_LOGITECH_M331_URL = 'https://shopee.vn/Chu%E1%BB%99t-kh%C3%B4ng-d%C3%A2y-Logitech-M331-1000-DPI-Pin-24-th%C3%A1ng-K%E1%BA%BFt-n%E1%BB%91i-10m-B%E1%BA%A3o-h%C3%A0nh-12-th%C3%A1ng-i.1256164758.24680442740?extraParams=%7B%22display_model_id%22%3A245820218328%2C%22model_selection_logic%22%3A3%7D&sp_atk=3a2855f8-ad07-4741-9958-e8401744390c&xptdk=3a2855f8-ad07-4741-9958-e8401744390c';
-
-
 const storeDomains = {
   'Shopee': 'shopee.vn',
   'Tiki': 'tiki.vn',
@@ -57,9 +54,9 @@ const offer = (storeName, channel, storePrice, shippingFee, publicDiscount, cash
 });
 
 const onlineStores = (base) => [
-  offer('Shopee', 'online', Math.round(base * 0.96), 25000, 15000, 8000, 'Đã có voucher cá nhân'),
-  offer('Tiki', 'online', Math.round(base * 1.02), 12000, 25000, 5000, 'Đã có tài khoản'),
-  offer('Lazada', 'online', Math.round(base * 0.99), 18000, 12000, 12000, 'Đã có tài khoản')
+  offer('Shopee', 'online', Math.round(base * 0.98), 25000, 0, 0, 'Dữ liệu cơ bản'),
+  offer('Lazada', 'online', Math.round(base * 0.96), 30000, 0, 0, 'Dữ liệu cơ bản'),
+  offer('Tiki', 'online', Math.round(base * 1.04), 20000, 0, 0, 'Dữ liệu cơ bản')
 ];
 
 const offlineByCategory = (category, base) => {
@@ -304,53 +301,30 @@ export const products = [
   })
 ];
 
-const applyLogitechM331ShopeeDemo = (productItem, store) => {
+const applyLogitechM331ExpectedDemo = (productItem, store) => {
   if (productItem.id !== 'mouse-logitech') return store;
 
   const demoStores = {
     'Shopee': {
-      storePrice: 334400,
-      shippingFee: 0,
-      publicDiscount: 6688,
+      storePrice: 180000,
+      shippingFee: 25000,
+      publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Đã có tài khoản',
-      storeUrl: SHOPEE_LOGITECH_M331_URL,
-      dataNote: 'Giá sau voucher Shopee: 327.712đ'
-    },
-    'Tiki': {
-      storePrice: 349000,
-      shippingFee: 12000,
-      publicDiscount: 15000,
-      cashback: 3000,
-      accountStatus: 'Đã có tài khoản'
+      accountStatus: 'Dữ liệu cơ bản'
     },
     'Lazada': {
-      storePrice: 359000,
-      shippingFee: 18000,
-      publicDiscount: 20000,
-      cashback: 5000,
-      accountStatus: 'Đã có voucher cá nhân'
-    },
-    'FPT Shop': {
-      storePrice: 369000,
-      shippingFee: 0,
-      publicDiscount: 20000,
+      storePrice: 175000,
+      shippingFee: 30000,
+      publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Đã có tài khoản'
+      accountStatus: 'Dữ liệu cơ bản'
     },
-    'CellphoneS': {
-      storePrice: 359000,
-      shippingFee: 0,
-      publicDiscount: 12000,
+    'Tiki': {
+      storePrice: 190000,
+      shippingFee: 20000,
+      publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Đã có tài khoản'
-    },
-    'Thế Giới Di Động': {
-      storePrice: 379000,
-      shippingFee: 0,
-      publicDiscount: 25000,
-      cashback: 0,
-      accountStatus: 'Đã có voucher cá nhân'
+      accountStatus: 'Dữ liệu cơ bản'
     }
   };
 
@@ -364,16 +338,18 @@ products.forEach((p) => {
       ...store,
       storeUrl: storeSearchUrl(store.storeName, p.name)
     };
-    return applyLogitechM331ShopeeDemo(p, withUrl);
+    return applyLogitechM331ExpectedDemo(p, withUrl);
   });
 });
 
 export const categories = ['Tất cả', ...Array.from(new Set(products.map((p) => p.category)))];
 export const categoryGroups = categories.filter((c) => c !== 'Tất cả');
 
-export const getFinalCost = (store) => Math.max(0, Number(store.storePrice || 0) + Number(store.shippingFee || 0) - Number(store.publicDiscount || 0) - Number(store.cashback || 0));
+export const getFinalCost = (store) => Math.max(0, Number(store.storePrice || 0) + Number(store.shippingFee || 0));
+export const getBasicCost = getFinalCost;
 export const getBestStore = (product) => [...product.stores].sort((a, b) => a.storePrice - b.storePrice)[0];
-export const getBestFinalStore = (product) => [...product.stores].sort((a, b) => getFinalCost(a) - getFinalCost(b))[0];
+export const getBestFinalStore = (product) => [...product.stores].filter((s) => ['Shopee', 'Lazada', 'Tiki'].includes(s.storeName)).sort((a, b) => getFinalCost(a) - getFinalCost(b))[0];
+export const getBestProjectedStore = getBestFinalStore;
 export const getWorstStore = (product) => [...product.stores].sort((a, b) => b.storePrice - a.storePrice)[0];
 export const getSavingAmount = (product) => Math.max(0, getWorstStore(product).storePrice - getBestStore(product).storePrice);
 export const getStoreLogo = (storeName) => {

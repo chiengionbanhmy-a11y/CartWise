@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import CawiRobot from './CawiRobot.jsx';
 import { formatCurrency } from '../data/currency.js';
-import { getBestFinalStore, getStoreLogo } from '../data/products.js';
+import { getStoreLogo } from '../data/products.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
-const accountOptions = ['Chưa có tài khoản', 'Đã có tài khoản', 'Đã có voucher cá nhân', 'Đã liên kết Shopee'];
+const comparableStores = ['Shopee', 'Lazada', 'Tiki'];
 
 function getCountdown(endTime) {
   const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
@@ -15,20 +15,18 @@ function getCountdown(endTime) {
   return `${h}:${m}:${s}`;
 }
 
-function calculateFinal(row) {
-  return Math.max(0, Number(row.storePrice || 0) + Number(row.shippingFee || 0) - Number(row.publicDiscount || 0) - Number(row.cashback || 0));
+function getBasicTotal(row) {
+  return Math.max(0, Number(row.storePrice || 0) + Number(row.shippingFee || 0));
 }
 
 function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
   const [countdown, setCountdown] = useState(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
-  const [offers, setOffers] = useState(() => product.stores.map((s) => ({ ...s })));
-  const [shopeeConnected, setShopeeConnected] = useState(() => product.id === 'mouse-logitech');
+  const [voucherByStore, setVoucherByStore] = useState({});
 
   useEffect(() => {
-    setOffers(product.stores.map((s) => ({ ...s })));
     setCountdown(product.offerEndTime ? getCountdown(product.offerEndTime) : null);
-    setShopeeConnected(product.id === 'mouse-logitech');
+    setVoucherByStore({});
   }, [product]);
 
   useEffect(() => {
@@ -42,30 +40,52 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
     onCurrencyChange?.(cur);
   }
 
-  function updateOffer(index, field, value) {
-    setOffers((prev) => prev.map((item, i) => {
-      if (i !== index) return item;
-      if (field === 'accountStatus') return { ...item, [field]: value };
-      return { ...item, [field]: Math.max(0, Number(value || 0)) };
+  function updateVoucher(storeName, value) {
+    setVoucherByStore((prev) => ({
+      ...prev,
+      [storeName]: value === '' ? '' : Math.max(0, Number(value || 0))
     }));
   }
 
-  const rows = useMemo(() => offers.map((offer, index) => {
-    const linkedShopee = shopeeConnected && offer.storeName === 'Shopee';
-    const hydratedOffer = linkedShopee ? { ...offer, accountStatus: 'Đã liên kết Shopee' } : offer;
-    return { ...hydratedOffer, index, finalCost: calculateFinal(hydratedOffer) };
-  }), [offers, shopeeConnected]);
-  const bestFinal = useMemo(() => [...rows].sort((a, b) => a.finalCost - b.finalCost)[0], [rows]);
-  const originalBest = useMemo(() => getBestFinalStore(product), [product]);
-  const shopeeRow = rows.find((r) => r.storeName === 'Shopee');
-  const hasNoAccount = rows.some((r) => r.accountStatus === 'Chưa có tài khoản');
+  const rows = useMemo(() => {
+    const onlineRows = product.stores
+      .filter((store) => comparableStores.includes(store.storeName))
+      .sort((a, b) => comparableStores.indexOf(a.storeName) - comparableStores.indexOf(b.storeName));
+
+    return onlineRows.map((store) => {
+      const basicTotal = getBasicTotal(store);
+      const rawVoucher = voucherByStore[store.storeName];
+      const hasVoucher = rawVoucher !== undefined && rawVoucher !== '' && Number(rawVoucher) > 0;
+      const voucher = hasVoucher ? Number(rawVoucher) : 0;
+      return {
+        ...store,
+        basicTotal,
+        voucher,
+        hasVoucher,
+        afterVoucher: hasVoucher ? Math.max(0, basicTotal - voucher) : null
+      };
+    });
+  }, [product, voucherByStore]);
+
+  const bestBasic = useMemo(() => [...rows].sort((a, b) => a.basicTotal - b.basicTotal)[0], [rows]);
+  const personalizedRows = useMemo(() => rows.filter((row) => row.hasVoucher), [rows]);
+  const bestPersonalized = useMemo(() => personalizedRows.length ? [...personalizedRows].sort((a, b) => a.afterVoucher - b.afterVoucher)[0] : null, [personalizedRows]);
+
+  const basicConclusion = bestBasic
+    ? `${bestBasic.storeName} đang có tổng chi phí dự kiến thấp nhất theo dữ liệu cơ bản hiện có.`
+    : 'Chưa có đủ dữ liệu để kết luận.';
+
+  const personalConclusion = bestPersonalized
+    ? `Theo voucher bạn đã nhập, ${bestPersonalized.storeName} đang là lựa chọn tiết kiệm nhất cho tài khoản của bạn.`
+    : `${bestBasic?.storeName || 'Nền tảng tốt nhất'} là lựa chọn tốt nhất theo giá cơ bản. Nếu bạn có voucher ở nền tảng khác, kết quả có thể thay đổi.`;
 
   return (
     <div className="modal-backdrop product-backdrop" role="dialog" aria-modal="true">
-      <div className="product-modal premium-modal">
+      <div className="product-modal premium-modal expected-cost-modal">
         <button className="close-btn" onClick={onClose}>×</button>
-        <div className="modal-grid premium-modal-grid">
-          <section className="modal-image-panel premium-image-panel">
+        <div className="modal-grid premium-modal-grid expected-cost-grid">
+          <section className="modal-image-panel premium-image-panel expected-product-card">
+            <span className="expected-card-label">Sản phẩm đang so sánh</span>
             <img
               src={product.image}
               alt={product.name}
@@ -75,6 +95,13 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                 }
               }}
             />
+            <h3>{product.name}</h3>
+            <p>{product.description}</p>
+            <div className="expected-card-meta">
+              <span>{product.category}</span>
+              <span>{product.subCategory}</span>
+            </div>
+
             <div className="quick-convert premium-convert">
               <h4>Quy đổi tiền tệ nhanh</h4>
               <div className="currency-grid compact">
@@ -86,111 +113,141 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
             </div>
           </section>
 
-          <section className="modal-info-panel has-advisor premium-info-panel">
+          <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel">
             <div className="modal-advisor-slot">
               <CawiRobot
                 mode="modal"
-                message={`Đừng chỉ nhìn giá ban đầu — hãy xem tổng tiền thật sự phải trả. ${bestFinal?.storeName || originalBest.storeName} đang tiết kiệm nhất!`}
+                message="Đừng chỉ nhìn giá ban đầu — hãy xem tổng tiền dự kiến cần trả sau phí vận chuyển."
               />
             </div>
-            <span className="category-chip">{product.category} · {product.subCategory}</span>
-            <h2>{product.name}</h2>
-            <p>{product.description}</p>
 
-            <div className="best-price-box true-price-hero">
-              <span>Giá thật sau cùng thấp nhất</span>
-              <strong>{bestFinal ? formatCurrency(bestFinal.finalCost, localCurrency) : '—'}</strong>
-              <p>Tiết kiệm nhất tại <b>{bestFinal?.storeName}</b></p>
-              {countdown && <div className="countdown">Ưu đãi sắp hết: <b>{countdown}</b></div>}
-            </div>
-
-            <div className="true-price-message">
-              <b>Đừng chỉ nhìn giá ban đầu</b>
-              <span>CartWise tính cả phí vận chuyển, mã giảm giá và hoàn xu để ước tính tổng tiền thật sự phải trả.</span>
-            </div>
-
-            <div className={shopeeConnected ? 'shopee-account-card connected' : 'shopee-account-card'}>
-              <div className="shopee-account-left">
-                <img src={getStoreLogo('Shopee')} alt="Shopee" />
-                <div>
-                  <b>Liên kết tài khoản Shopee</b>
-                  <span>
-                    {shopeeConnected
-                      ? 'Đã liên kết Shopee với CartWise trong bản demo. Hàng Shopee sẽ dùng dữ liệu phí/voucher đã cấu hình.'
-                      : 'Kết nối Shopee để CartWise ước tính phí vận chuyển, voucher và tổng chi phí sát hơn.'}
-                  </span>
-                  {shopeeConnected && shopeeRow && (
-                    <small>Tổng Shopee hiện tại: {formatCurrency(shopeeRow.finalCost, localCurrency)}</small>
-                  )}
-                </div>
-              </div>
-              <button type="button" onClick={() => setShopeeConnected((prev) => !prev)}>
-                {shopeeConnected ? 'Đã liên kết' : 'Liên kết Shopee'}
-              </button>
-            </div>
-            <p className="shopee-demo-note">
-              Lưu ý: bản demo chưa đăng nhập Shopee thật. Để lấy phí vận chuyển, voucher cá nhân và điều kiện tài khoản theo thời gian thực, CartWise cần tích hợp API/đăng nhập hợp lệ từ Shopee.
+            <span className="category-chip">Tính năng chính của CartWise</span>
+            <h2>So sánh tổng chi phí dự kiến</h2>
+            <p className="expected-lead">
+              Đừng chỉ nhìn giá ban đầu — hãy xem tổng tiền thật sự có thể phải trả sau khi cộng phí vận chuyển.
             </p>
 
-            <h3>So sánh giá thật sau cùng</h3>
-            <div className="final-price-panel">
-              <div className="final-price-table">
-                <div className="final-row final-head">
-                  <span>Nơi bán</span>
+            <div className="expected-explain-box">
+              CartWise không chỉ so sánh giá niêm yết, mà còn giúp bạn ước tính tổng chi phí cần trả sau khi cộng phí vận chuyển. Vì voucher có thể khác nhau theo từng tài khoản, CartWise tách riêng phần so sánh công bằng và phần tùy chỉnh theo voucher cá nhân của bạn.
+            </div>
+
+            <div className="best-price-box expected-hero-box">
+              <span>Tổng chi phí dự kiến thấp nhất</span>
+              <strong>{bestBasic ? formatCurrency(bestBasic.basicTotal, localCurrency) : '—'}</strong>
+              <p>{basicConclusion}</p>
+              {countdown && <div className="countdown">Ưu đãi tham khảo: <b>{countdown}</b></div>}
+            </div>
+
+            <div className="expected-section-title">
+              <span>Phần 1</span>
+              <h3>So sánh công bằng</h3>
+              <p>Bảng này so sánh theo cùng điều kiện cơ bản, chưa tính voucher cá nhân vì ưu đãi có thể khác nhau theo từng tài khoản.</p>
+            </div>
+
+            <div className="expected-table-wrap">
+              <div className="expected-table fair-table">
+                <div className="expected-row expected-head">
+                  <span>Nền tảng</span>
                   <span>Giá sản phẩm</span>
-                  <span>Phí ship</span>
-                  <span>Giảm giá</span>
-                  <span>Hoàn xu</span>
-                  <span>Tài khoản</span>
-                  <span>Tổng cuối</span>
-                  <span></span>
+                  <span>Phí vận chuyển ước tính</span>
+                  <span>Tổng chi phí cơ bản</span>
+                  <span>Trạng thái đề xuất</span>
                 </div>
                 {rows.map((row) => {
-                  const isBest = row.index === bestFinal?.index;
+                  const isBest = row.storeName === bestBasic?.storeName;
+                  const status = isBest ? 'Tốt nhất' : row.basicTotal === bestBasic?.basicTotal ? 'Tốt' : 'Cao hơn';
                   return (
-                    <div className={isBest ? 'final-row best-final' : 'final-row'} key={`${row.storeName}-${row.channel}`}>
-                      <span className="final-store-cell">
+                    <div className={isBest ? 'expected-row best-basic' : 'expected-row'} key={row.storeName}>
+                      <span className="expected-store-cell">
                         <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
                         <b>{row.storeName}</b>
-                        <em>{row.accountStatus === 'Đã liên kết Shopee' ? 'Đã liên kết' : 'Dữ liệu so sánh'}</em>
-                        {isBest && <i>Giá thật thấp nhất</i>}
-                        {row.dataNote && <small className="row-data-note">{row.dataNote}</small>}
+                        {isBest && <i>Tổng dự kiến thấp nhất</i>}
                       </span>
                       <span>{formatCurrency(row.storePrice, localCurrency)}</span>
-                      <label>
-                        <input type="number" min="0" value={row.shippingFee} onChange={(e) => updateOffer(row.index, 'shippingFee', e.target.value)} />
-                      </label>
-                      <label>
-                        <input type="number" min="0" value={row.publicDiscount} onChange={(e) => updateOffer(row.index, 'publicDiscount', e.target.value)} />
-                      </label>
-                      <label>
-                        <input type="number" min="0" value={row.cashback} onChange={(e) => updateOffer(row.index, 'cashback', e.target.value)} />
-                      </label>
-                      <label>
-                        <select value={row.accountStatus} onChange={(e) => updateOffer(row.index, 'accountStatus', e.target.value)}>
-                          {accountOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-                        </select>
-                      </label>
-                      <strong>{formatCurrency(row.finalCost, localCurrency)}</strong>
-                      <a className="buy-link" href={row.storeUrl} target="_blank" rel="noreferrer">Mua tại đây</a>
+                      <span>{formatCurrency(row.shippingFee, localCurrency)}</span>
+                      <strong>{formatCurrency(row.basicTotal, localCurrency)}</strong>
+                      <span className={status === 'Tốt nhất' ? 'status-pill best' : 'status-pill'}>{status}</span>
                     </div>
                   );
                 })}
               </div>
+            </div>
 
-              {hasNoAccount && (
-                <div className="account-warning">
-                  Một số mã giảm giá hoặc ưu đãi có thể yêu cầu đăng nhập hoặc tài khoản đủ điều kiện.
+            <div className="formula-box expected-formula">
+              <b>Công thức:</b> Tổng chi phí cơ bản = Giá sản phẩm + Phí vận chuyển ước tính
+            </div>
+
+            <div className="expected-section-title personal-title">
+              <span>Phần 2</span>
+              <h3>Tùy chỉnh theo tài khoản của bạn</h3>
+              <p>Nhập voucher thủ công nếu bạn đang có mã giảm giá ở từng nền tảng.</p>
+            </div>
+
+            <div className="voucher-card-grid">
+              {rows.map((row) => (
+                <article className="voucher-card" key={`voucher-${row.storeName}`}>
+                  <div className="voucher-card-head">
+                    <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
+                    <div>
+                      <b>Voucher {row.storeName}</b>
+                      <span>Tổng cơ bản: {formatCurrency(row.basicTotal, localCurrency)}</span>
+                    </div>
+                  </div>
+                  <label>
+                    Nhập số tiền giảm
+                    <input
+                      type="number"
+                      min="0"
+                      inputMode="numeric"
+                      placeholder="Ví dụ: 25000"
+                      value={voucherByStore[row.storeName] ?? ''}
+                      onChange={(event) => updateVoucher(row.storeName, event.target.value)}
+                    />
+                  </label>
+                  <div className="voucher-result">
+                    <span>Voucher cá nhân</span>
+                    <b>{row.hasVoucher ? formatCurrency(row.voucher, localCurrency) : 'Chưa có dữ liệu voucher'}</b>
+                  </div>
+                  <div className="voucher-result total">
+                    <span>Tổng sau voucher</span>
+                    <strong>{row.hasVoucher ? formatCurrency(row.afterVoucher, localCurrency) : 'Chưa xác định'}</strong>
+                  </div>
+                  <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>
+                </article>
+              ))}
+            </div>
+
+            <div className="expected-table-wrap personalized-wrap">
+              <div className="expected-table personalized-table">
+                <div className="expected-row expected-head">
+                  <span>Nền tảng</span>
+                  <span>Tổng cơ bản</span>
+                  <span>Voucher cá nhân</span>
+                  <span>Tổng sau voucher</span>
                 </div>
-              )}
-
-              <p className="final-price-note">
-                CartWise so sánh dựa trên tổng chi phí ước tính, bao gồm giá sản phẩm, phí vận chuyển, mã giảm giá công khai và hoàn xu/điểm thưởng nếu có. Giá cuối cùng có thể thay đổi tùy tài khoản, vị trí giao hàng, voucher cá nhân và chính sách của từng nền tảng.
-              </p>
-              <div className="formula-box">
-                <b>Công thức:</b> Tổng chi phí ước tính = Giá sản phẩm + Phí vận chuyển - Mã giảm giá - Giá trị hoàn xu/điểm thưởng
+                {rows.map((row) => (
+                  <div className={bestPersonalized?.storeName === row.storeName ? 'expected-row best-personal' : 'expected-row'} key={`personal-${row.storeName}`}>
+                    <span className="expected-store-cell">
+                      <img src={getStoreLogo(row.storeName)} alt={row.storeName} />
+                      <b>{row.storeName}</b>
+                      {bestPersonalized?.storeName === row.storeName && <i>Theo voucher của bạn</i>}
+                    </span>
+                    <span>{formatCurrency(row.basicTotal, localCurrency)}</span>
+                    <span>{row.hasVoucher ? formatCurrency(row.voucher, localCurrency) : 'Chưa có dữ liệu'}</span>
+                    <strong>{row.hasVoucher ? formatCurrency(row.afterVoucher, localCurrency) : 'Chưa xác định'}</strong>
+                  </div>
+                ))}
               </div>
             </div>
+
+            <div className="expected-conclusion-card">
+              <b>Kết luận dự kiến</b>
+              <p>{personalConclusion}</p>
+            </div>
+
+            <p className="final-price-note expected-note">
+              Kết quả sau voucher chỉ phản ánh dữ liệu bạn đã nhập. Nếu bạn có voucher ở nền tảng khác, kết quả có thể thay đổi. CartWise không cam kết giá chính xác tuyệt đối vì phí vận chuyển, voucher cá nhân và chính sách từng nền tảng có thể thay đổi theo tài khoản và vị trí giao hàng.
+            </p>
           </section>
         </div>
       </div>

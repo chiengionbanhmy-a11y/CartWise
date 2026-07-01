@@ -5730,7 +5730,7 @@ main {
 }
 
 /* =======================================================
-   v27 — Shopee account demo + chỉ giữ bảng So sánh giá thật
+   v27 cũ — styles thừa của bản demo Shopee, không còn dùng ở v28
    ======================================================= */
 .shopee-account-card {
   display: flex;
@@ -5840,5 +5840,442 @@ main {
 
   .shopee-account-card button {
     width: 100%;
+  }
+}
+
+/* =======================================================
+   v28 — So sánh tổng chi phí dự kiến MVP
+   ======================================================= */
+.expected-cost-modal {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(59, 130, 246, .10), transparent 32%),
+    radial-gradient(circle at 88% 8%, rgba(34, 197, 94, .10), transparent 34%),
+    linear-gradient(180deg, #ffffff, #f8fbff 70%, #f6faf8);
+}
+
+.expected-cost-grid {
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) !important;
+  gap: 24px !important;
+}
+
+.expected-product-card {
+  align-self: start;
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.94), rgba(248, 251, 255, .96));
+  border: 1px solid rgba(30, 64, 175, .11);
+  box-shadow: 0 24px 54px rgba(15, 23, 42, .10);
+}
+
+.expected-card-label {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 950;
+  font-size: 12px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.expected-product-card h3 {
+  margin: 2px 0 0;
+  color: #0f172a;
+  font-size: 24px;
+  line-height: 1.18;
+}
+
+.expected-product-card p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.expected-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.expected-card-meta span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.expected-cost-panel > h2 {
+  max-width: 720px;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.expected-lead {
+  max-width: 760px;
+  margin: 0 0 16px;
+  color: #334155;
+  font-weight: 850;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.expected-explain-box {
+  padding: 17px 18px;
+  margin: 0 0 16px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(239, 246, 255, .94), rgba(240, 253, 244, .92));
+  border: 1px solid rgba(37, 99, 235, .16);
+  color: #1e3a5f;
+  font-weight: 760;
+  line-height: 1.62;
+}
+
+.expected-hero-box {
+  margin-bottom: 20px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(34, 197, 94, .16), transparent 28%),
+    linear-gradient(135deg, #0f172a, #1e3a5f 60%, #0f766e);
+  color: #ffffff;
+  border: 0;
+  box-shadow: 0 22px 56px rgba(15, 23, 42, .22);
+}
+
+.expected-hero-box span,
+.expected-hero-box p,
+.expected-hero-box .countdown {
+  color: rgba(255,255,255,.86) !important;
+}
+
+.expected-hero-box strong {
+  color: #ffffff !important;
+}
+
+.expected-section-title {
+  margin: 22px 0 12px;
+  padding-top: 4px;
+}
+
+.expected-section-title span {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.expected-section-title h3 {
+  margin: 8px 0 5px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.expected-section-title p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 720;
+  line-height: 1.55;
+}
+
+.expected-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, .22);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, .07);
+}
+
+.expected-table {
+  display: grid;
+  gap: 8px;
+  min-width: 820px;
+  padding: 10px;
+}
+
+.expected-row {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, .14);
+  color: #1e293b;
+  font-weight: 760;
+}
+
+.fair-table .expected-row {
+  grid-template-columns: 210px 140px 170px 170px 132px;
+}
+
+.personalized-table .expected-row {
+  grid-template-columns: 220px 160px 180px 180px;
+}
+
+.expected-head {
+  background: linear-gradient(135deg, #0f172a, #1e3a5f);
+  color: #ffffff;
+  border: 0;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .04em;
+  font-weight: 950;
+}
+
+.expected-row.best-basic,
+.expected-row.best-personal {
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+  border-color: rgba(34, 197, 94, .34);
+  box-shadow: 0 14px 32px rgba(34, 197, 94, .10);
+}
+
+.expected-store-cell {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 3px 10px;
+  align-items: center;
+}
+
+.expected-store-cell img {
+  grid-row: span 3;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  padding: 7px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .10);
+}
+
+.expected-store-cell b {
+  color: #0f172a;
+  font-weight: 950;
+}
+
+.expected-store-cell i {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.expected-row strong {
+  color: #0f766e;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.status-pill {
+  width: fit-content;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.status-pill.best {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.expected-formula {
+  background: #f8fafc;
+  border-color: rgba(37, 99, 235, .12);
+}
+
+.personal-title span {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.voucher-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 12px 0 16px;
+}
+
+.voucher-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, .20);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, .07);
+}
+
+.voucher-card-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.voucher-card-head img {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  padding: 8px;
+  background: #f8fafc;
+}
+
+.voucher-card-head div {
+  display: grid;
+  gap: 2px;
+}
+
+.voucher-card-head b {
+  color: #0f172a;
+  font-weight: 950;
+}
+
+.voucher-card-head span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.voucher-card label {
+  display: grid;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.voucher-card input {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(148, 163, 184, .32);
+  border-radius: 15px;
+  outline: none;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.voucher-card input:focus {
+  border-color: rgba(37, 99, 235, .42);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}
+
+.voucher-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.voucher-result b {
+  text-align: right;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.voucher-result.total {
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+}
+
+.voucher-result.total strong {
+  color: #0f766e;
+  text-align: right;
+  font-weight: 950;
+}
+
+.buy-link.soft {
+  min-height: 38px;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.personalized-wrap {
+  margin-top: 12px;
+}
+
+.expected-conclusion-card {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ecfdf5, #eff6ff);
+  border: 1px solid rgba(34, 197, 94, .24);
+}
+
+.expected-conclusion-card b {
+  display: block;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 950;
+  margin-bottom: 4px;
+}
+
+.expected-conclusion-card p {
+  margin: 0;
+  color: #14532d;
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.expected-note {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, .18);
+}
+
+@media (max-width: 1120px) {
+  .expected-cost-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .expected-product-card {
+    position: relative;
+    top: auto;
+  }
+
+  .voucher-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .expected-lead {
+    font-size: 16px;
+  }
+
+  .expected-table {
+    min-width: 760px;
+  }
+
+  .fair-table .expected-row {
+    grid-template-columns: 190px 130px 160px 160px 120px;
+  }
+
+  .personalized-table .expected-row {
+    grid-template-columns: 200px 150px 170px 170px;
   }
 }
