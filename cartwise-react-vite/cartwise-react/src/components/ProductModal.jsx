@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3 } from 'lucide-react';
+import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3 } from 'lucide-react';
 import CawiRobot from './CawiRobot.jsx';
 import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from '../data/currency.js';
-import { getStoreLogo } from '../data/products.js';
+import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore } from '../data/products.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
@@ -28,11 +28,58 @@ function formatCountdown(ms) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function PriceHistoryChart({ data, currency }) {
+  if (!data?.length) return null;
+  const width = 340;
+  const height = 130;
+  const paddingX = 18;
+  const paddingY = 18;
+  const values = data.map((item) => item.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(1, max - min);
+  const points = data.map((item, index) => {
+    const x = paddingX + (index * (width - paddingX * 2)) / Math.max(1, data.length - 1);
+    const y = height - paddingY - ((item.value - min) / range) * (height - paddingY * 2);
+    return { x, y, ...item };
+  });
+  const line = points.map((point) => `${point.x},${point.y}`).join(' ');
+  const first = data[0];
+  const last = data[data.length - 1];
+
+  return (
+    <div className="price-history-chart-v38">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Biểu đồ lịch sử giá">
+        <defs>
+          <linearGradient id="cw38ChartFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(34,197,94,.26)" />
+            <stop offset="100%" stopColor="rgba(34,197,94,0)" />
+          </linearGradient>
+        </defs>
+        <polyline
+          points={`${paddingX},${height - paddingY} ${line} ${width - paddingX},${height - paddingY}`}
+          fill="url(#cw38ChartFill)"
+          stroke="none"
+        />
+        <polyline points={line} fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        {points.map((point, index) => (
+          <circle key={`${point.label}-${index}`} cx={point.x} cy={point.y} r={index === points.length - 1 ? 5 : 3.5} />
+        ))}
+      </svg>
+      <div className="history-range-v38">
+        <span>{first.label}: <b>{formatCurrency(first.value, currency)}</b></span>
+        <span>{last.label}: <b>{formatCurrency(last.value, currency)}</b></span>
+      </div>
+    </div>
+  );
+}
+
 function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
   const [voucherByStore, setVoucherByStore] = useState({});
   const [selectedChannel, setSelectedChannel] = useState('online');
   const [personalOpen, setPersonalOpen] = useState(false);
+  const [resultSort, setResultSort] = useState('total');
   const [now, setNow] = useState(Date.now());
   const [deliveryBasis, setDeliveryBasis] = useState(() => JSON.parse(localStorage.getItem('cartwise-delivery-basis') || 'null'));
   const [manualAddress, setManualAddress] = useState(deliveryBasis?.address || '');
@@ -41,6 +88,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
     setVoucherByStore({});
     setSelectedChannel('online');
     setPersonalOpen(false);
+    setResultSort('total');
   }, [product]);
 
   useEffect(() => {
@@ -171,6 +219,29 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const onlineRows = useMemo(() => allRows.filter((row) => row.channel === 'online' || onlineStores.includes(row.storeName)).sort((a, b) => onlineStores.indexOf(a.storeName) - onlineStores.indexOf(b.storeName)), [allRows]);
   const offlineRows = useMemo(() => allRows.filter((row) => row.channel === 'offline'), [allRows]);
   const selectedRows = selectedChannel === 'online' ? onlineRows : offlineRows;
+  const sortedSelectedRows = useMemo(() => {
+    const rows = [...selectedRows];
+    if (resultSort === 'shipping') {
+      return rows.sort((a, b) => {
+        const shipA = a.basicTotal == null ? Number.POSITIVE_INFINITY : Number(a.shippingFee || 0);
+        const shipB = b.basicTotal == null ? Number.POSITIVE_INFINITY : Number(b.shippingFee || 0);
+        return shipA - shipB;
+      });
+    }
+    if (resultSort === 'popular') {
+      return rows.sort((a, b) => getStorePopularityScore(a.storeName) - getStorePopularityScore(b.storeName));
+    }
+    return rows.sort((a, b) => {
+      const totalA = a.basicTotal == null ? Number.POSITIVE_INFINITY : a.basicTotal;
+      const totalB = b.basicTotal == null ? Number.POSITIVE_INFINITY : b.basicTotal;
+      return totalA - totalB;
+    });
+  }, [selectedRows, resultSort]);
+
+  const savingStats = useMemo(() => getOptimalSavingStats(product, selectedRows), [product, selectedRows]);
+  const priceHistory = useMemo(() => getPriceHistory(product), [product]);
+  const priceInsight = useMemo(() => getPriceInsight(product), [product]);
+  const PriceStatusIcon = priceInsight.tone === 'good' ? TrendingDown : priceInsight.tone === 'warning' ? TrendingUp : Minus;
 
   const bestOnline = useMemo(() => [...onlineRows].filter((row) => row.basicTotal != null).sort((a, b) => a.basicTotal - b.basicTotal)[0], [onlineRows]);
   const bestOffline = useMemo(() => [...offlineRows].filter((row) => row.basicTotal != null).sort((a, b) => a.basicTotal - b.basicTotal)[0], [offlineRows]);
@@ -246,6 +317,19 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
               </div>
               <small>Voucher dạng giảm tiền sẽ được hiểu theo đúng đơn vị tiền tệ bạn đang chọn.</small>
             </div>
+
+            <div className={`price-insight-panel-v38 ${priceInsight.tone}`}>
+              <div className="price-insight-head-v38">
+                <span><BarChart3 size={17} /> Lịch sử giá gần đây</span>
+                <b><PriceStatusIcon size={16} /> {priceInsight.status}</b>
+              </div>
+              <PriceHistoryChart data={priceHistory} currency={localCurrency} />
+              <div className="buy-wait-box-v38">
+                <strong>Mua ngay hay chờ?</strong>
+                <p>{priceInsight.suggestion}</p>
+                <small>Giá hiện tại: {formatCurrency(priceInsight.current, localCurrency)} · Trung bình gần đây: {formatCurrency(priceInsight.average, localCurrency)}</small>
+              </div>
+            </div>
           </section>
 
           <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel v30-cost-panel v31-cost-panel">
@@ -277,6 +361,22 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
               <p>{conclusion}</p>
             </div>
 
+            <div className="optimal-saving-card-v38">
+              <div>
+                <span>Tính toán khoản tiết kiệm tối ưu</span>
+                <h3>{savingStats.best ? `Chọn ${savingStats.best.storeName}` : 'Đang cập nhật'}</h3>
+                <p>
+                  {savingStats.saveMax > 0
+                    ? `Có thể tiết kiệm tối đa ${formatCurrency(savingStats.saveMax, localCurrency)} so với lựa chọn có tổng chi phí cao nhất trong danh sách hiện tại.`
+                    : 'Các lựa chọn hiện chưa có chênh lệch đủ lớn để tính khoản tiết kiệm.'}
+                </p>
+              </div>
+              <div className="saving-metrics-v38">
+                <span>So với lựa chọn kế tiếp <b>{formatCurrency(savingStats.saveVsNext, localCurrency)}</b></span>
+                <span>So với mức trung bình <b>{formatCurrency(savingStats.saveVsAverage, localCurrency)}</b></span>
+              </div>
+            </div>
+
             <div className="expected-workspace v31-workspace">
               <section className="expected-pane fair-pane v31-fair-pane">
                 <div className="expected-section-title compact-title">
@@ -302,9 +402,19 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
                 </div>
 
                 <div className="selected-channel-detail-v31">
-                  <h4>{selectedChannel === 'online' ? 'Chi tiết mua online' : 'Chi tiết mua trực tiếp'}</h4>
+                  <div className="detail-title-row-v38">
+                    <h4>{selectedChannel === 'online' ? 'Chi tiết mua online' : 'Chi tiết mua trực tiếp'}</h4>
+                    <label className="sort-select-v38">
+                      <span>Sắp xếp</span>
+                      <select value={resultSort} onChange={(event) => setResultSort(event.target.value)}>
+                        <option value="total">Tổng chi phí thấp nhất</option>
+                        <option value="shipping">Phí vận chuyển thấp nhất</option>
+                        <option value="popular">Nơi bán phổ biến</option>
+                      </select>
+                    </label>
+                  </div>
                   <div className="compact-fair-list v31-compact-list">
-                    {selectedRows.map((row) => renderRow(row, selectedChannel === 'online' ? bestOnline : bestOffline))}
+                    {sortedSelectedRows.map((row) => renderRow(row, selectedChannel === 'online' ? bestOnline : bestOffline))}
                   </div>
                 </div>
 

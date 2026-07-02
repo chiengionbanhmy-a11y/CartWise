@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Clock3 } from 'lucide-react';
+import { Clock3, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
-import { getBestFinalStore, getFinalCost } from '../data/products.js';
+import { getBestFinalStore, getFinalCost, getPriceInsight, getOptimalSavingStats } from '../data/products.js';
 
 function formatCountdown(ms) {
   if (!Number.isFinite(ms) || ms <= 0) return 'Đã kết thúc';
@@ -15,6 +15,9 @@ function formatCountdown(ms) {
 function ProductCard({ product, currency = 'VND', onOpenProduct }) {
   const [now, setNow] = useState(Date.now());
   const bestFinal = getBestFinalStore(product);
+  const priceInsight = getPriceInsight(product);
+  const savingStats = getOptimalSavingStats(product);
+  const StatusIcon = priceInsight.tone === 'good' ? TrendingDown : priceInsight.tone === 'warning' ? TrendingUp : Minus;
   const showCountdown = product.flashSaleToday && product.offerEndTime && product.offerEndTime > now;
 
   useEffect(() => {
@@ -36,7 +39,10 @@ function ProductCard({ product, currency = 'VND', onOpenProduct }) {
         }}
       />
       <div className="product-body">
-        <span className="category-chip">{product.subCategory}</span>
+        <div className="product-card-topline-v38">
+          <span className="category-chip">{product.subCategory}</span>
+          <span className={`price-status-badge-v38 ${priceInsight.tone}`}><StatusIcon size={14} />{priceInsight.status}</span>
+        </div>
         <h3>{product.name}</h3>
         <p>{product.description}</p>
         {showCountdown && (
@@ -51,6 +57,7 @@ function ProductCard({ product, currency = 'VND', onOpenProduct }) {
           {product.originalPrice && <span>{formatCurrency(product.originalPrice, currency)}</span>}
         </div>
         <div className="store-line">Dự kiến tốt nhất tại <b>{bestFinal?.storeName || 'đang cập nhật'}</b></div>
+        {savingStats.saveMax > 0 && <div className="saving-line-v38">Tiết kiệm tối đa <b>{formatCurrency(savingStats.saveMax, currency)}</b></div>}
         <button className="primary full" onClick={() => onOpenProduct(product)}>So sánh tổng chi phí</button>
       </div>
       {product.discountPercent > 0 && <span className="discount-badge">-{product.discountPercent}%</span>}

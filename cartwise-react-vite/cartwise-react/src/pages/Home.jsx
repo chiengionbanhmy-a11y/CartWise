@@ -1,21 +1,34 @@
 import { useMemo, useState } from 'react';
 import { Search, Mic } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
-import { categories } from '../data/products.js';
+import { categories, getBestFinalStore, getFinalCost, getStorePopularityScore } from '../data/products.js';
 
 function Home({ appState, onOpenProduct, onNavigate }) {
   const { products, currency } = appState;
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('Tất cả');
+  const [sortBy, setSortBy] = useState('popular');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return products.filter((p) => {
+    const matched = products.filter((p) => {
       const matchCategory = category === 'Tất cả' || p.category === category;
       const haystack = [p.name, p.category, p.subCategory, p.description, ...(p.tags || [])].join(' ').toLowerCase();
       return matchCategory && (!q || haystack.includes(q));
     });
-  }, [products, query, category]);
+
+    return matched.sort((a, b) => {
+      const bestA = getBestFinalStore(a);
+      const bestB = getBestFinalStore(b);
+      if (sortBy === 'total') {
+        return (bestA ? getFinalCost(bestA) : Number.POSITIVE_INFINITY) - (bestB ? getFinalCost(bestB) : Number.POSITIVE_INFINITY);
+      }
+      if (sortBy === 'shipping') {
+        return Number(bestA?.shippingFee ?? Number.POSITIVE_INFINITY) - Number(bestB?.shippingFee ?? Number.POSITIVE_INFINITY);
+      }
+      return getStorePopularityScore(bestA?.storeName) - getStorePopularityScore(bestB?.storeName);
+    });
+  }, [products, query, category, sortBy]);
 
   const topProducts = filtered.slice(0, 8);
   function stubFeature(name) {
@@ -58,6 +71,22 @@ function Home({ appState, onOpenProduct, onNavigate }) {
           {categories.map((c) => (
             <button key={c} className={category === c ? 'tab active' : 'tab'} onClick={() => setCategory(c)}>{c}</button>
           ))}
+        </div>
+
+        <div className="home-filter-summary-v38">
+          <div>
+            <span>Danh mục hiện tại</span>
+            <b>{category}</b>
+            <small>{filtered.length} sản phẩm phù hợp{query ? ` cho “${query}”` : ''}</small>
+          </div>
+          <label>
+            <span>Sắp xếp kết quả</span>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+              <option value="popular">Nơi bán phổ biến</option>
+              <option value="total">Tổng chi phí thấp nhất</option>
+              <option value="shipping">Phí vận chuyển thấp nhất</option>
+            </select>
+          </label>
         </div>
 
         <div className="hero-stats-strip">

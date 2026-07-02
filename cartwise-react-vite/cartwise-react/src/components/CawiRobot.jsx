@@ -114,7 +114,7 @@ function getBotReply(text) {
   }
 
   if (/(robot|co the giup gi|huong dan|cach dung)/.test(normalized)) {
-    return 'Bạn có thể click 1 lần vào robot để mở chat, click 2 lần liên tiếp để đổi màu robot, và kéo thả robot tới vị trí bạn muốn. Mình cũng có thể trả lời các câu hỏi linh hoạt như một trợ lý AI mini ngay trong web.';
+    return 'Bạn có thể click 1 lần vào robot để mở chat, click 2 lần liên tiếp để đổi màu robot, và kéo thả robot tới vị trí bạn muốn. Mình cũng có thể trả lời các câu hỏi linh hoạt như một trợ lý mua sắm thông minh ngay trong web.';
   }
 
   if (/(cam on|thank)/.test(normalized)) {
@@ -127,10 +127,6 @@ function getBotReply(text) {
 
   if (/(tong chi phi du kien|chi phi du kien|gia niem yet|gia ban dau)/.test(normalized)) {
     return 'CartWise không chỉ nhìn giá niêm yết. Web sẽ cộng thêm phí vận chuyển ước tính để tạo tổng chi phí dự kiến. Voucher cá nhân được tách riêng để bảng so sánh công bằng không bị sai lệch.';
-  }
-
-  if (/(khong mat tien|mien phi|api|openai|gemini|key)/.test(normalized)) {
-    return 'Bản Cawi Robo này không gọi OpenAI, Gemini hay API trả phí. Mình trả lời bằng logic thông minh có sẵn trong web và dữ liệu sản phẩm của CartWise, nên bạn không cần API key và không bị trừ tiền.';
   }
 
   return 'Mình có thể chưa hiểu hết ý bạn, nhưng vẫn sẵn sàng hỗ trợ. Bạn thử hỏi ngắn gọn hơn về sản phẩm cụ thể, nơi mua rẻ hơn, cách đổi tiền tệ, voucher hoặc flash sale nhé.';
@@ -149,7 +145,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [chatPosition, setChatPosition] = useState(null);
   const [chatSize, setChatSize] = useState(null);
   const [robotPosition, setRobotPosition] = useState(null);
-  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình là Cawi Robo. Bản này không dùng API trả phí, nhưng mình vẫn có thể trả lời thông minh dựa trên dữ liệu CartWise có sẵn.' }]);
+  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình là Cawi Robo, trợ lý mua sắm của CartWise. Bạn muốn mình so sánh sản phẩm nào hôm nay?' }]);
 
   const rootRef = useRef(null);
   const robotRef = useRef(null);
