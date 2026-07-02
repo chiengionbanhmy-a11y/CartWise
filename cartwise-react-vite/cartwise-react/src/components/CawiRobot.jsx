@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { products, getBestFinalStore, getBestStore, getSavingAmount } from '../data/products.js';
+import { formatCurrency } from '../data/currency.js';
 import './CawiRobot.css';
 
 const floatingStops = ['118px', '32vh', '54vh', 'calc(100vh - 220px)'];
@@ -14,19 +16,116 @@ const quickQuestions = [
 const themes = [
   { shell: '#F4F8FF', edge: '#D7E6FF', face: '#121827', ear: '#65A7FF', earDark: '#2F7DF2', cart: '#FF8D67', cartDark: '#F06646', basketLine: 'rgba(255,255,255,.34)', accent: '#46D9C1', blush: 'rgba(255,151,184,.72)', glow: 'rgba(255,111,178,.38)' },
   { shell: '#FFF5EE', edge: '#FFD8C9', face: '#171A28', ear: '#FFB08A', earDark: '#FF7A52', cart: '#67A7FF', cartDark: '#2D7FE9', basketLine: 'rgba(255,255,255,.34)', accent: '#30D0B3', blush: 'rgba(255,156,190,.72)', glow: 'rgba(255,134,184,.38)' },
-  { shell: '#F0FFF8', edge: '#CFF3E2', face: '#111E25', ear: '#69D4A5', earDark: '#25A96B', cart: '#5ECB92', cartDark: '#28A865', basketLine: 'rgba(255,255,255,.34)', accent: '#4AC8FF', blush: 'rgba(255,151,192,.70)', glow: 'rgba(111,255,190,.30)' },
+  { shell: '#F0FFF8', edge: '#CFF3E2', face: '#111E25', ear: '#69D4A5', earDark: '#25A96B', cart: '#5ECB92', cartDark: '#28A865', basketLine: 'rgba(255,255,255,.33)', accent: '#4AC8FF', blush: 'rgba(255,151,192,.70)', glow: 'rgba(111,255,190,.30)' },
   { shell: '#F7F2FF', edge: '#E4D9FF', face: '#1A1730', ear: '#A98CFF', earDark: '#7658E9', cart: '#987BFF', cartDark: '#6F55E8', basketLine: 'rgba(255,255,255,.33)', accent: '#5BE6D6', blush: 'rgba(255,158,200,.72)', glow: 'rgba(177,117,255,.34)' },
   { shell: '#EFFBFF', edge: '#CFEFFF', face: '#122333', ear: '#54BFFF', earDark: '#158DE0', cart: '#F6B84A', cartDark: '#DE9420', basketLine: 'rgba(255,255,255,.34)', accent: '#2FD6AD', blush: 'rgba(255,164,198,.72)', glow: 'rgba(82,191,255,.28)' }
 ];
 
+const productHints = [
+  { id: 'mouse-logitech', terms: ['m331', 'logitech', 'chuột', 'mouse'] },
+  { id: 'powerbank-anker', terms: ['anker', 'pin dự phòng', 'powerbank', 'sạc dự phòng'] },
+  { id: 'sunscreen-anessa', terms: ['anessa', 'kem chống nắng'] },
+  { id: 'lipstick', terms: ['dior', 'lip glow', 'son dưỡng', 'son dior', 'lip balm'] },
+  { id: 'rice-cooker', terms: ['philips', 'nồi cơm', 'hd3170'] },
+  { id: 'mini-fan', terms: ['quạt', 's-18', 'quạt mini'] },
+  { id: 'water-lavie-500', terms: ['lavie', 'nước khoáng', 'nước lavie'] },
+  { id: 'haohao', terms: ['hảo hảo', 'hao hao', 'mì', 'mì gói'] },
+  { id: 'notebook', terms: ['vở', 'hồng hà', '4586', 'subject a4'] },
+  { id: 'casio', terms: ['casio', 'máy tính', 'fx-580', '580vnx'] },
+  { id: 'lego-classic', terms: ['lego', 'classic', 'xếp hình'] },
+  { id: 'teddy-bear', terms: ['gấu bông', 'thú bông', 'teddy'] }
+];
+
+function normalizeText(text = '') {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function findMentionedProduct(query) {
+  const normalized = normalizeText(query);
+  const hint = productHints.find((item) => item.terms.some((term) => normalized.includes(normalizeText(term))));
+  return hint ? products.find((item) => item.id === hint.id) : null;
+}
+
+function buildBestStoreReply(product) {
+  const best = getBestFinalStore(product) || getBestStore(product);
+  if (!best) return `Hiện mình chưa có đủ dữ liệu giá để so sánh rõ cho sản phẩm ${product.name}.`;
+  const saving = getSavingAmount(product);
+  const bestCost = Number(best.storePrice || 0) + Number(best.shippingFee || 0);
+  const savingText = saving > 0 ? ` Bạn có thể tiết kiệm khoảng ${formatCurrency(saving, 'VND')} so với nơi giá cao hơn.` : '';
+  return `Với ${product.name}, hiện ${best.storeName} là lựa chọn đáng chú ý nhất trên CartWise với tổng chi phí dự kiến khoảng ${formatCurrency(bestCost, 'VND')}.${savingText}`;
+}
+
 function getBotReply(text) {
-  const q = text.toLowerCase();
-  if (q.includes('rẻ') || q.includes('giá') || q.includes('so sánh')) return 'Bạn hãy bấm “So sánh tổng chi phí” ở sản phẩm. Mình sẽ giúp xem nền tảng nào có tổng chi phí dự kiến thấp nhất sau khi cộng phí vận chuyển.';
-  if (q.includes('tiền') || q.includes('usd') || q.includes('vnd') || q.includes('quy đổi')) return 'Khi mở sản phẩm, bạn có thể đổi nhanh VND sang USD, CNY, EUR, JPY hoặc KRW ngay trong khung sản phẩm.';
-  if (q.includes('mua') || q.includes('link') || q.includes('cửa hàng')) return 'Bạn bấm “Mua ở đây” ở từng điểm bán. CartWise sẽ mở link tới trang mua chính thức phù hợp.';
-  if (q.includes('ưu đãi') || q.includes('sale') || q.includes('flash')) return 'Bạn vào mục Flash Sale để xem các sản phẩm đang giảm giá và đồng hồ đếm ngược ưu đãi.';
-  if (q.includes('robot') || q.includes('giúp')) return 'Mình là Cawi Robo. Mình hỗ trợ so sánh giá, gợi ý nơi mua, nhắc ưu đãi và giải thích cách dùng CartWise.';
-  return 'Mình đã hiểu. Bạn có thể hỏi về so sánh giá, nơi mua rẻ nhất, đổi tiền tệ, flash sale hoặc cách dùng CartWise nhé.';
+  const normalized = normalizeText(text);
+  const matchedProduct = findMentionedProduct(text);
+
+  if (!normalized) {
+    return 'Bạn cứ nhập câu hỏi như: “Sản phẩm nào rẻ nhất?”, “Cách đổi tiền tệ?” hoặc tên sản phẩm cụ thể để mình hỗ trợ nhé.';
+  }
+
+  if (matchedProduct && /(gia|re|so sanh|mua|tot nhat|nen mua|chi phi)/.test(normalized)) {
+    return buildBestStoreReply(matchedProduct);
+  }
+
+  if (/(xin chao|chao|hello|hi|hey)/.test(normalized)) {
+    return 'Xin chào! Mình là Cawi Robo — trợ lý mua sắm của CartWise. Bạn có thể hỏi về giá, nơi mua, phí vận chuyển, voucher hoặc cách dùng web nhé.';
+  }
+
+  if (/(ban la ai|robot la ai|gioi thieu)/.test(normalized)) {
+    return 'Mình là Cawi Robo, trợ lý mua sắm của CartWise. Mình có thể gợi ý nơi mua rẻ hơn, giải thích cách so sánh chi phí dự kiến, hỗ trợ đổi tiền tệ và hướng dẫn dùng website.';
+  }
+
+  if (/(re nhat|tot nhat|so sanh gia|so sanh tong chi phi|san pham nao re nhat)/.test(normalized)) {
+    const ranked = products
+      .map((item) => ({ item, best: getBestFinalStore(item) || getBestStore(item) }))
+      .filter((entry) => entry.best)
+      .sort((a, b) => (Number(a.best.storePrice || 0) + Number(a.best.shippingFee || 0)) - (Number(b.best.storePrice || 0) + Number(b.best.shippingFee || 0)));
+    const top = ranked[0];
+    if (!top) return 'Mình chưa có đủ dữ liệu để xếp hạng lúc này.';
+    const bestCost = Number(top.best.storePrice || 0) + Number(top.best.shippingFee || 0);
+    return `Nếu xét theo dữ liệu hiện có trên web, ${top.item.name} đang có mức tổng chi phí dự kiến thấp nổi bật tại ${top.best.storeName}, khoảng ${formatCurrency(bestCost, 'VND')}. Nếu bạn muốn, hãy nói tên sản phẩm để mình phân tích chi tiết hơn.`;
+  }
+
+  if (/(tien te|usd|vnd|eur|jpy|krw|cny|quy doi|doi tien)/.test(normalized)) {
+    return 'Bạn có thể đổi đơn vị tiền tệ trong phần cài đặt hoặc ngay trong khung so sánh sản phẩm. Khi bạn nhập voucher dạng giảm tiền, CartWise sẽ hiểu đúng theo đơn vị tiền tệ đang hiển thị.';
+  }
+
+  if (/(voucher|giam gia|giam tien|phan tram)/.test(normalized)) {
+    return 'Trong phần “Tùy chỉnh theo tài khoản của bạn”, bạn có thể chọn giảm theo tiền hoặc theo %. Phần này áp dụng cho mua online và được tách riêng khỏi bảng so sánh công bằng để tránh làm lệch kết quả chính.';
+  }
+
+  if (/(ship|van chuyen|phi ship|freeship)/.test(normalized)) {
+    return 'Phí vận chuyển được dùng để ước tính tổng chi phí khi mua online. Khi mở sản phẩm, bạn sẽ thấy phần so sánh online riêng để nhìn rõ giá sản phẩm, phí vận chuyển và tổng dự kiến.';
+  }
+
+  if (/(mua|link|mo link|truy cap san pham)/.test(normalized)) {
+    return 'Bạn chỉ cần bấm “Mua tại đây” ở từng nền tảng. CartWise sẽ mở đúng link sản phẩm tương ứng để bạn tiếp tục mua sắm.';
+  }
+
+  if (/(flash sale|sale|uu dai|giam gia soc)/.test(normalized)) {
+    return 'Bạn có thể vào mục Flash Sale để xem các sản phẩm đang có ưu đãi nổi bật. Nếu một sản phẩm đang sale, CartWise cũng có thể hiển thị đồng hồ đếm ngược thời gian kết thúc ưu đãi.';
+  }
+
+  if (/(robot|co the giup gi|huong dan|cach dung)/.test(normalized)) {
+    return 'Bạn có thể click 1 lần vào robot để mở chat, click 2 lần liên tiếp để đổi màu robot, và kéo thả robot tới vị trí bạn muốn. Mình cũng có thể trả lời các câu hỏi linh hoạt như một trợ lý AI mini ngay trong web.';
+  }
+
+  if (/(cam on|thank)/.test(normalized)) {
+    return 'Rất vui được hỗ trợ bạn. Nếu cần, bạn cứ hỏi thêm về sản phẩm, chi phí dự kiến hoặc cách dùng CartWise nhé!';
+  }
+
+  if (matchedProduct) {
+    return `${buildBestStoreReply(matchedProduct)} Nếu muốn, bạn có thể hỏi tiếp về voucher, ship hoặc nơi mua của sản phẩm này.`;
+  }
+
+  return 'Mình có thể chưa hiểu hết ý bạn, nhưng vẫn sẵn sàng hỗ trợ. Bạn thử hỏi ngắn gọn hơn về sản phẩm cụ thể, nơi mua rẻ hơn, cách đổi tiền tệ, voucher hoặc flash sale nhé.';
 }
 
 function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi Robo!' }) {
@@ -42,7 +141,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [chatPosition, setChatPosition] = useState(null);
   const [chatSize, setChatSize] = useState(null);
   const [robotPosition, setRobotPosition] = useState(null);
-  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua rẻ hơn, ưu đãi và cách dùng CartWise.' }]);
+  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình có thể tư vấn nơi mua, giải thích tổng chi phí dự kiến và phản hồi như một trợ lý AI mini của CartWise.' }]);
 
   const rootRef = useRef(null);
   const robotRef = useRef(null);
@@ -115,7 +214,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
     const animate = () => {
       const { current, target } = followRef.current;
-      const ease = 0.36;
+      const ease = 0.3;
       current.x += (target.x - current.x) * ease;
       current.y += (target.y - current.y) * ease;
       current.tilt += (target.tilt - current.tilt) * ease;
@@ -130,10 +229,10 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       const rect = robotRef.current?.getBoundingClientRect();
       if (!rect) return;
       const centerX = rect.left + rect.width * 0.5;
-      const centerY = rect.top + rect.height * 0.25;
+      const centerY = rect.top + rect.height * 0.28;
       const dx = Math.max(-1, Math.min(1, (event.clientX - centerX) / 140));
       const dy = Math.max(-1, Math.min(1, (event.clientY - centerY) / 110));
-      followRef.current.target = { x: dx * 3, y: dy * 2.2, tilt: dx * 5, pupilX: dx * 3.6, pupilY: dy * 3.1 };
+      followRef.current.target = { x: dx * 3, y: dy * 2.2, tilt: dx * 5, pupilX: dx * 3.5, pupilY: dy * 3.1 };
       if (!followRef.current.rafId) followRef.current.rafId = window.requestAnimationFrame(animate);
     };
     applyVars(followRef.current.current);
@@ -167,7 +266,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         }
         return;
       }
-      if (mode === 'floating' && inactiveFor >= 20000 && now - lastMove.current >= 20000 && !moving && !sleeping) {
+      if (mode === 'floating' && inactiveFor >= 20000 && now - lastMove.current >= 20000 && !moving && !sleeping && !robotPosition) {
         setMoving(true);
         setStopIndex((prev) => (prev + 1) % floatingStops.length);
         lastMove.current = now;
@@ -178,7 +277,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       events.forEach((eventName) => window.removeEventListener(eventName, markActivity));
       clearInterval(interval);
     };
-  }, [mode, moving, sleeping]);
+  }, [mode, moving, sleeping, robotPosition]);
 
   useEffect(() => {
     const handleMouseMove = (event) => {
@@ -186,10 +285,22 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         const data = robotDragRef.current;
         const moved = Math.abs(event.clientX - data.startX) + Math.abs(event.clientY - data.startY) > 4;
         data.moved = data.moved || moved;
-        setRobotPosition({
-          x: event.clientX - data.offsetX,
-          y: event.clientY - data.offsetY
-        });
+
+        if (data.mode === 'floating') {
+          setRobotPosition({
+            x: event.clientX - data.offsetX,
+            y: event.clientY - data.offsetY
+          });
+        } else {
+          const rawX = event.clientX - data.parentLeft - data.offsetX;
+          const rawY = event.clientY - data.parentTop - data.offsetY;
+          const maxX = Math.max(0, data.parentWidth - data.width);
+          const maxY = Math.max(0, data.parentHeight - data.height);
+          setRobotPosition({
+            x: Math.min(Math.max(0, rawX), maxX),
+            y: Math.min(Math.max(0, rawY), maxY)
+          });
+        }
         return;
       }
 
@@ -197,21 +308,30 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
         const data = resizeRef.current;
         const minW = 320;
         const minH = 360;
+        const maxW = Math.max(minW, window.innerWidth - 12);
+        const maxH = Math.max(minH, window.innerHeight - 12);
+        let nextLeft = data.startLeft;
+        let nextTop = data.startTop;
+        let nextWidth = data.startWidth;
+        let nextHeight = data.startHeight;
 
-        // Giữ chuột ở 1 góc bất kỳ.
-        // Kéo chuột LÊN = phóng to khung chat.
-        // Kéo chuột XUỐNG = thu nhỏ khung chat.
-        const growAmount = data.startY - event.clientY;
-        const nextW = Math.max(minW, data.width + growAmount * 1.2);
-        const nextH = Math.max(minH, data.height + growAmount * 1.05);
+        if (data.corner.includes('right')) {
+          nextWidth = Math.max(minW, Math.min(maxW, event.clientX - data.startLeft));
+        }
+        if (data.corner.includes('left')) {
+          nextWidth = Math.max(minW, Math.min(maxW, data.startRight - event.clientX));
+          nextLeft = data.startRight - nextWidth;
+        }
+        if (data.corner.includes('bottom')) {
+          nextHeight = Math.max(minH, Math.min(maxH, event.clientY - data.startTop));
+        }
+        if (data.corner.includes('top')) {
+          nextHeight = Math.max(minH, Math.min(maxH, data.startBottom - event.clientY));
+          nextTop = data.startBottom - nextHeight;
+        }
 
-        const centerX = data.left + data.width / 2;
-        const centerY = data.top + data.height / 2;
-        const nextX = centerX - nextW / 2;
-        const nextY = centerY - nextH / 2;
-
-        setChatPosition({ x: nextX, y: nextY });
-        setChatSize({ width: nextW, height: nextH });
+        setChatPosition({ x: nextLeft, y: nextTop });
+        setChatSize({ width: nextWidth, height: nextHeight });
         return;
       }
 
@@ -231,9 +351,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       robotDragRef.current = null;
       dragRef.current = null;
       resizeRef.current = null;
-      document.body.classList.remove('cw22-dragging');
-      document.body.classList.remove('cw22-resizing');
-      document.body.classList.remove('cw22-robot-dragging');
+      document.body.classList.remove('cw22-dragging', 'cw22-resizing', 'cw22-robot-dragging');
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -246,11 +364,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
   const widgetStyle = useMemo(() => {
     if (mode === 'floating') {
-      if (robotPosition) return { left: `${robotPosition.x}px`, top: `${robotPosition.y}px`, right: 'auto', bottom: 'auto' };
-      return { right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
+      if (robotPosition) return { ...cssVars, left: `${robotPosition.x}px`, top: `${robotPosition.y}px`, right: 'auto', bottom: 'auto' };
+      return { ...cssVars, right: '20px', top: floatingStops[stopIndex], bottom: 'auto', left: 'auto' };
     }
-    return undefined;
-  }, [mode, stopIndex, robotPosition]);
+    if (robotPosition) {
+      return { ...cssVars, position: 'absolute', left: `${robotPosition.x}px`, top: `${robotPosition.y}px`, right: 'auto', bottom: 'auto' };
+    }
+    return cssVars;
+  }, [mode, stopIndex, robotPosition, cssVars]);
 
   const chatStyle = {
     ...(chatPosition ? { left: `${chatPosition.x}px`, top: `${chatPosition.y}px`, right: 'auto', bottom: 'auto' } : {}),
@@ -275,9 +396,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     const rect = card.getBoundingClientRect();
     dragRef.current = {
       offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-      width: rect.width,
-      height: rect.height
+      offsetY: event.clientY - rect.top
     };
 
     setChatPosition({ x: rect.left, y: rect.top });
@@ -295,12 +414,12 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       corner,
       startX: event.clientX,
       startY: event.clientY,
-      left: rect.left,
-      top: rect.top,
-      width: rect.width,
-      height: rect.height,
-      centerX: rect.left + rect.width / 2,
-      centerY: rect.top + rect.height / 2
+      startLeft: rect.left,
+      startTop: rect.top,
+      startWidth: rect.width,
+      startHeight: rect.height,
+      startRight: rect.left + rect.width,
+      startBottom: rect.top + rect.height
     };
     setChatPosition({ x: rect.left, y: rect.top });
     setChatSize({ width: rect.width, height: rect.height });
@@ -308,19 +427,42 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   };
 
   const startRobotDrag = (event) => {
-    if (mode !== 'floating' || event.button !== 0) return;
+    if (event.button !== 0) return;
     if (event.target.closest('button')) return;
     const root = rootRef.current;
     if (!root) return;
     const rect = root.getBoundingClientRect();
-    robotDragRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-      moved: false
-    };
-    setRobotPosition({ x: rect.left, y: rect.top });
+
+    if (mode === 'floating') {
+      robotDragRef.current = {
+        mode,
+        startX: event.clientX,
+        startY: event.clientY,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        moved: false
+      };
+      setRobotPosition({ x: rect.left, y: rect.top });
+    } else {
+      const parent = root.parentElement;
+      const parentRect = parent?.getBoundingClientRect();
+      if (!parentRect) return;
+      robotDragRef.current = {
+        mode,
+        startX: event.clientX,
+        startY: event.clientY,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        parentLeft: parentRect.left,
+        parentTop: parentRect.top,
+        parentWidth: parentRect.width,
+        parentHeight: parentRect.height,
+        width: rect.width,
+        height: rect.height,
+        moved: false
+      };
+      setRobotPosition({ x: rect.left - parentRect.left, y: rect.top - parentRect.top });
+    }
     document.body.classList.add('cw22-robot-dragging');
   };
 
@@ -340,7 +482,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
       setChatOpen((open) => !open);
       setBubbleVisible(false);
       clickTimer.current = null;
-    }, 240);
+    }, 220);
   };
 
   const sendMessage = (text) => {
@@ -348,7 +490,9 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     if (!clean) return;
     setMessages((prev) => [...prev, { from: 'user', text: clean }]);
     setInput('');
-    setTimeout(() => setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]), 420);
+    window.setTimeout(() => {
+      setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
+    }, 360);
   };
 
   const startVoiceInput = () => {
@@ -403,7 +547,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   );
 
   return (
-    <aside ref={rootRef} className={`cw22-widget cw22-${mode} ${moving ? 'moving' : ''} ${sleeping ? 'sleeping' : ''} ${hovered ? 'hovered' : ''} ${chatOpen ? 'chat-open' : ''}`} style={{ ...cssVars, ...widgetStyle }} aria-label="Cawi Robo">
+    <aside ref={rootRef} className={`cw22-widget cw22-${mode} ${moving ? 'moving' : ''} ${sleeping ? 'sleeping' : ''} ${hovered ? 'hovered' : ''} ${chatOpen ? 'chat-open' : ''}`} style={widgetStyle} aria-label="Cawi Robo">
       {bubbleVisible && !chatOpen && (
         <div className="cw22-bubble">
           <p>{bubbleText}</p>
@@ -413,11 +557,11 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
 
       {chatOpen && (
         <div className="cw22-chat" style={chatStyle} onClick={(event) => event.stopPropagation()}>
-          <header onMouseDown={startDrag} title="Giữ chuột và kéo để di chuyển khung chat">
+          <header onMouseDown={startDrag} title="Giữ chuột ở thanh trên để kéo khung chat">
             <div className="cw22-chat-ident">
               <div className="cw22-mini-avatar">{renderRobot(true)}</div>
               <div className="cw22-chat-ident-text">
-                <strong>Cawi Robo</strong>
+                <strong>Cawi Robo AI</strong>
                 <span className="cw22-status"><i />Đang hoạt động</span>
               </div>
             </div>
@@ -430,7 +574,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
             {quickQuestions.map((q) => <button key={q} type="button" onClick={() => sendMessage(q)}>{q}</button>)}
           </div>
           <form className="cw22-input" onSubmit={(event) => { event.preventDefault(); sendMessage(input); }}>
-            <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập câu hỏi của bạn..." />
+            <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập bất kỳ câu hỏi nào cho Cawi Robo..." />
             <button type="button" className="cw22-mic" onClick={startVoiceInput} aria-label="Nhập bằng giọng nói">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" /><path d="M19 10a7 7 0 0 1-14 0" /><path d="M12 19v2" /></svg>
             </button>
@@ -438,14 +582,14 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 18V6" /><path d="M7 11l5-5 5 5" /></svg>
             </button>
           </form>
-          <button className="cw22-resize-handle top-left" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('top-left', event)} />
-          <button className="cw22-resize-handle top-right" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('top-right', event)} />
-          <button className="cw22-resize-handle bottom-left" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('bottom-left', event)} />
-          <button className="cw22-resize-handle bottom-right" type="button" aria-label="Kéo lên để phóng to, kéo xuống để thu nhỏ khung chat" onMouseDown={(event) => startResize('bottom-right', event)} />
+          <button className="cw22-resize-handle top-left" type="button" aria-label="Kéo góc để thay đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-left', event)} />
+          <button className="cw22-resize-handle top-right" type="button" aria-label="Kéo góc để thay đổi kích cỡ khung chat" onMouseDown={(event) => startResize('top-right', event)} />
+          <button className="cw22-resize-handle bottom-left" type="button" aria-label="Kéo góc để thay đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-left', event)} />
+          <button className="cw22-resize-handle bottom-right" type="button" aria-label="Kéo góc để thay đổi kích cỡ khung chat" onMouseDown={(event) => startResize('bottom-right', event)} />
         </div>
       )}
 
-      <div ref={robotRef} className="cw22-avatar" onMouseDown={startRobotDrag} onClick={handleRobotClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} title="Kéo thả để đổi vị trí. Click 1 lần để mở chat, click 2 lần để đổi màu">
+      <div ref={robotRef} className="cw22-avatar" onMouseDown={startRobotDrag} onClick={handleRobotClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} title="Click 1 lần mở khung chat, click 2 lần liên tiếp để đổi màu, kéo thả để đổi vị trí">
         <span className="cw22-pink-glow" />
         <span className="cw22-fx fx1">✿</span><span className="cw22-fx fx2">❤</span><span className="cw22-fx fx3">❀</span><span className="cw22-fx fx4">♡</span>
         {renderRobot(false)}
