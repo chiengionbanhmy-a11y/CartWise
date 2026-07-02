@@ -7193,3 +7193,169 @@ option {
     height: 46px;
   }
 }
+
+/* =======================================================
+   v34 — product real links/prices, no barcode, brand slogan under logo text
+   ======================================================= */
+.brand-copy-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 1px !important;
+  white-space: nowrap !important;
+  line-height: 1.05 !important;
+}
+
+.brand-copy-row strong {
+  display: block !important;
+  line-height: 1.02 !important;
+}
+
+.brand-slogan,
+.brand-slogan-inline {
+  display: block !important;
+  white-space: nowrap !important;
+  margin-top: 2px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  color: #64748b !important;
+}
+
+.browser-search-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.disabled-link {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .62;
+  background: #e5e7eb !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+}
+
+.fair-cost-card:has(.disabled-link) {
+  opacity: .85;
+}
+
+/* =======================================================
+   v35 — About layout + robot box polish
+   ======================================================= */
+.about-robot-box {
+  position: relative !important;
+  min-height: 360px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden;
+}
+
+.about-robot-box .cw22-widget {
+  width: 100%;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-robot-box .cw22-bubble {
+  margin-right: 0;
+}
+
+.modal-advisor-slot,
+.premium-info-panel .modal-advisor-slot {
+  position: relative !important;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.modal-advisor-slot .cw22-widget {
+  width: 100%;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.overview-layout-v35 {
+  display: grid;
+  gap: 18px;
+}
+
+.overview-intro-v35 {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,247,237,.82), rgba(239,246,255,.92));
+  border: 1px solid rgba(226,232,240,.88);
+}
+
+.overview-intro-v35 p {
+  margin: 0;
+  line-height: 1.7;
+  color: #475569;
+}
+
+.overview-grid-v35 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overview-card-v35 {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(226,232,240,.92);
+  box-shadow: 0 14px 34px rgba(15,23,42,.06);
+  display: grid;
+  gap: 10px;
+}
+
+.overview-badge-v35 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #1e3a8a;
+  background: rgba(219,234,254,.9);
+}
+
+.overview-card-v35 p {
+  margin: 0;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+.robot-tip-card-v35 {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(239,246,255,.96), rgba(255,247,237,.96));
+  border: 1px solid rgba(191,219,254,.9);
+}
+
+.robot-tip-card-v35 strong {
+  color: #1e293b;
+}
+
+.robot-tip-card-v35 span {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .overview-grid-v35 {
+    grid-template-columns: 1fr;
+  }
+  .about-robot-box {
+    min-height: 320px !important;
+  }
+}
