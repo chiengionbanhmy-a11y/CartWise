@@ -151,9 +151,9 @@ export const products = [
     subCategory: 'Phụ kiện máy tính',
     image: 'logitech-m331.jpg',
     description: 'Chuột không dây yên tĩnh, phù hợp học tập và làm việc hằng ngày.',
-    basePrice: 289000,
-    originalPrice: 369000,
-    discountPercent: 22,
+    basePrice: 360483,
+    originalPrice: 418000,
+    discountPercent: 14,
     offerHours: 12,
     flashSaleToday: true,
     tags: ['chuột', 'logitech', 'đồ điện tử', 'laptop', 'máy tính']
@@ -190,7 +190,7 @@ export const products = [
     name: 'Son Dưỡng Có Màu Dior Addict Lip Glow 3.2g',
     category: 'Mỹ phẩm',
     subCategory: 'Son môi',
-    image: 'lipstick.svg',
+    image: 'dior-lip-glow.webp',
     description: 'Son dưỡng có màu Dior Addict Lip Glow 3.2g, màu nhẹ tự nhiên, phù hợp đi học và đi chơi.',
     basePrice: 129000,
     originalPrice: 179000,
@@ -255,7 +255,7 @@ export const products = [
     name: 'Vở Hồng Hà 200 trang A4 4586',
     category: 'Học tập',
     subCategory: 'Vở',
-    image: 'notebook.svg',
+    image: 'hongha-a4-notebook.webp',
     description: 'Vở Hồng Hà 200 trang A4 4586, phù hợp ghi chép, học tập và ôn thi.',
     basePrice: 22000,
     originalPrice: 30000,
@@ -307,31 +307,34 @@ export const products = [
 const applyLogitechM331ExpectedDemo = (productItem, store) => {
   if (productItem.id !== 'mouse-logitech') return store;
 
-  const demoStores = {
+  const realLinkStores = {
     'Shopee': {
-      storePrice: 180000,
-      shippingFee: 25000,
+      storePrice: 360483,
+      shippingFee: 0,
       publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Dữ liệu cơ bản'
+      accountStatus: 'Theo link Shopee bạn cung cấp',
+      storeUrl: 'https://shopee.vn/Chu%E1%BB%99t-kh%C3%B4ng-d%C3%A2y-Logitech-M331-1000-DPI-Pin-24-th%C3%A1ng-K%E1%BA%BFt-n%E1%BB%91i-10m-B%E1%BA%A3o-h%C3%A0nh-12-th%C3%A1ng-i.1256164758.24680442740?extraParams=%7B%22display_model_id%22%3A245820218328%2C%22model_selection_logic%22%3A3%7D&sp_atk=9beda66d-5ec1-456e-9ecb-7bb4d22daa5f&xptdk=9beda66d-5ec1-456e-9ecb-7bb4d22daa5f'
     },
     'Lazada': {
-      storePrice: 175000,
-      shippingFee: 30000,
+      storePrice: 399000,
+      shippingFee: 0,
       publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Dữ liệu cơ bản'
+      accountStatus: 'Theo link Lazada bạn cung cấp',
+      storeUrl: 'https://www.lazada.vn/products/pdp-i1168010387-s4311666005.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AChu%2525E1%2525BB%252599t%252Bkh%2525C3%2525B4ng%252Bd%2525C3%2525A2y%252BLogitech%252BM331%253Bnid%253A1168010387%253Bsrc%253ALazadaMainSrp%253Brn%253A503a5ff7b0734b71bcea92e4a1a9d557%253Bregion%253Avn%253Bsku%253A1168010387_VNAMZ%253Bprice%253A399000%253Bclient%253Adesktop%253Bsupplier_id%253A200165709073%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A1%253Butlog_bucket_id%253A470687%253Basc_category_id%253A4460%253Bitem_id%253A1168010387%253Bsku_id%253A4311666005%253Bshop_id%253A1885553%253BtemplateInfo%253A107883_E%2523-1_A3_C%2523164594_J%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=vi&location=H%E1%BB%93%20Ch%C3%AD%20Minh&price=3.99E%205&priceCompare=skuId%3A4311666005%3Bsource%3Alazada-search-voucher%3Bsn%3A503a5ff7b0734b71bcea92e4a1a9d557%3BoriginPrice%3A399000%3BdisplayPrice%3A399000%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3AmockedSalePrice%3BvoucherPricePlugin%3A0%3Btimestamp%3A1782967027444&ratingscore=4.9195561719833565&request_id=503a5ff7b0734b71bcea92e4a1a9d557&review=721&sale=3182&search=1&source=search&spm=a2o4n.searchlist.list.1&stock=1'
     },
     'Tiki': {
-      storePrice: 190000,
-      shippingFee: 20000,
+      storePrice: 469000,
+      shippingFee: 0,
       publicDiscount: 0,
       cashback: 0,
-      accountStatus: 'Dữ liệu cơ bản'
+      accountStatus: 'Theo link Tiki bạn cung cấp',
+      storeUrl: 'https://tiki.vn/chuot-khong-day-logitech-m331-hang-chinh-hang-p160305888.html?spid=160305892'
     }
   };
 
-  const override = demoStores[store.storeName];
+  const override = realLinkStores[store.storeName];
   return override ? { ...store, ...override } : store;
 };
 
