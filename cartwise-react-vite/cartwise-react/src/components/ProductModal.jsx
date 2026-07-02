@@ -8,6 +8,7 @@ const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
 
 function getBasicTotal(row) {
+  if (row?.available === false || row?.storePrice == null) return null;
   return Math.max(0, Number(row.storePrice || 0) + Number(row.shippingFee || 0));
 }
 
@@ -171,9 +172,9 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
   const offlineRows = useMemo(() => allRows.filter((row) => row.channel === 'offline'), [allRows]);
   const selectedRows = selectedChannel === 'online' ? onlineRows : offlineRows;
 
-  const bestOnline = useMemo(() => [...onlineRows].sort((a, b) => a.basicTotal - b.basicTotal)[0], [onlineRows]);
-  const bestOffline = useMemo(() => [...offlineRows].sort((a, b) => a.basicTotal - b.basicTotal)[0], [offlineRows]);
-  const bestSelected = useMemo(() => [...selectedRows].sort((a, b) => a.basicTotal - b.basicTotal)[0], [selectedRows]);
+  const bestOnline = useMemo(() => [...onlineRows].filter((row) => row.basicTotal != null).sort((a, b) => a.basicTotal - b.basicTotal)[0], [onlineRows]);
+  const bestOffline = useMemo(() => [...offlineRows].filter((row) => row.basicTotal != null).sort((a, b) => a.basicTotal - b.basicTotal)[0], [offlineRows]);
+  const bestSelected = useMemo(() => [...selectedRows].filter((row) => row.basicTotal != null).sort((a, b) => a.basicTotal - b.basicTotal)[0], [selectedRows]);
   const personalizedRows = useMemo(() => onlineRows.filter((row) => row.hasVoucher), [onlineRows]);
   const bestPersonalized = useMemo(() => personalizedRows.length ? [...personalizedRows].sort((a, b) => a.afterVoucher - b.afterVoucher)[0] : null, [personalizedRows]);
 
@@ -184,8 +185,9 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
       : `${bestOffline?.storeName || 'Cửa hàng trực tiếp'} đang có mức giá tham khảo tốt nhất trong nhóm cửa hàng trực tiếp.`;
 
   function renderRow(row, bestRow, compact = false) {
-    const isBest = row.storeName === bestRow?.storeName;
-    const saleActive = row.channel === 'online' && product.flashSaleToday && product.offerEndTime && product.offerEndTime > now;
+    const isUnavailable = row.available === false || row.basicTotal == null;
+    const isBest = !isUnavailable && row.storeName === bestRow?.storeName;
+    const saleActive = !isUnavailable && row.channel === 'online' && product.flashSaleToday && product.offerEndTime && product.offerEndTime > now;
     return (
       <article className={isBest ? 'fair-cost-card best-basic channel-row-v31' : 'fair-cost-card channel-row-v31'} key={`${row.channel}-${row.storeName}`}>
         <div className="fair-cost-head">
@@ -196,10 +198,10 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
           </div>
         </div>
         <dl>
-          <div><dt>Giá</dt><dd>{formatCurrency(row.storePrice, localCurrency)}</dd></div>
-          {row.channel === 'online' && <div><dt>Ship ước tính</dt><dd>{formatCurrency(row.shippingFee, localCurrency)}</dd></div>}
+          <div><dt>Giá</dt><dd>{isUnavailable ? 'Không có sản phẩm' : formatCurrency(row.storePrice, localCurrency)}</dd></div>
+          {row.channel === 'online' && <div><dt>Ship ước tính</dt><dd>{isUnavailable ? '—' : formatCurrency(row.shippingFee, localCurrency)}</dd></div>}
           {row.channel === 'offline' && <div><dt>Hình thức</dt><dd>Mua trực tiếp</dd></div>}
-          <div className="total-line"><dt>{row.channel === 'online' ? 'Tổng dự kiến' : 'Giá tại cửa hàng'}</dt><dd>{formatCurrency(row.basicTotal, localCurrency)}</dd></div>
+          <div className="total-line"><dt>{row.channel === 'online' ? 'Tổng dự kiến' : 'Giá tại cửa hàng'}</dt><dd>{isUnavailable ? 'Không có sản phẩm' : formatCurrency(row.basicTotal, localCurrency)}</dd></div>
         </dl>
         {saleActive && (
           <div className="sale-countdown-v31">
@@ -207,7 +209,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
             <span>Kết thúc ưu đãi sau <b>{formatCountdown(product.offerEndTime - now)}</b></span>
           </div>
         )}
-        {!compact && <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>}
+        {!compact && (isUnavailable ? <span className="buy-link soft disabled-link">Không có sản phẩm</span> : <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>)}
       </article>
     );
   }
@@ -322,7 +324,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose }) {
 
                   {personalOpen && (
                     <div className="voucher-card-grid compact-voucher-grid v31-voucher-area">
-                      {onlineRows.map((row) => {
+                      {onlineRows.filter((row) => row.available !== false && row.basicTotal != null).map((row) => {
                         const entry = row.voucherEntry || {};
                         const inputValue = getVoucherInputValue(entry);
                         return (

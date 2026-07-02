@@ -7193,3 +7193,49 @@ option {
     height: 46px;
   }
 }
+
+/* =======================================================
+   v34 — product real links/prices, no barcode, brand slogan under logo text
+   ======================================================= */
+.brand-copy-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 1px !important;
+  white-space: nowrap !important;
+  line-height: 1.05 !important;
+}
+
+.brand-copy-row strong {
+  display: block !important;
+  line-height: 1.02 !important;
+}
+
+.brand-slogan,
+.brand-slogan-inline {
+  display: block !important;
+  white-space: nowrap !important;
+  margin-top: 2px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  color: #64748b !important;
+}
+
+.browser-search-row {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.disabled-link {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .62;
+  background: #e5e7eb !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+}
+
+.fair-cost-card:has(.disabled-link) {
+  opacity: .85;
+}

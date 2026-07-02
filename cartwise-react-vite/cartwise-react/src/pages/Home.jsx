@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, Mic, ScanLine } from 'lucide-react';
+import { Search, Mic } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import { categories } from '../data/products.js';
 
@@ -52,10 +52,6 @@ function Home({ appState, onOpenProduct, onNavigate }) {
               </button>
             </div>
           </div>
-          <button className="utility-tile" onClick={() => stubFeature('Quét mã vạch')}>
-            <ScanLine size={22} />
-            <span>Quét mã vạch</span>
-          </button>
         </div>
 
         <div className="scroll-tabs home-tabs centered-tabs">
