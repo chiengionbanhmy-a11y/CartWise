@@ -58,3 +58,20 @@ http://localhost:5173
 4. Build command: `npm run build`.
 5. Publish directory: `dist`.
 6. Bấm Deploy.
+
+
+## CartWise v37 — Cawi Robo miễn phí, không cần API key
+
+Bản v37 không gọi OpenAI/Gemini/API trả phí. Cawi Robo trả lời dựa trên logic có sẵn và dữ liệu sản phẩm trong `src/data/products.js`.
+
+Ưu điểm:
+- Không cần `OPENAI_API_KEY`
+- Không cần thêm thẻ thanh toán
+- Không phát sinh chi phí AI
+- Không cần cấu hình Environment Variables trên Vercel
+
+Root Directory trên Vercel vẫn là:
+
+```txt
+cartwise-react-vite/cartwise-react
+```

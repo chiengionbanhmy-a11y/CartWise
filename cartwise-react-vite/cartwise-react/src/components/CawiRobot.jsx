@@ -62,61 +62,6 @@ function buildBestStoreReply(product) {
   return `Với ${product.name}, hiện ${best.storeName} là lựa chọn đáng chú ý nhất trên CartWise với tổng chi phí dự kiến khoảng ${formatCurrency(bestCost, 'VND')}.${savingText}`;
 }
 
-function buildCartWiseAIContext() {
-  return {
-    app: 'CartWise',
-    feature: 'So sánh tổng chi phí dự kiến',
-    rules: [
-      'Tổng chi phí dự kiến = giá sản phẩm + phí vận chuyển ước tính',
-      'Voucher cá nhân do người dùng nhập thủ công và phải tách riêng khỏi so sánh công bằng',
-      'Không cam kết giá chính xác tuyệt đối theo thời gian thực nếu chưa có API chính thức từ sàn TMĐT'
-    ],
-    products: products.map((item) => {
-      const onlineStores = item.stores
-        .filter((store) => ['Shopee', 'Lazada', 'Tiki'].includes(store.storeName))
-        .map((store) => ({
-          storeName: store.storeName,
-          available: store.available !== false,
-          priceVnd: store.storePrice ?? null,
-          shippingFeeVnd: store.shippingFee ?? 0,
-          totalExpectedVnd: store.available === false || store.storePrice == null ? null : Number(store.storePrice || 0) + Number(store.shippingFee || 0)
-        }));
-      const best = getBestFinalStore(item) || getBestStore(item);
-      return {
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        bestStore: best?.storeName || null,
-        bestTotalExpectedVnd: best ? Number(best.storePrice || 0) + Number(best.shippingFee || 0) : null,
-        onlineStores
-      };
-    })
-  };
-}
-
-async function askCawiAI(message, history) {
-  const response = await fetch('/api/cawi-chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message,
-      history,
-      context: buildCartWiseAIContext()
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`AI API error ${response.status}`);
-  }
-
-  const data = await response.json();
-  return {
-    reply: data?.reply || getBotReply(message),
-    mode: data?.mode || 'fallback',
-    warning: data?.warning || ''
-  };
-}
-
 function getBotReply(text) {
   const normalized = normalizeText(text);
   const matchedProduct = findMentionedProduct(text);
@@ -180,6 +125,14 @@ function getBotReply(text) {
     return `${buildBestStoreReply(matchedProduct)} Nếu muốn, bạn có thể hỏi tiếp về voucher, ship hoặc nơi mua của sản phẩm này.`;
   }
 
+  if (/(tong chi phi du kien|chi phi du kien|gia niem yet|gia ban dau)/.test(normalized)) {
+    return 'CartWise không chỉ nhìn giá niêm yết. Web sẽ cộng thêm phí vận chuyển ước tính để tạo tổng chi phí dự kiến. Voucher cá nhân được tách riêng để bảng so sánh công bằng không bị sai lệch.';
+  }
+
+  if (/(khong mat tien|mien phi|api|openai|gemini|key)/.test(normalized)) {
+    return 'Bản Cawi Robo này không gọi OpenAI, Gemini hay API trả phí. Mình trả lời bằng logic thông minh có sẵn trong web và dữ liệu sản phẩm của CartWise, nên bạn không cần API key và không bị trừ tiền.';
+  }
+
   return 'Mình có thể chưa hiểu hết ý bạn, nhưng vẫn sẵn sàng hỗ trợ. Bạn thử hỏi ngắn gọn hơn về sản phẩm cụ thể, nơi mua rẻ hơn, cách đổi tiền tệ, voucher hoặc flash sale nhé.';
 }
 
@@ -196,7 +149,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [chatPosition, setChatPosition] = useState(null);
   const [chatSize, setChatSize] = useState(null);
   const [robotPosition, setRobotPosition] = useState(null);
-  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình là Cawi Robo AI. Khi cấu hình OPENAI_API_KEY trên Vercel, mình có thể trả lời bằng AI thật và dùng dữ liệu CartWise để tư vấn mua sắm.' }]);
+  const [messages, setMessages] = useState([{ from: 'bot', text: 'Xin chào! Mình là Cawi Robo. Bản này không dùng API trả phí, nhưng mình vẫn có thể trả lời thông minh dựa trên dữ liệu CartWise có sẵn.' }]);
 
   const rootRef = useRef(null);
   const robotRef = useRef(null);
@@ -540,41 +493,16 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     }, 220);
   };
 
-  const sendMessage = async (text) => {
+  const sendMessage = (text) => {
     const clean = text.trim();
     if (!clean) return;
 
-    const pendingId = `pending-${Date.now()}`;
-    const previousMessages = messages;
-
-    setMessages((prev) => [
-      ...prev,
-      { from: 'user', text: clean },
-      { from: 'bot', text: 'Cawi Robo AI đang suy nghĩ...', pending: true, id: pendingId }
-    ]);
+    setMessages((prev) => [...prev, { from: 'user', text: clean }]);
     setInput('');
 
-    try {
-      const result = await askCawiAI(clean, previousMessages);
-      setMessages((prev) => prev.map((item) => (
-        item.id === pendingId
-          ? {
-              from: 'bot',
-              text: result.mode === 'openai'
-                ? result.reply
-                : `${result.reply}${result.warning ? `\n\nLưu ý: ${result.warning}` : ''}`,
-              id: pendingId
-            }
-          : item
-      )));
-    } catch {
-      const fallbackReply = getBotReply(clean);
-      setMessages((prev) => prev.map((item) => (
-        item.id === pendingId
-          ? { from: 'bot', text: `${fallbackReply}\n\nLưu ý: AI API thật chưa phản hồi, Cawi đang dùng chế độ dự phòng.`, id: pendingId }
-          : item
-      )));
-    }
+    window.setTimeout(() => {
+      setMessages((prev) => [...prev, { from: 'bot', text: getBotReply(clean) }]);
+    }, 320);
   };
 
   const startVoiceInput = () => {
@@ -643,7 +571,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
             <div className="cw22-chat-ident">
               <div className="cw22-mini-avatar">{renderRobot(true)}</div>
               <div className="cw22-chat-ident-text">
-                <strong>Cawi Robo AI</strong>
+                <strong>Cawi Robo</strong>
                 <span className="cw22-status"><i />Đang hoạt động</span>
               </div>
             </div>
@@ -656,7 +584,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
             {quickQuestions.map((q) => <button key={q} type="button" onClick={() => sendMessage(q)}>{q}</button>)}
           </div>
           <form className="cw22-input" onSubmit={(event) => { event.preventDefault(); sendMessage(input); }}>
-            <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập bất kỳ câu hỏi nào cho Cawi Robo..." />
+            <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Hỏi Cawi Robo về giá, voucher, phí ship..." />
             <button type="button" className="cw22-mic" onClick={startVoiceInput} aria-label="Nhập bằng giọng nói">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" /><path d="M19 10a7 7 0 0 1-14 0" /><path d="M12 19v2" /></svg>
             </button>
