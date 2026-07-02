@@ -358,3 +358,40 @@
   .cw22-msg { font-size: 15px; }
   .cw22-input { padding: 12px; }
 }
+
+
+/* =======================================================
+   v36 — Cawi Robo AI thật qua /api/cawi-chat
+   ======================================================= */
+.cw22-msg.pending {
+  position: relative;
+  color: #475569;
+  background: linear-gradient(135deg, #eef6ff, #f8fafc) !important;
+}
+
+.cw22-msg.pending::after {
+  content: '';
+  display: inline-block;
+  width: 1.1em;
+  margin-left: .18em;
+  animation: cw36Dots 1.15s steps(4, end) infinite;
+}
+
+.cw22-chat-ident-text strong::after {
+  content: ' thật';
+  margin-left: 6px;
+  font-size: 12px;
+  color: #16a34a;
+  background: rgba(34, 197, 94, .12);
+  border: 1px solid rgba(34, 197, 94, .18);
+  border-radius: 999px;
+  padding: 3px 8px;
+  vertical-align: middle;
+}
+
+@keyframes cw36Dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75%, 100% { content: '...'; }
+}
