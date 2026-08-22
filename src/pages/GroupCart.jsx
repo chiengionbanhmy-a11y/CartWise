@@ -3,12 +3,11 @@ import { ArrowLeft, Users, Truck, Copy, Check, PlusCircle, PartyPopper, X, Globe
 import { formatCurrency } from '../data/currency.js';
 import { seedGroupCarts, computeGroupStats, freeshipThresholds, generateMockJoiner, generateGroupCode } from '../data/groupCarts.js';
 import { getPlan } from '../data/plans.js';
-import PaymentQr from '../components/PaymentQr.jsx';
-import { fetchVietQrBanks, FALLBACK_BANKS } from '../utils/vietqr.js';
+import PaymentQrMock from '../components/PaymentQrMock.jsx';
 
 const EXTRA_KEY = 'cartwise-group-extra-members';
 const CUSTOM_KEY = 'cartwise-group-custom';
-const SETTLEMENT_KEY = 'cartwise-group-settlements'; // v64 — Ghép Đơn Cùng Bạn Bè: chia tiền + trạng thái đã/chưa thanh toán
+const SETTLEMENT_KEY = 'cartwise-group-settlements'; // v63 — Nhóm Góp Tiền: chia tiền + trạng thái đã/chưa thanh toán
 
 function loadExtraMembers() {
   return JSON.parse(localStorage.getItem(EXTRA_KEY) || '{}');
@@ -54,37 +53,9 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
   const [form, setForm] = useState({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', yourName: '', visibility: 'public' });
   const [settlements, setSettlements] = useState(loadSettlements);
   const [settleOpenId, setSettleOpenId] = useState(null);
-  const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '' });
-  const [banks, setBanks] = useState(FALLBACK_BANKS);
-
-  // Tải danh sách ngân hàng hỗ trợ VietQR (công khai, không cần API key).
-  // Lỗi mạng thì fetchVietQrBanks tự rơi về FALLBACK_BANKS, không cần xử lý ở đây.
-  useEffect(() => {
-    let cancelled = false;
-    fetchVietQrBanks().then((list) => {
-      if (!cancelled && list?.length) setBanks(list);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  function toggleSettleOpen(group) {
-    const opening = settleOpenId !== group.id;
-    setSettleOpenId(opening ? group.id : null);
-    if (opening) {
-      setSettleBankDraft({ bankQuery: '', bank: null, accountNo: '', accountName: group.ownerName || '' });
-    }
-  }
-
-  function resetSettlement(groupId) {
-    setSettlements((prev) => {
-      const next = { ...prev };
-      delete next[groupId];
-      saveSettlements(next);
-      return next;
-    });
-  }
+  // v64 — nhóm "tự nhập": mỗi người 1 mã QR riêng, mặc định thu gọn (chỉ hiện tên), bấm vào
+  // mới hiện mã QR của đúng người đó. Lưu theo groupId -> memberId đang mở.
+  const [qrOpenMember, setQrOpenMember] = useState({});
 
   const groupsCreatedThisMonth = useMemo(
     () => customGroups.filter((g) => monthKey(new Date(g.createdAt)) === monthKey()).length,
@@ -100,30 +71,16 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     });
   }
 
-  function canStartSettlement() {
-    return Boolean(settleBankDraft.bank && settleBankDraft.accountNo.length >= 6 && settleBankDraft.accountName.trim());
-  }
-
   function startSettlement(group, mode) {
-    if (!canStartSettlement()) return;
     const total = group.members.reduce((sum, m) => sum + Number(m.amount || 0), 0);
-    const n = Math.max(1, group.members.length);
-    const base = Math.floor(total / n);
-    const remainder = total - base * n; // dồn phần dư (nếu có) vào người cuối để tổng luôn khớp
-    const requests = group.members.map((m, index) => ({
+    const evenShare = Math.round(total / Math.max(1, group.members.length));
+    const requests = group.members.map((m) => ({
       memberId: m.id,
       name: m.name,
-      amount: mode === 'even' ? base + (index === n - 1 ? remainder : 0) : Number(m.amount || 0),
+      amount: mode === 'even' ? evenShare : Number(m.amount || 0),
       paid: false
     }));
-    updateSettlement(group.id, {
-      mode,
-      requests,
-      bank: settleBankDraft.bank,
-      accountNo: settleBankDraft.accountNo,
-      accountName: settleBankDraft.accountName.trim(),
-      createdAt: new Date().toISOString()
-    });
+    updateSettlement(group.id, { mode, requests, createdAt: new Date().toISOString() });
   }
 
   function togglePaid(groupId, memberId) {
@@ -135,6 +92,10 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       saveSettlements(merged);
       return merged;
     });
+  }
+
+  function toggleQrMember(groupId, memberId) {
+    setQrOpenMember((prev) => ({ ...prev, [groupId]: prev[groupId] === memberId ? null : memberId }));
   }
 
   const allGroups = useMemo(() => {
@@ -236,7 +197,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       <button className="standalone-back-v45" onClick={onBack}><ArrowLeft size={18} /> Quay lại</button>
 
       <div className="standalone-hero-v45">
-        <span className="eyebrow"><Users size={15} /> Ghép Đơn Cùng Bạn Bè</span>
+        <span className="eyebrow"><Users size={15} /> Nhóm Góp Tiền</span>
         <h1>Ghép đơn cùng bạn bè và chia tiền rõ ràng</h1>
         <p>Rủ bạn bè cùng góp đơn vào một nơi bán để cả nhóm đạt ngưỡng freeship, rồi chốt số tiền mỗi người cần trả — chia đều hoặc tự nhập, có yêu cầu thanh toán QR và bảng theo dõi ai đã trả, ai chưa.</p>
       </div>
@@ -409,81 +370,20 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     const settlement = settlements[group.id];
     const isOpen = settleOpenId === group.id;
 
-    // Yêu cầu thanh toán được chốt trước khi có QR thật (không có thông tin ngân
-    // hàng) — cần chốt lại nhóm để nhập tài khoản nhận tiền thì mới tạo được QR.
-    if (settlement && !settlement.bank) {
-      return (
-        <div className="groupcart-settle-v63 active">
-          <p className="groupcart-settle-legacy-note-v64">
-            Yêu cầu thanh toán này được tạo trước khi có mã QR thật — chốt lại nhóm để nhập tài khoản nhận tiền.
-          </p>
-          <button type="button" className="ghost full groupcart-settle-toggle-v63" onClick={() => resetSettlement(group.id)}>
-            <Wallet size={16} /> Chốt lại nhóm
-          </button>
-        </div>
-      );
-    }
-
     if (!settlement) {
       return (
         <div className="groupcart-settle-v63">
-          <button type="button" className="ghost full groupcart-settle-toggle-v63" onClick={() => toggleSettleOpen(group)}>
+          <button type="button" className="ghost full groupcart-settle-toggle-v63" onClick={() => setSettleOpenId(isOpen ? null : group.id)}>
             <Wallet size={16} /> Chốt nhóm &amp; yêu cầu thanh toán
           </button>
           {isOpen && (
-            <>
-              <div className="groupcart-settle-bank-form-v64">
-                <p>Nhập tài khoản nhận tiền của bạn để tạo mã QR cho từng thành viên:</p>
-                <div className="groupcart-settle-bank-row-v64">
-                  <label>
-                    <span>Ngân hàng</span>
-                    <input
-                      type="text"
-                      list={`gdcbb-banklist-${group.id}`}
-                      placeholder="Gõ tên ngân hàng, VD: Techcombank"
-                      value={settleBankDraft.bankQuery}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const match = banks.find((b) => `${b.shortName} (${b.code})` === value);
-                        setSettleBankDraft((d) => ({ ...d, bankQuery: value, bank: match || null }));
-                      }}
-                    />
-                    <datalist id={`gdcbb-banklist-${group.id}`}>
-                      {banks.map((b) => (
-                        <option key={b.bin} value={`${b.shortName} (${b.code})`} />
-                      ))}
-                    </datalist>
-                  </label>
-                  <label>
-                    <span>Số tài khoản</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="VD: 19035829999"
-                      value={settleBankDraft.accountNo}
-                      onChange={(e) => setSettleBankDraft((d) => ({ ...d, accountNo: e.target.value.replace(/\D/g, '') }))}
-                    />
-                  </label>
-                </div>
-                <label>
-                  <span>Tên chủ tài khoản</span>
-                  <input
-                    type="text"
-                    placeholder="VD: NGUYEN VAN A"
-                    value={settleBankDraft.accountName}
-                    onChange={(e) => setSettleBankDraft((d) => ({ ...d, accountName: e.target.value }))}
-                  />
-                </label>
+            <div className="groupcart-settle-modes-v63">
+              <p>Chọn cách chia tiền cho nhóm này:</p>
+              <div className="groupcart-settle-mode-buttons-v63">
+                <button type="button" onClick={() => { startSettlement(group, 'even'); setSettleOpenId(null); }}>Chia đều</button>
+                <button type="button" onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Tự nhập (giữ số tiền đã góp)</button>
               </div>
-              <div className="groupcart-settle-modes-v63">
-                <p>Chọn cách chia tiền cho nhóm này:</p>
-                <div className="groupcart-settle-mode-buttons-v63">
-                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'even'); setSettleOpenId(null); }}>Chia đều</button>
-                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Tự nhập (giữ số tiền đã góp)</button>
-                </div>
-                {!canStartSettlement() && <small className="groupcart-settle-hint-v64">Nhập đủ ngân hàng, số tài khoản và tên chủ tài khoản để tạo QR.</small>}
-              </div>
-            </>
+            </div>
           )}
         </div>
       );
@@ -506,27 +406,49 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                 <CheckCircle2 size={16} />
                 <span>{req.name}</span>
               </button>
-              <b>{formatCurrency(req.amount, 'VND')}</b>
+              <b>{formatCurrency(req.amount, currency)}</b>
               <span className="groupcart-settle-tag-v63">{req.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}</span>
             </div>
           ))}
         </div>
 
         {plan.groupFund.qr && settlement.requests.some((r) => !r.paid) && (
-          <div className="groupcart-settle-qrs-v63">
-            {settlement.requests.filter((r) => !r.paid).map((req) => (
-              <PaymentQr
-                key={req.memberId}
-                memberName={req.name}
-                amount={req.amount}
-                bin={settlement.bank.bin}
-                bankShortName={settlement.bank.shortName}
-                accountNo={settlement.accountNo}
-                accountName={settlement.accountName}
-                groupTitle={group.title}
+          settlement.mode === 'even' ? (
+            // Chia đều: mọi người trả đúng 1 số tiền như nhau -> chỉ cần 1 mã QR chung,
+            // không cần tạo riêng cho từng thành viên.
+            <div className="groupcart-settle-qrs-v63">
+              <PaymentQrMock
+                label={`Cả nhóm "${group.title}"`}
+                amount={settlement.requests.find((r) => !r.paid)?.amount || 0}
+                currency={currency}
+                shared
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            // Tự nhập: mỗi người một số tiền khác nhau -> danh sách tên có thể bấm để mở,
+            // chỉ hiện mã QR của đúng người vừa bấm (tránh lẫn lộn nhiều mã cùng lúc).
+            <div className="groupcart-manual-qr-list-v63">
+              {settlement.requests.filter((r) => !r.paid).map((req) => {
+                const isQrOpen = qrOpenMember[group.id] === req.memberId;
+                return (
+                  <div key={req.memberId} className="groupcart-manual-qr-item-v63">
+                    <button
+                      type="button"
+                      className={isQrOpen ? 'groupcart-manual-qr-name-btn-v63 open' : 'groupcart-manual-qr-name-btn-v63'}
+                      onClick={() => toggleQrMember(group.id, req.memberId)}
+                    >
+                      <QrCode size={14} />
+                      <span>{req.name} — {formatCurrency(req.amount, currency)}</span>
+                      <span className="groupcart-manual-qr-hint-v63">{isQrOpen ? 'Ẩn mã QR' : 'Xem mã QR'}</span>
+                    </button>
+                    {isQrOpen && (
+                      <PaymentQrMock label={req.name} amount={req.amount} currency={currency} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )
         )}
       </div>
     );
