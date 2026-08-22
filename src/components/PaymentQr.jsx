@@ -33,6 +33,10 @@ function PaymentQr({ label, memberName, amount, bin, bankShortName, accountNo, a
       <div className="payment-qr-badge-v64">{bankShortName}</div>
       <a href={qrUrl} target="_blank" rel="noreferrer" className="payment-qr-image-wrap-v64">
         <img src={qrUrl} alt={`Mã QR chuyển khoản cho ${displayLabel}`} loading="lazy" />
+        {/* v66 — nhãn tên ngay dưới logo VietQR, phía trên ô mã QR, để khi ảnh này
+            được gửi/chụp lại vào nhóm chat, mọi người nhận ra ngay đây là mã của ai
+            mà không cần xem phần chữ bên dưới ảnh. */}
+        <span className="payment-qr-name-tag-top-v66">{displayLabel}</span>
         <span className="payment-qr-name-tag-v64">{displayLabel}</span>
       </a>
       <div className="payment-qr-info-v64">
