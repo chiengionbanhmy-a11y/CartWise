@@ -11775,9 +11775,9 @@ option {
 }
 
 /* =======================================================
-   v63 — Báo cáo cải tiến Vòng 4: 6 tính năng mới
-   (Cawi Tín Hiệu Mua, Giỏ Hàng Tối Ưu, Cawi Cố Vấn Chi Tiêu,
-   Bộ đếm tiết kiệm, Cawi Đánh Giá Tổng Hợp, Nhóm Góp Tiền)
+   v63/v64 — Báo cáo cải tiến Vòng 4: tính năng mới
+   (Cawi Tín Hiệu Mua, Cawi Cố Vấn Chi Tiêu, Bộ đếm tiết kiệm,
+   Cawi Đánh Giá Tổng Hợp, Ghép Đơn Cùng Bạn Bè)
    ======================================================= */
 
 /* ---- Bộ đếm "Số tiền đã tiết kiệm" ---- */
@@ -11913,7 +11913,7 @@ option {
 .spending-advisor-result-v63 p { margin: 0; font-weight: 650; color: #334155; }
 .spending-advisor-result-v63 small { color: var(--muted); line-height: 1.5; }
 
-/* ---- Nhóm Góp Tiền: chốt nhóm, chia tiền, QR mô phỏng ---- */
+/* ---- Ghép Đơn Cùng Bạn Bè: chốt nhóm, chia tiền, QR VietQR thật ---- */
 .groupcart-cap-locked-v63 { margin: 16px 0 20px; }
 .groupcart-settle-v63 { margin-top: 6px; border-top: 1px dashed var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .groupcart-settle-toggle-v63 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -11924,6 +11924,10 @@ option {
   flex: 1; min-width: 140px; border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 10px; font-weight: 750;
 }
 .groupcart-settle-mode-buttons-v63 button:hover { background: #f8fafc; }
+.groupcart-settle-mode-buttons-v63 button:disabled { opacity: .5; cursor: not-allowed; }
+.groupcart-settle-mode-buttons-v63 button:disabled:hover { background: #fff; }
+.groupcart-settle-hint-v64 { color: var(--muted); font-size: 12px; }
+.groupcart-settle-legacy-note-v64 { margin: 0; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.5; }
 .groupcart-settle-dashboard-head-v63 { display: flex; align-items: center; gap: 8px; font-weight: 800; }
 .groupcart-settle-dashboard-head-v63 span { margin-left: auto; color: var(--muted); font-size: 12.5px; font-weight: 700; }
 .groupcart-settle-list-v63 { display: flex; flex-direction: column; gap: 6px; }
@@ -11937,35 +11941,43 @@ option {
 .groupcart-settle-row-v63.paid .groupcart-settle-tag-v63 { color: #15803d; }
 .groupcart-settle-qrs-v63 { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 
-.payment-qr-mock-v63 {
+.groupcart-settle-bank-form-v64 {
+  display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; background: #f8fafc; border: 1px solid var(--line);
+}
+.groupcart-settle-bank-form-v64 p { margin: 0; color: var(--muted); font-weight: 650; font-size: 13px; }
+.groupcart-settle-bank-row-v64 { display: flex; gap: 10px; flex-wrap: wrap; }
+.groupcart-settle-bank-form-v64 label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 700; color: #334155; flex: 1; min-width: 160px; }
+.groupcart-settle-bank-form-v64 input {
+  font-weight: 500; font-size: 14px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.groupcart-settle-bank-form-v64 input:focus { outline: none; border-color: #172033; }
+
+.payment-qr-v64 {
   width: 220px; padding: 14px; border-radius: 20px; background: #fff; border: 1px solid var(--line);
   box-shadow: 0 12px 30px rgba(15,23,42,.08); display: flex; flex-direction: column; gap: 8px; position: relative;
 }
-.payment-qr-badge-v63 {
-  position: absolute; top: -10px; right: 10px; background: #b91c1c; color: #fff; font-size: 10.5px; font-weight: 800;
+.payment-qr-badge-v64 {
+  position: absolute; top: -10px; right: 10px; background: #172033; color: #fff; font-size: 10.5px; font-weight: 800;
   padding: 3px 9px; border-radius: 999px; letter-spacing: .02em;
 }
-.payment-qr-grid-wrap-v63 { position: relative; width: 100%; }
-.payment-qr-grid-v63 {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; width: 100%; aspect-ratio: 1; background: #fff; padding: 6px; border: 1px solid var(--line); border-radius: 10px;
-}
-.payment-qr-grid-v63 span { background: transparent; border-radius: 1px; }
-.payment-qr-grid-v63 span.on { background: #172033; }
+.payment-qr-image-wrap-v64 { position: relative; display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.payment-qr-image-wrap-v64 img { display: block; width: 100%; height: auto; }
 /* v64 — ghi chú tên ngay trên ảnh QR (không chỉ ở phần chữ bên dưới) để phân biệt rõ mã
    nào của ai khi nhiều mã QR hiển thị gần nhau lúc thanh toán trong nhóm. */
-.payment-qr-name-tag-v63 {
+.payment-qr-name-tag-v64 {
   position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
   max-width: calc(100% - 16px); padding: 4px 10px; border-radius: 999px;
   background: rgba(2,6,23,.86); color: #fff; font-size: 11px; font-weight: 800;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 4px 12px rgba(2,6,23,.25);
 }
-.payment-qr-info-v63 { display: flex; flex-direction: column; gap: 2px; }
-.payment-qr-info-v63 span { color: #334155; font-weight: 650; font-size: 12.5px; }
-.payment-qr-info-v63 small { color: var(--muted); }
-.payment-qr-disclaimer-v63 { display: flex; align-items: flex-start; gap: 5px; color: #b45309; font-size: 10.5px; line-height: 1.4; }
-.payment-qr-disclaimer-v63 svg { flex: 0 0 auto; margin-top: 1px; }
+.payment-qr-info-v64 { display: flex; flex-direction: column; gap: 2px; }
+.payment-qr-info-v64 span { color: #334155; font-weight: 650; font-size: 12.5px; }
+.payment-qr-info-v64 small { color: var(--muted); }
+.payment-qr-disclaimer-v64 { display: flex; align-items: flex-start; gap: 5px; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+.payment-qr-disclaimer-v64 svg { flex: 0 0 auto; margin-top: 1px; }
 
-/* ---- Nhóm Góp Tiền "tự nhập": danh sách tên thu gọn, bấm để mở mã QR riêng ---- */
+/* ---- Ghép Đơn Cùng Bạn Bè "tự nhập" (hoặc chia đều bị lệch làm tròn): danh sách tên
+   thu gọn, bấm để mở mã QR riêng ---- */
 .groupcart-manual-qr-list-v63 { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .groupcart-manual-qr-item-v63 { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .groupcart-manual-qr-name-btn-v63 {

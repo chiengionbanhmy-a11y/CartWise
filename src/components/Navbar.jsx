@@ -14,7 +14,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
     ['home', t.home],
     ['flash', t.flash],
     ['stores', t.stores],
-    ['group-cart', 'Nhóm Góp Tiền'],
+    ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['about', t.about]
   ];
 
