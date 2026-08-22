@@ -11976,3 +11976,62 @@ option {
 .groupcart-manual-qr-name-btn-v63 span:first-of-type { flex: 1; text-align: left; }
 .groupcart-manual-qr-hint-v63 { color: var(--primary-dark); font-size: 12px; font-weight: 800; }
 .groupcart-manual-qr-name-btn-v63.open { border-color: rgba(251,146,60,.4); background: rgba(255,247,237,.7); }
+
+/* ---- v65 — Ghép Đơn Cùng Bạn Bè: form ngân hàng + QR VietQR thật ---- */
+.groupcart-settle-bank-form-v64 {
+  display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; background: #f8fafc; border: 1px solid var(--line);
+}
+.groupcart-settle-bank-form-v64 p { margin: 0; color: var(--muted); font-weight: 650; font-size: 13px; }
+.groupcart-settle-bank-row-v64 { display: flex; gap: 10px; flex-wrap: wrap; }
+.groupcart-settle-bank-form-v64 label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 700; color: #334155; flex: 1; min-width: 160px; }
+.groupcart-settle-bank-form-v64 input {
+  font-weight: 500; font-size: 14px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+}
+.groupcart-settle-bank-form-v64 input:focus { outline: none; border-color: #172033; }
+.groupcart-settle-hint-v64 { color: var(--muted); font-size: 12px; }
+.groupcart-settle-legacy-note-v64 { margin: 0; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.5; }
+
+.payment-qr-v64 {
+  width: 230px; padding: 14px; border-radius: 20px; background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(15,23,42,.08); display: flex; flex-direction: column; gap: 8px;
+}
+/* Dải tên gắn liền phía trên khung ảnh — không đè lên chính mã QR để không ảnh
+   hưởng khả năng quét, nhưng vẫn "dính liền" trực quan với đúng mã QR bên dưới
+   để không thể nhầm mã nào của ai khi nhiều mã QR đứng cạnh nhau. */
+.payment-qr-name-ribbon-v65 {
+  align-self: flex-start; max-width: 100%; padding: 5px 12px; border-radius: 999px 999px 4px 4px;
+  background: #172033; color: #fff; font-size: 12.5px; font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.payment-qr-badge-v64 {
+  align-self: flex-start; background: #f1f5f9; color: #334155; font-size: 10.5px; font-weight: 800;
+  padding: 3px 9px; border-radius: 999px; letter-spacing: .02em;
+}
+.payment-qr-image-wrap-v64 { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.payment-qr-image-wrap-v64 img { display: block; width: 100%; height: auto; }
+.payment-qr-info-v64 { display: flex; flex-direction: column; gap: 2px; }
+.payment-qr-info-v64 b { font-size: 12.5px; color: #334155; }
+.payment-qr-info-v64 span { color: var(--primary-dark); font-weight: 800; font-size: 15px; }
+.payment-qr-info-v64 small { color: var(--muted); }
+.payment-qr-disclaimer-v64 { display: flex; align-items: flex-start; gap: 5px; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+.payment-qr-disclaimer-v64 svg { flex: 0 0 auto; margin-top: 1px; }
+
+/* Chia đều: 1 mã QR chung cho cả nhóm */
+.even-mode-v65 { flex-direction: column; align-items: flex-start; }
+.groupcart-settle-shared-note-v65 { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.55; max-width: 320px; }
+.groupcart-settle-shared-note-v65 b { color: var(--primary-dark); }
+
+/* ---- v65 — Thông báo khi ảnh QR không tải được (thay icon vỡ ảnh) ---- */
+.payment-qr-error-v65 {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  padding: 18px 12px; border-radius: 12px; background: rgba(254,242,242,.7); border: 1px dashed rgba(239,68,68,.35);
+  color: #b91c1c;
+}
+.payment-qr-error-v65 svg:first-child { color: #ef4444; }
+.payment-qr-error-v65 > span { font-size: 12px; font-weight: 650; line-height: 1.5; }
+.payment-qr-error-actions-v65 { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.payment-qr-error-actions-v65 button,
+.payment-qr-error-actions-v65 a {
+  display: inline-flex; align-items: center; gap: 5px; border: 1px solid rgba(239,68,68,.35); background: #fff;
+  color: #b91c1c; border-radius: 999px; padding: 6px 11px; font-size: 11.5px; font-weight: 800;
+}
