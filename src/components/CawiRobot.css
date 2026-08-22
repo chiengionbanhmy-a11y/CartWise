@@ -1,0 +1,603 @@
+.cw22-widget {
+  --cw22-look-x: 0px;
+  --cw22-look-y: 0px;
+  --cw22-head-x: 0px;
+  --cw22-head-y: 0px;
+  --cw22-head-tilt: 0deg;
+  position: fixed;
+  z-index: 2600;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.cw22-floating {
+  transition: top .55s ease, right .55s ease;
+}
+
+.cw22-inline {
+  position: relative;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  width: 100%;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* v60: .cw22-modal (ProductModal) không khoá cứng top/right/left/bottom bằng !important như
+   .cw22-inline nữa — để khi người dùng kéo thả, style inline left/top do CawiRobot.jsx set
+   (trong hàm widgetStyle) có thể thắng bình thường thay vì luôn bị ép về vị trí mặc định. */
+.cw22-modal {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.cw22-bubble {
+  position: relative;
+  width: 255px;
+  max-width: min(255px, calc(100vw - 110px));
+  margin: 0 2px 10px 0;
+  padding: 14px 40px 14px 16px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(210, 222, 240, .88);
+  box-shadow: 0 18px 36px rgba(15,23,42,.14);
+  color: #5d6f8d;
+  backdrop-filter: blur(12px);
+}
+
+.cw22-inline .cw22-bubble,
+.cw22-modal .cw22-bubble {
+  margin-right: 0;
+}
+
+.cw22-bubble::after {
+  content: '';
+  position: absolute;
+  right: 28px;
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg);
+  background: inherit;
+  border-right: 1px solid rgba(210, 222, 240, .88);
+  border-bottom: 1px solid rgba(210, 222, 240, .88);
+}
+
+.cw22-bubble p {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.45;
+  font-size: 15px;
+}
+
+.cw22-bubble button {
+  position: absolute;
+  right: 9px;
+  top: 8px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 20px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+.cw22-avatar {
+  position: relative;
+  width: 108px;
+  height: 130px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  filter: drop-shadow(0 14px 24px rgba(15, 23, 42, .16));
+  animation: cw22Float 3.4s ease-in-out infinite;
+}
+
+.cw22-inline .cw22-avatar {
+  width: 126px;
+  height: 152px;
+}
+
+.cw22-modal .cw22-avatar {
+  width: 106px;
+  height: 128px;
+}
+
+.cw22-widget.moving .cw22-avatar {
+  animation: cw22Walk 1.05s ease-in-out infinite;
+}
+
+.cw22-widget.hovered .cw22-avatar {
+  animation: cw22Shake .42s ease-in-out 1;
+}
+
+.cw22-robot-dragging .cw22-avatar,
+.cw22-avatar:active {
+  cursor: grabbing;
+}
+
+.cw22-pink-glow {
+  position: absolute;
+  inset: 18px 0 2px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--cw22-glow) 0%, rgba(255,111,178,.18) 34%, transparent 68%);
+  filter: blur(7px);
+  opacity: 0;
+  transform: scale(.84);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.cw22-widget.hovered .cw22-pink-glow {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.cw22-fx {
+  position: absolute;
+  z-index: 7;
+  opacity: 0;
+  pointer-events: none;
+  color: #ff5fa5;
+  text-shadow: 0 0 12px rgba(255, 92, 160, .55);
+  font-size: 20px;
+}
+
+.cw22-fx.fx1 { left: 3px; top: 8px; }
+.cw22-fx.fx2 { right: 4px; top: 2px; color: #ff477e; }
+.cw22-fx.fx3 { left: 18px; bottom: 18px; }
+.cw22-fx.fx4 { right: 18px; bottom: 34px; color: #ff79b7; }
+.cw22-widget.hovered .cw22-fx { animation: cw22Spark .95s ease-out forwards; }
+.cw22-widget.hovered .fx2 { animation-delay: .08s; }
+.cw22-widget.hovered .fx3 { animation-delay: .15s; }
+.cw22-widget.hovered .fx4 { animation-delay: .22s; }
+
+.cw22-robot { position: absolute; inset: 0; }
+.cw22-head-wrap {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 82px;
+  height: 74px;
+  margin-left: -41px;
+  transform: translate(var(--cw22-head-x), var(--cw22-head-y)) rotate(var(--cw22-head-tilt));
+  transform-origin: 50% 70%;
+  transition: transform .04s linear;
+  z-index: 4;
+}
+.cw22-antenna-stick { position: absolute; left: 50%; top: 0; width: 5px; height: 12px; margin-left: -2.5px; border-radius: 999px; background: #1f2937; z-index: 5; }
+.cw22-antenna-ball { position: absolute; left: 50%; top: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9ed5ff 0%, var(--cw22-ear) 50%, var(--cw22-ear-dark) 100%); box-shadow: 0 3px 8px rgba(30, 126, 234, .26); z-index: 6; }
+.cw22-head { position: absolute; left: 0; right: 0; top: 16px; height: 66px; border-radius: 50%; background: radial-gradient(circle at 32% 21%, #fff 0 13%, transparent 14%), linear-gradient(180deg, var(--cw22-shell), #fff 58%, var(--cw22-edge)); border: 2px solid color-mix(in srgb, var(--cw22-edge) 76%, #8fa8d1); box-shadow: inset 0 -7px 16px rgba(37,139,255,.08), 0 8px 18px rgba(15,23,42,.10); }
+.cw22-ear { position: absolute; top: 26px; width: 14px; height: 30px; border-radius: 999px; background: linear-gradient(180deg, var(--cw22-ear), var(--cw22-ear-dark)); box-shadow: inset 0 -2px 4px rgba(0,0,0,.14); }
+.cw22-ear.left { left: -8px; }
+.cw22-ear.right { right: -8px; }
+.cw22-face { position: absolute; left: 12px; right: 12px; top: 20px; height: 38px; border-radius: 22px; background: radial-gradient(circle at 32% 22%, rgba(255,255,255,.16), transparent 24%), linear-gradient(180deg, #20283a, var(--cw22-face)); overflow: hidden; }
+.cw22-brow { position: absolute; top: 8px; width: 14px; height: 5px; border-radius: 999px; background: var(--cw22-cart); opacity: .94; }
+.cw22-brow.left { left: 11px; transform: rotate(-8deg); }
+.cw22-brow.right { right: 11px; transform: rotate(8deg); }
+.cw22-eye { position: absolute; top: 15px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: inset 0 -1px 3px rgba(0,0,0,.14); }
+.cw22-eye.left { left: 8px; }
+.cw22-eye.right { right: 8px; }
+.cw22-pupil { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: #0b1220; transform: translate(calc(var(--cw22-look-x) * .55), calc(var(--cw22-look-y) * .5)); transition: transform .05s linear; }
+.cw22-pupil::after { content: ''; position: absolute; width: 2.4px; height: 2.4px; left: 1px; top: 1px; border-radius: 50%; background: #fff; }
+.cw22-cheek { position: absolute; bottom: 8px; width: 12px; height: 8px; border-radius: 50%; background: radial-gradient(circle, var(--cw22-blush), rgba(255,255,255,0) 72%); }
+.cw22-cheek.left { left: 6px; }
+.cw22-cheek.right { right: 6px; }
+.cw22-mouth { position: absolute; left: 50%; bottom: 5px; width: 20px; height: 9px; margin-left: -10px; border-bottom: 4px solid #ff6fa8; border-radius: 0 0 18px 18px; box-shadow: 0 0 8px rgba(255,111,168,.15); }
+.cw22-sleep-line { position: absolute; top: 23px; width: 16px; height: 3px; border-radius: 999px; background: #fff; opacity: 0; }
+.cw22-sleep-line.left { left: 10px; transform: rotate(9deg); }
+.cw22-sleep-line.right { right: 10px; transform: rotate(-9deg); }
+.cw22-widget.sleeping .cw22-eye, .cw22-widget.sleeping .cw22-brow, .cw22-widget.sleeping .cw22-mouth { opacity: 0; }
+.cw22-widget.sleeping .cw22-sleep-line, .cw22-widget.sleeping .cw22-sleep-text { opacity: 1; }
+
+.cw22-cart { position: absolute; left: 50%; top: 66px; width: 88px; height: 64px; margin-left: -44px; z-index: 2; }
+.cw22-cart-handle { position: absolute; left: -4px; top: 17px; width: 20px; height: 13px; border-left: 4px solid var(--cw22-ear-dark); border-top: 4px solid var(--cw22-ear-dark); border-radius: 12px 0 0 0; }
+.cw22-cart-rim { position: absolute; left: 8px; right: 6px; top: 0; height: 14px; border-radius: 999px; background: linear-gradient(180deg, color-mix(in srgb, var(--cw22-ear) 84%, #fff), var(--cw22-ear-dark)); box-shadow: inset 0 -2px 4px rgba(0,0,0,.12); z-index: 3; }
+.cw22-basket { position: absolute; left: 12px; right: 8px; top: 10px; bottom: 12px; border-radius: 0 0 15px 15px; background: linear-gradient(180deg, var(--cw22-cart), var(--cw22-cart-dark)); border: 2px solid rgba(0,0,0,.05); overflow: hidden; clip-path: polygon(5% 0, 98% 0, 88% 100%, 14% 100%); }
+.cw22-basket .v, .cw22-basket .h { position: absolute; display: block; background: var(--cw22-line); border-radius: 999px; }
+.cw22-basket .v { top: 8px; bottom: 7px; width: 2px; }
+.cw22-basket .v.one { left: 24px; }
+.cw22-basket .v.two { right: 24px; }
+.cw22-basket .h { left: 10px; right: 10px; height: 2px; }
+.cw22-basket .h.one { top: 18px; }
+.cw22-basket .h.two { bottom: 12px; }
+.cw22-bumper { position: absolute; left: 32px; right: 32px; bottom: 9px; height: 8px; border-radius: 999px; background: var(--cw22-accent); z-index: 4; }
+.cw22-wheel { position: absolute; bottom: 0; width: 18px; height: 18px; border-radius: 50%; background: #1f2937; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.cw22-wheel.left { left: 14px; }
+.cw22-wheel.right { right: 12px; }
+.cw22-wheel i { position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9ddaff, var(--cw22-ear) 54%, var(--cw22-ear-dark)); }
+.cw22-sleep-text { position: absolute; right: -4px; top: 8px; font-size: 16px; color: #8da0bb; font-weight: 900; opacity: 0; }
+
+.cw22-mini-avatar { width: 58px; height: 62px; border-radius: 18px; flex: 0 0 58px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(180deg, #f8fbff, #eef5ff); border: 1px solid rgba(218,230,244,.86); }
+.cw22-robot.mini { transform: scale(.48); transform-origin: top left; width: 108px; height: 130px; position: relative; }
+
+.cw22-chat {
+  position: fixed;
+  right: 24px;
+  bottom: 26px;
+  width: min(540px, calc(100vw - 36px));
+  min-width: 340px;
+  height: min(620px, calc(100vh - 64px));
+  min-height: 420px;
+  max-width: calc(100vw - 12px);
+  max-height: calc(100vh - 12px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px;
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(208,218,235,.95);
+  box-shadow: 0 28px 70px rgba(15,23,42,.18);
+  backdrop-filter: blur(14px);
+  z-index: 2800;
+}
+
+.cw22-chat[style*="left"] {
+  right: auto !important;
+  bottom: auto !important;
+}
+
+.cw22-chat header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(245,248,255,.98), rgba(237,244,255,.94));
+  cursor: grab;
+  border-bottom: 1px solid rgba(223,232,245,.9);
+  flex: 0 0 auto;
+  user-select: none;
+}
+
+.cw22-chat header:active {
+  cursor: grabbing;
+}
+
+.cw22-chat header button {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.cw22-chat-ident { display: flex; align-items: center; gap: 14px; }
+.cw22-chat-ident-text strong { display: block; font-size: 20px; color: #16233e; }
+.cw22-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 7px 13px; border-radius: 999px; background: #22c55e; color: #fff; font-weight: 800; }
+.cw22-status i { width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,.18); }
+.cw22-messages { flex: 1 1 auto; min-height: 120px; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(180deg, rgba(252,253,255,.92), rgba(246,249,255,.98)); }
+.cw22-msg { max-width: 84%; padding: 14px 16px; border-radius: 20px; font-size: 16px; line-height: 1.55; }
+.cw22-msg.bot { align-self: flex-start; background: #edf2f9; color: #223147; }
+.cw22-msg.user { align-self: flex-end; background: linear-gradient(135deg, #ff9654, #f4c542); color: #142034; font-weight: 800; }
+.cw22-quick { padding: 0 18px 14px; display: flex; gap: 10px; flex-wrap: wrap; max-height: 132px; overflow-y: auto; flex: 0 0 auto; }
+.cw22-quick button { border-radius: 999px; border: 1px solid #d4dfef; background: #fff; color: #1d2a45; font-weight: 800; padding: 10px 14px; cursor: pointer; }
+.cw22-input { display: flex; align-items: center; gap: 10px; padding: 12px 18px 16px; background: #fff; flex: 0 0 auto; }
+.cw22-input input { flex: 1; min-width: 0; border: none; outline: none; border-radius: 999px; background: #1f2b3f; color: #fff; padding: 16px 22px; font-size: 16px; font-family: inherit; }
+.cw22-input input::placeholder { color: rgba(255,255,255,.75); }
+.cw22-input button { border: none; cursor: pointer; }
+.cw22-mic { width: 46px; height: 46px; border-radius: 50%; background: #223149; color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+.cw22-send { width: 52px; height: 52px; border-radius: 50%; background: #fff; color: #1f2937; display: grid; place-items: center; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(211,219,232,.95), 0 10px 18px rgba(15,23,42,.12); }
+.cw22-send svg { width: 22px; height: 22px; margin: 0; display: block; }
+.cw22-mic svg { width: 21px; height: 21px; }
+
+.cw22-resize-handle {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  z-index: 20;
+  opacity: .92;
+}
+
+.cw22-resize-handle::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(100, 116, 139, .78);
+  border-style: solid;
+  transition: border-color .16s ease, transform .16s ease;
+}
+
+.cw22-resize-handle:hover::after {
+  border-color: rgba(251, 146, 60, .95);
+  transform: scale(1.08);
+}
+
+.cw22-resize-handle.top-left { left: 0; top: 0; cursor: nwse-resize; }
+.cw22-resize-handle.top-left::after { left: 10px; top: 10px; border-width: 2px 0 0 2px; }
+.cw22-resize-handle.top-right { right: 0; top: 0; cursor: nesw-resize; }
+.cw22-resize-handle.top-right::after { right: 10px; top: 10px; border-width: 2px 2px 0 0; }
+.cw22-resize-handle.bottom-left { left: 0; bottom: 0; cursor: nesw-resize; }
+.cw22-resize-handle.bottom-left::after { left: 10px; bottom: 10px; border-width: 0 0 2px 2px; }
+.cw22-resize-handle.bottom-right { right: 0; bottom: 0; cursor: nwse-resize; }
+.cw22-resize-handle.bottom-right::after { right: 10px; bottom: 10px; border-width: 0 2px 2px 0; }
+
+.cw22-dragging,
+.cw22-dragging *,
+.cw22-resizing,
+.cw22-resizing *,
+.cw22-robot-dragging,
+.cw22-robot-dragging * {
+  user-select: none !important;
+}
+
+.cw22-resizing .cw22-chat {
+  box-shadow: 0 32px 82px rgba(15,23,42,.24), 0 0 0 2px rgba(34,197,94,.20) !important;
+}
+
+@keyframes cw22Float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes cw22Walk { 0%,100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(3px) translateX(6px); } }
+@keyframes cw22Shake { 0%,100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-2deg) scale(1.02); } 50% { transform: rotate(2deg) scale(1.03); } 75% { transform: rotate(-1deg) scale(1.02); } }
+@keyframes cw22Spark { 0% { opacity: 0; transform: translateY(8px) scale(.55); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-28px) scale(1.2); } }
+
+@media (max-width: 900px) {
+  .cw22-chat {
+    right: 12px;
+    bottom: 14px;
+    width: min(92vw, 490px);
+    height: min(580px, calc(100vh - 32px));
+  }
+  .cw22-avatar { width: 100px; height: 122px; }
+  .cw22-bubble { max-width: 214px; }
+}
+
+@media (max-width: 640px) {
+  .cw22-avatar { width: 94px; height: 116px; }
+  .cw22-chat {
+    width: calc(100vw - 16px);
+    min-width: 0;
+    right: 8px;
+    bottom: 8px;
+    border-radius: 22px;
+  }
+  .cw22-msg { font-size: 15px; }
+  .cw22-input { padding: 12px; }
+}
+
+
+
+
+
+/* =======================================================
+   v38 — normal Cawi Robo header
+   ======================================================= */
+.cw22-chat-ident-text strong::after {
+  content: none !important;
+}
+
+.cw22-msg.bot {
+  white-space: pre-wrap;
+}
+
+
+/* =======================================================
+   v43 — more premium Cawi Robo appearance
+   ======================================================= */
+.cw22-avatar {
+  filter: drop-shadow(0 18px 28px rgba(15, 23, 42, .18)) drop-shadow(0 0 18px rgba(199,154,61,.14));
+}
+
+.cw22-head {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.96) 0 12%, transparent 13%),
+    linear-gradient(145deg, #ffffff 0%, var(--cw22-shell) 42%, var(--cw22-edge) 100%) !important;
+  border: 2px solid color-mix(in srgb, var(--cw22-edge) 82%, #9a6a23) !important;
+  box-shadow:
+    inset 0 -8px 14px rgba(122,84,28,.08),
+    0 10px 24px rgba(15,23,42,.14),
+    0 0 0 5px rgba(255,255,255,.36) !important;
+}
+
+.cw22-face {
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,.14), transparent 24%),
+    linear-gradient(180deg, #243044 0%, var(--cw22-face) 86%) !important;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 0 12px rgba(255,255,255,.05);
+}
+
+.cw22-brow {
+  background: linear-gradient(90deg, #ffd37a, var(--cw22-cart)) !important;
+}
+
+.cw22-mouth {
+  border-bottom-color: #34d399 !important;
+  box-shadow: 0 0 12px rgba(52,211,153,.28) !important;
+}
+
+.cw22-ear,
+.cw22-cart-rim {
+  background: linear-gradient(180deg, #f9d675, var(--cw22-ear-dark)) !important;
+}
+
+.cw22-basket {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.14), transparent 28%),
+    linear-gradient(180deg, var(--cw22-cart), var(--cw22-cart-dark)) !important;
+  border: 1px solid rgba(255,255,255,.28) !important;
+  box-shadow: inset 0 0 16px rgba(255,255,255,.10);
+}
+
+.cw22-wheel {
+  background: #172033 !important;
+}
+
+.cw22-wheel i {
+  background: radial-gradient(circle at 35% 35%, #fff1b8, #d8a33a 54%, #6f4c18) !important;
+}
+
+
+/* =======================================================
+   v59 — cute & friendly Cawi Robo appearance (visual only)
+   Chỉ đổi ngoại hình (màu sắc, tỉ lệ, hình khối); mọi hành vi,
+   hiệu ứng, tương tác (kéo thả, chat, đổi theme, ngủ...) giữ nguyên.
+   ======================================================= */
+.cw22-avatar {
+  filter: drop-shadow(0 14px 22px rgba(15, 23, 42, .14)) drop-shadow(0 0 14px rgba(255, 182, 193, .22));
+}
+
+.cw22-head {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.98) 0 17%, transparent 18%),
+    linear-gradient(160deg, #ffffff 0%, var(--cw22-shell) 55%, var(--cw22-edge) 100%) !important;
+  border: 3px solid color-mix(in srgb, var(--cw22-edge) 65%, #ffffff) !important;
+  box-shadow:
+    inset 0 -6px 12px rgba(255,255,255,.55),
+    0 10px 20px rgba(15,23,42,.12),
+    0 0 0 5px rgba(255,255,255,.55) !important;
+}
+
+.cw22-ear {
+  top: 27px;
+  width: 13px;
+  height: 27px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff, var(--cw22-ear)) !important;
+  box-shadow: inset 0 -3px 5px rgba(0,0,0,.08), 0 3px 6px rgba(15,23,42,.08);
+}
+.cw22-ear.left { left: -7px; }
+.cw22-ear.right { right: -7px; }
+
+.cw22-antenna-ball {
+  background: radial-gradient(circle at 35% 32%, #ffffff 0 22%, #ffd9e6 45%, var(--cw22-ear) 78%, var(--cw22-ear-dark) 100%);
+}
+
+.cw22-face {
+  top: 18px;
+  height: 44px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 32% 20%, rgba(255,255,255,.9), transparent 34%),
+    linear-gradient(180deg, #fff9f2 0%, #ffe9d6 100%) !important;
+  border: 1.5px solid rgba(255,255,255,.75);
+  box-shadow: inset 0 1px 5px rgba(255,255,255,.7);
+}
+
+.cw22-brow {
+  top: 4px;
+  width: 11px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cw22-ear-dark) 55%, #7a5230) !important;
+  opacity: .5 !important;
+}
+.cw22-brow.left { transform: rotate(-4deg); }
+.cw22-brow.right { transform: rotate(4deg); }
+
+.cw22-eye {
+  top: 10px;
+  width: 14px;
+  height: 13px;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(15,23,42,.08);
+  box-shadow: inset 0 -2px 3px rgba(0,0,0,.08), 0 1px 2px rgba(255,255,255,.85);
+}
+.cw22-eye.left { left: 8px; }
+.cw22-eye.right { right: 8px; }
+
+.cw22-pupil {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: #2b2320;
+}
+
+.cw22-cheek {
+  width: 12px;
+  height: 8px;
+  bottom: 7px;
+  background: radial-gradient(circle, rgba(255,150,178,.9), rgba(255,255,255,0) 72%);
+}
+
+.cw22-mouth {
+  bottom: 9px;
+  width: 13px;
+  height: 6px;
+  border-bottom: 3px solid #ff8fb3 !important;
+  box-shadow: 0 0 8px rgba(255,143,179,.28) !important;
+}
+
+/* =======================================================
+   v61 — gương mặt hoạt hình, gần gũi hơn (chỉ đổi ngoại hình:
+   mắt to tròn hơn, lông mày cong mềm mại, miệng cười rõ hơn,
+   má hồng đậm hơn). Mọi hành vi/tương tác giữ nguyên như v59.
+   ======================================================= */
+.cw22-eye {
+  top: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(15,23,42,.05);
+  box-shadow: inset 0 -2px 3px rgba(0,0,0,.05), 0 1px 3px rgba(255,255,255,.9);
+}
+.cw22-eye.left { left: 5px; }
+.cw22-eye.right { right: 5px; }
+
+.cw22-pupil {
+  width: 9.5px;
+  height: 9.5px;
+  margin: -4.75px 0 0 -4.75px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #5a6a90 0%, #1c2333 58%, #0b0f18 100%);
+}
+
+.cw22-pupil::after {
+  content: '';
+  position: absolute;
+  width: 3.6px;
+  height: 3.6px;
+  left: 1.6px;
+  top: 1.4px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.cw22-brow {
+  top: 1px;
+  width: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cw22-ear-dark) 40%, #b8895a) !important;
+  opacity: .55 !important;
+}
+.cw22-brow.left { transform: rotate(-14deg); }
+.cw22-brow.right { transform: rotate(14deg); }
+
+.cw22-cheek {
+  width: 15px;
+  height: 10px;
+  bottom: 5px;
+  background: radial-gradient(circle, rgba(255,130,168,.92), rgba(255,255,255,0) 72%);
+}
+.cw22-cheek.left { left: 3px; }
+.cw22-cheek.right { right: 3px; }
+
+.cw22-mouth {
+  bottom: 7px;
+  width: 17px;
+  height: 9px;
+  margin-left: -8.5px;
+  border-bottom: 3.6px solid #ff7aa2 !important;
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 0 9px rgba(255,122,162,.32) !important;
+}
+
+.cw22-wheel i {
+  background: radial-gradient(circle at 35% 35%, #fff2c9, #f3c979 54%, #b3812f) !important;
+}
