@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Users, Truck, Copy, Check, PlusCircle, PartyPopper, X, Globe, Lock, UserCheck, Wallet, QrCode, CheckCircle2, Crown, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Users, Truck, Copy, Check, PlusCircle, PartyPopper, X, Globe, Lock, UserCheck, Wallet, QrCode, CheckCircle2, Crown } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { seedGroupCarts, computeGroupStats, freeshipThresholds, generateMockJoiner, generateGroupCode } from '../data/groupCarts.js';
 import { getPlan } from '../data/plans.js';
@@ -56,7 +56,6 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
   const [settleOpenId, setSettleOpenId] = useState(null);
   const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '' });
   const [banks, setBanks] = useState(FALLBACK_BANKS);
-  const [expandedManualQrId, setExpandedManualQrId] = useState(null); // v65 — chế độ tự nhập: chỉ hiện QR của người vừa bấm tên
 
   // Tải danh sách ngân hàng hỗ trợ VietQR (công khai, không cần API key).
   // Lỗi mạng thì fetchVietQrBanks tự rơi về FALLBACK_BANKS, không cần xử lý ở đây.
@@ -125,7 +124,6 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       accountName: settleBankDraft.accountName.trim(),
       createdAt: new Date().toISOString()
     });
-    setExpandedManualQrId(null);
   }
 
   function togglePaid(groupId, memberId) {
@@ -515,65 +513,20 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
         </div>
 
         {plan.groupFund.qr && settlement.requests.some((r) => !r.paid) && (
-          settlement.mode === 'even' ? (
-            // Chia đều: mọi người trả cùng 1 số tiền như nhau nên chỉ cần 1 mã QR
-            // chung cho cả nhóm — mỗi người tự quét và chuyển đúng phần của mình.
-            (() => {
-              const unpaid = settlement.requests.filter((r) => !r.paid);
-              const shareAmount = unpaid[0]?.amount ?? 0;
-              const sameAmountForAll = unpaid.every((r) => r.amount === shareAmount);
-              return (
-                <div className="groupcart-settle-qrs-v63 even-mode-v65">
-                  <PaymentQr
-                    memberName={`Chia đều · ${unpaid.length} người chưa trả`}
-                    amount={shareAmount}
-                    bin={settlement.bank.bin}
-                    bankShortName={settlement.bank.shortName}
-                    accountNo={settlement.accountNo}
-                    accountName={settlement.accountName}
-                    groupTitle={group.title}
-                  />
-                  <p className="groupcart-settle-shared-note-v65">
-                    Mỗi người quét chung mã này và tự chuyển <b>{formatCurrency(shareAmount, 'VND')}</b>.
-                    {!sameAmountForAll && ' Phần lẻ làm tròn (nếu có, thường dưới vài trăm đồng) do người chốt nhóm tự bù, không ảnh hưởng tổng thu.'}
-                  </p>
-                </div>
-              );
-            })()
-          ) : (
-            // Tự nhập: mỗi người 1 số tiền khác nhau nên vẫn cần QR riêng — nhưng
-            // thu gọn thành danh sách tên, bấm vào tên nào mới hiện QR của người đó,
-            // tránh hiện hàng loạt mã QR cùng lúc gây rối và dễ quét nhầm.
-            <div className="groupcart-manual-qr-list-v63">
-              {settlement.requests.filter((r) => !r.paid).map((req) => {
-                const isOpen = expandedManualQrId === req.memberId;
-                return (
-                  <div key={req.memberId} className="groupcart-manual-qr-item-v63">
-                    <button
-                      type="button"
-                      className={isOpen ? 'groupcart-manual-qr-name-btn-v63 open' : 'groupcart-manual-qr-name-btn-v63'}
-                      onClick={() => setExpandedManualQrId(isOpen ? null : req.memberId)}
-                    >
-                      <QrCode size={16} />
-                      <span>{req.name} — {formatCurrency(req.amount, 'VND')}</span>
-                      <ChevronDown size={16} className={isOpen ? 'rotated' : ''} />
-                    </button>
-                    {isOpen && (
-                      <PaymentQr
-                        memberName={req.name}
-                        amount={req.amount}
-                        bin={settlement.bank.bin}
-                        bankShortName={settlement.bank.shortName}
-                        accountNo={settlement.accountNo}
-                        accountName={settlement.accountName}
-                        groupTitle={group.title}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )
+          <div className="groupcart-settle-qrs-v63">
+            {settlement.requests.filter((r) => !r.paid).map((req) => (
+              <PaymentQr
+                key={req.memberId}
+                memberName={req.name}
+                amount={req.amount}
+                bin={settlement.bank.bin}
+                bankShortName={settlement.bank.shortName}
+                accountNo={settlement.accountNo}
+                accountName={settlement.accountName}
+                groupTitle={group.title}
+              />
+            ))}
+          </div>
         )}
       </div>
     );

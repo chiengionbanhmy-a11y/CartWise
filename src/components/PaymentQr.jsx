@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Info, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { buildVietQrUrl } from '../utils/vietqr.js';
 
@@ -16,9 +15,6 @@ import { buildVietQrUrl } from '../utils/vietqr.js';
 // thủ công sau khi nhận được tiền (đúng như đã nêu trong báo cáo cải tiến).
 
 function PaymentQr({ memberName, amount, bin, bankShortName, accountNo, accountName, groupTitle }) {
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-
   const qrUrl = buildVietQrUrl({
     bin,
     accountNo,
@@ -26,43 +22,16 @@ function PaymentQr({ memberName, amount, bin, bankShortName, accountNo, accountN
     amount,
     addInfo: `${groupTitle} ${memberName}`
   });
-  // Thêm tham số vô hại đổi theo attempt để ép trình duyệt tải lại thật (không
-  // dùng bản lỗi đã cache) khi người dùng bấm "Thử tải lại".
-  const qrUrlWithRetry = attempt === 0 ? qrUrl : `${qrUrl}&_retry=${attempt}`;
 
   return (
     <div className="payment-qr-v64">
-      <div className="payment-qr-name-ribbon-v65">{memberName}</div>
-
-      {failed ? (
-        <div className="payment-qr-error-v65">
-          <AlertTriangle size={18} />
-          <span>Không tải được ảnh QR — có thể do mạng nơi bạn đang dùng chặn ảnh từ VietQR.</span>
-          <div className="payment-qr-error-actions-v65">
-            <button type="button" onClick={() => { setFailed(false); setAttempt((n) => n + 1); }}>
-              <RefreshCw size={14} /> Thử lại
-            </button>
-            <a href={qrUrl} target="_blank" rel="noreferrer">
-              <ExternalLink size={14} /> Mở link ảnh trong tab mới
-            </a>
-          </div>
-        </div>
-      ) : (
-        <a href={qrUrl} target="_blank" rel="noreferrer" className="payment-qr-image-wrap-v64">
-          <img
-            key={attempt}
-            src={qrUrlWithRetry}
-            alt={`Mã QR chuyển khoản cho ${memberName}`}
-            loading="lazy"
-            onError={() => setFailed(true)}
-          />
-        </a>
-      )}
-
       <div className="payment-qr-badge-v64">{bankShortName}</div>
+      <a href={qrUrl} target="_blank" rel="noreferrer" className="payment-qr-image-wrap-v64">
+        <img src={qrUrl} alt={`Mã QR chuyển khoản cho ${memberName}`} loading="lazy" />
+      </a>
       <div className="payment-qr-info-v64">
         <b>Yêu cầu thanh toán</b>
-        <span>{formatCurrency(amount, 'VND')}</span>
+        <span>{memberName} → {formatCurrency(amount, 'VND')}</span>
         <small>Quét bằng app ngân hàng bất kỳ hỗ trợ VietQR</small>
       </div>
       <div className="payment-qr-disclaimer-v64">
