@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
 
-function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free' }) {
+function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
   const { page, t, user, profile, products } = appState;
   const [menuOpen, setMenuOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
@@ -91,6 +91,11 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       </nav>
 
       <div className="nav-actions nav-actions-v43">
+        <button type="button" className="cart-nav-btn-v67" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
+          <ShoppingCart size={20} />
+          {cartCount > 0 && <span>{cartCount}</span>}
+        </button>
+
         {user ? (
           <>
             <button className="profile-pill" onClick={() => { closePanels(); onOpenProfile(); }}><span>{profile.avatar}</span>{profile.name}</button>
@@ -166,6 +171,11 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenPurchaseHistory?.(); }}>
                 <ShoppingBag size={18} />
                 <span>Lịch sử mua hàng</span>
+              </button>
+
+              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
+                <ShoppingCart size={18} />
+                <span>Giỏ hàng so sánh{cartCount > 0 ? ` (${cartCount})` : ''}</span>
               </button>
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>

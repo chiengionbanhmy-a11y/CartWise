@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Users, Truck, Copy, Check, PlusCircle, PartyPopper, X, Globe, Lock, UserCheck, Wallet, QrCode, CheckCircle2, Crown } from 'lucide-react';
+import {
+  ArrowLeft, Users, Truck, Copy, Check, PlusCircle, PartyPopper, X, Globe, Lock, UserCheck, Wallet,
+  QrCode, CheckCircle2, Crown, Pencil, Eye, Minus, Plus, Trash2, RotateCcw, ShieldAlert
+} from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { seedGroupCarts, computeGroupStats, freeshipThresholds, generateMockJoiner, generateGroupCode } from '../data/groupCarts.js';
 import { getPlan } from '../data/plans.js';
@@ -9,6 +12,9 @@ import { fetchVietQrBanks, FALLBACK_BANKS } from '../utils/vietqr.js';
 const EXTRA_KEY = 'cartwise-group-extra-members';
 const CUSTOM_KEY = 'cartwise-group-custom';
 const SETTLEMENT_KEY = 'cartwise-group-settlements'; // v64 — Ghép Đơn Cùng Bạn Bè: chia tiền + trạng thái đã/chưa thanh toán
+const MEMBER_OVERRIDES_KEY = 'cartwise-group-member-overrides'; // v67 — nhóm đã qua chỉnh sửa (thêm/xoá/đổi số lượng sản phẩm)
+const SAVED_ACCOUNT_KEY = 'cartwise-saved-bank-account'; // v67 — tài khoản nhận tiền đã lưu để dùng lại lần sau
+const LASTNAME_KEY = 'cartwise-group-lastname';
 
 function loadExtraMembers() {
   return JSON.parse(localStorage.getItem(EXTRA_KEY) || '{}');
@@ -28,6 +34,32 @@ function loadSettlements() {
 function saveSettlements(map) {
   localStorage.setItem(SETTLEMENT_KEY, JSON.stringify(map));
 }
+function loadMemberOverrides() {
+  return JSON.parse(localStorage.getItem(MEMBER_OVERRIDES_KEY) || '{}');
+}
+function saveMemberOverrides(map) {
+  localStorage.setItem(MEMBER_OVERRIDES_KEY, JSON.stringify(map));
+}
+function loadSavedAccount() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_ACCOUNT_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+function saveSavedAccount(value) {
+  localStorage.setItem(SAVED_ACCOUNT_KEY, JSON.stringify(value));
+}
+function clearSavedAccount() {
+  localStorage.removeItem(SAVED_ACCOUNT_KEY);
+}
+function loadViewHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('cartwise-price-check-history') || '[]');
+  } catch {
+    return [];
+  }
+}
 
 function monthKey(date = new Date()) {
   return `${date.getFullYear()}-${date.getMonth() + 1}`;
@@ -43,22 +75,125 @@ function getVisibilityMeta(value) {
   return visibilityOptions.find((item) => item.value === value) || visibilityOptions[0];
 }
 
+// v67 — Ô chọn sản phẩm dạng tìm kiếm: gõ tên để lọc nhanh, hoặc để trống và bấm
+// vào ô để xem gợi ý "Đã xem gần đây" / "Gợi ý cho bạn" (dựa theo lịch sử xem sản
+// phẩm đã lưu sẵn của CartWise — cùng nguồn dữ liệu với "Lịch sử kiểm tra giá").
+function ProductPicker({ products, recentlyViewed, suggested, value, onChange, placeholder }) {
+  const [query, setQuery] = useState(value?.name || '');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setQuery(value?.name || '');
+  }, [value?.id]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    return products.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 8);
+  }, [products, query]);
+
+  function pick(product) {
+    onChange(product);
+    setQuery(product.name);
+    setOpen(false);
+  }
+
+  return (
+    <div className="groupcart-product-picker-v67">
+      <input
+        type="text"
+        value={query}
+        placeholder={placeholder}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+        onBlur={() => window.setTimeout(() => setOpen(false), 160)}
+      />
+      {open && (
+        <div className="groupcart-product-suggest-v67">
+          {filtered ? (
+            filtered.length ? filtered.map((p) => (
+              <button type="button" key={p.id} onMouseDown={() => pick(p)}>{p.name}</button>
+            )) : <span className="groupcart-product-suggest-empty-v67">Không tìm thấy sản phẩm phù hợp — thử từ khoá khác nhé.</span>
+          ) : (
+            <>
+              {recentlyViewed.length > 0 && (
+                <div className="groupcart-product-suggest-group-v67">
+                  <small>Đã xem gần đây</small>
+                  {recentlyViewed.map((p) => <button type="button" key={p.id} onMouseDown={() => pick(p)}>{p.name}</button>)}
+                </div>
+              )}
+              {suggested.length > 0 && (
+                <div className="groupcart-product-suggest-group-v67">
+                  <small>Gợi ý cho bạn</small>
+                  {suggested.map((p) => <button type="button" key={p.id} onMouseDown={() => pick(p)}>{p.name}</button>)}
+                </div>
+              )}
+              {!recentlyViewed.length && !suggested.length && (
+                <span className="groupcart-product-suggest-empty-v67">Gõ tên sản phẩm để tìm kiếm.</span>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
   const { products, currency, planId } = appState;
   const plan = getPlan(planId);
   const [extraMembers, setExtraMembers] = useState(loadExtraMembers);
   const [customGroups, setCustomGroups] = useState(loadCustomGroups);
+  const [memberOverrides, setMemberOverrides] = useState(loadMemberOverrides);
   const [joinBanner, setJoinBanner] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [form, setForm] = useState({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', yourName: '', visibility: 'public' });
+  const [form, setForm] = useState({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', quantity: 1, yourName: '', visibility: 'public' });
   const [settlements, setSettlements] = useState(loadSettlements);
   const [settleOpenId, setSettleOpenId] = useState(null);
-  const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '' });
+  const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '', remember: false });
   const [banks, setBanks] = useState(FALLBACK_BANKS);
+  const [hasSavedAccount, setHasSavedAccount] = useState(() => Boolean(loadSavedAccount()));
   // v64 — mỗi người 1 mã QR riêng, mặc định thu gọn (chỉ hiện tên), bấm vào mới hiện
   // mã QR của đúng người đó. Lưu theo groupId -> memberId đang mở.
   const [qrOpenMember, setQrOpenMember] = useState({});
+  // v67 — màn hình phóng to xem chi tiết / chỉnh sửa 1 nhóm (thay cho hiện mọi thứ
+  // ngay trên thẻ nhóm thu gọn). mode: 'view' (xem nhóm + chốt nhóm/QR) hoặc
+  // 'edit' (thêm/xoá/đổi số lượng sản phẩm, chủ nhóm mới được xoá thành viên).
+  const [detailView, setDetailView] = useState(null);
+  const [addProductForm, setAddProductForm] = useState({ name: '', productId: '', quantity: 1 });
+
+  const viewHistory = useMemo(loadViewHistory, []);
+  const recentlyViewedProducts = useMemo(() => {
+    const seen = new Set();
+    const list = [];
+    for (const entry of viewHistory) {
+      if (seen.has(entry.productId)) continue;
+      const product = products.find((p) => p.id === entry.productId);
+      if (!product) continue;
+      seen.add(entry.productId);
+      list.push(product);
+      if (list.length >= 5) break;
+    }
+    return list;
+  }, [viewHistory, products]);
+  const suggestedProducts = useMemo(() => {
+    const recentIds = new Set(recentlyViewedProducts.map((p) => p.id));
+    const categoryCounts = {};
+    viewHistory.forEach((entry) => { if (entry.category) categoryCounts[entry.category] = (categoryCounts[entry.category] || 0) + 1; });
+    const topCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]).map(([c]) => c);
+    if (!topCategories.length) return [];
+    const picks = [];
+    for (const cat of topCategories) {
+      for (const p of products) {
+        if (recentIds.has(p.id) || picks.some((x) => x.id === p.id)) continue;
+        if (p.category === cat) picks.push(p);
+        if (picks.length >= 5) break;
+      }
+      if (picks.length >= 5) break;
+    }
+    return picks;
+  }, [viewHistory, products, recentlyViewedProducts]);
 
   // Tải danh sách ngân hàng hỗ trợ VietQR (công khai, không cần API key).
   // Lỗi mạng thì fetchVietQrBanks tự rơi về FALLBACK_BANKS, không cần xử lý ở đây.
@@ -76,7 +211,12 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     const opening = settleOpenId !== group.id;
     setSettleOpenId(opening ? group.id : null);
     if (opening) {
-      setSettleBankDraft({ bankQuery: '', bank: null, accountNo: '', accountName: group.ownerName || '' });
+      const saved = loadSavedAccount();
+      if (saved?.bank) {
+        setSettleBankDraft({ bankQuery: saved.bankQuery || '', bank: saved.bank, accountNo: saved.accountNo || '', accountName: saved.accountName || group.ownerName || '', remember: true });
+      } else {
+        setSettleBankDraft({ bankQuery: '', bank: null, accountNo: '', accountName: group.ownerName || '', remember: false });
+      }
     }
   }
 
@@ -87,6 +227,11 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       saveSettlements(next);
       return next;
     });
+  }
+
+  function requestRedoSettlement(groupId) {
+    if (!window.confirm('Đổi lại cách chia tiền sẽ xoá trạng thái đã/chưa thanh toán hiện tại của nhóm và cần chốt nhóm lại từ đầu. Bạn có chắc chắn muốn đổi lại không?')) return;
+    resetSettlement(groupId);
   }
 
   const groupsCreatedThisMonth = useMemo(
@@ -103,8 +248,10 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     });
   }
 
+  const accountNoValid = /^\d{6,19}$/.test(settleBankDraft.accountNo);
+
   function canStartSettlement() {
-    return Boolean(settleBankDraft.bank && settleBankDraft.accountNo.length >= 6 && settleBankDraft.accountName.trim());
+    return Boolean(settleBankDraft.bank && accountNoValid && settleBankDraft.accountName.trim());
   }
 
   function startSettlement(group, mode) {
@@ -127,6 +274,10 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       accountName: settleBankDraft.accountName.trim(),
       createdAt: new Date().toISOString()
     });
+    if (settleBankDraft.remember && settleBankDraft.bank) {
+      saveSavedAccount({ bank: settleBankDraft.bank, bankQuery: settleBankDraft.bankQuery, accountNo: settleBankDraft.accountNo, accountName: settleBankDraft.accountName.trim() });
+      setHasSavedAccount(true);
+    }
   }
 
   function togglePaid(groupId, memberId) {
@@ -146,12 +297,16 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
 
   const allGroups = useMemo(() => {
     const base = [...seedGroupCarts, ...customGroups];
-    return base.map((group) => ({
-      ...group,
-      visibility: group.visibility || 'public',
-      members: [...group.members, ...(extraMembers[group.id] || [])]
-    }));
-  }, [customGroups, extraMembers]);
+    return base.map((group) => {
+      const overrideMembers = memberOverrides[group.id];
+      const rawMembers = overrideMembers || [...group.members, ...(extraMembers[group.id] || [])];
+      return {
+        ...group,
+        visibility: group.visibility || 'public',
+        members: rawMembers.map((m) => ({ ...m, quantity: m.quantity || 1 }))
+      };
+    });
+  }, [customGroups, extraMembers, memberOverrides]);
 
   const publicGroups = useMemo(() => allGroups.filter((group) => group.visibility === 'public'), [allGroups]);
   const myOtherGroups = useMemo(
@@ -211,6 +366,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       return;
     }
     const ownerName = form.yourName.trim() || 'Bạn';
+    const quantity = Math.max(1, Math.round(Number(form.quantity) || 1));
     const newGroup = {
       id: `GC-CUSTOM-${Date.now()}`,
       code: generateGroupCode(),
@@ -226,7 +382,8 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           avatar: ownerName.charAt(0).toUpperCase(),
           productId: product.id,
           productLabel: product.name,
-          amount: Math.round(Number(product.basePrice || 0)),
+          quantity,
+          amount: Math.round(Number(product.basePrice || 0)) * quantity,
           joinedAt: new Date().toISOString()
         }
       ]
@@ -235,7 +392,72 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     setCustomGroups(next);
     saveCustomGroups(next);
     setCreateOpen(false);
-    setForm({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', yourName: '', visibility: 'public' });
+    setForm({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', quantity: 1, yourName: '', visibility: 'public' });
+    localStorage.setItem(LASTNAME_KEY, ownerName);
+  }
+
+  // ---- v67 — chỉnh sửa sản phẩm/số lượng trong nhóm (mở từ nút "Chỉnh sửa") ----
+  function commitMemberEdit(group, nextMembers) {
+    setMemberOverrides((prev) => {
+      const merged = { ...prev, [group.id]: nextMembers };
+      saveMemberOverrides(merged);
+      return merged;
+    });
+  }
+
+  function changeQuantity(group, memberId, delta) {
+    const nextMembers = group.members.map((m) => {
+      if (m.id !== memberId) return m;
+      const nextQty = Math.max(1, (m.quantity || 1) + delta);
+      const product = products.find((p) => p.id === m.productId);
+      const unit = product ? Math.round(Number(product.basePrice || 0)) : Math.round(Number(m.amount || 0) / Math.max(1, m.quantity || 1));
+      return { ...m, quantity: nextQty, amount: unit * nextQty };
+    });
+    commitMemberEdit(group, nextMembers);
+  }
+
+  function removeGroupMember(group, memberId, memberName) {
+    if (group.members.length <= 1) {
+      alert('Nhóm cần ít nhất 1 thành viên — không thể xoá người cuối cùng.');
+      return;
+    }
+    if (!window.confirm(`Xoá "${memberName}" khỏi nhóm này? Không thể hoàn tác.`)) return;
+    commitMemberEdit(group, group.members.filter((m) => m.id !== memberId));
+  }
+
+  function submitAddProduct(group) {
+    const product = products.find((p) => p.id === addProductForm.productId);
+    const name = addProductForm.name.trim();
+    if (!name || !product) {
+      alert('Nhập tên hiển thị và chọn một sản phẩm trước khi thêm.');
+      return;
+    }
+    const quantity = Math.max(1, Math.round(Number(addProductForm.quantity) || 1));
+    const unit = Math.round(Number(product.basePrice || 0));
+    const entry = {
+      id: `edit-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      name,
+      avatar: name.charAt(0).toUpperCase(),
+      productId: product.id,
+      productLabel: product.name,
+      quantity,
+      amount: unit * quantity,
+      joinedAt: new Date().toISOString()
+    };
+    commitMemberEdit(group, [...group.members, entry]);
+    localStorage.setItem(LASTNAME_KEY, name);
+    setAddProductForm({ name, productId: '', quantity: 1 });
+  }
+
+  function openDetail(group, mode) {
+    setDetailView({ groupId: group.id, mode });
+    setAddProductForm({ name: localStorage.getItem(LASTNAME_KEY) || '', productId: '', quantity: 1 });
+  }
+
+  const activeDetailGroup = detailView ? allGroups.find((g) => g.id === detailView.groupId) : null;
+
+  if (activeDetailGroup) {
+    return renderGroupDetail(activeDetailGroup, detailView.mode);
   }
 
   return (
@@ -254,10 +476,16 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           <strong>Đây là tính năng demo</strong>
           <span>
             Ngưỡng miễn phí vận chuyển bên dưới là số liệu tham khảo cho bản demo. Tiến trình nhóm lưu trên trình duyệt của bạn (localStorage); mở link mời trên trình duyệt/thiết bị khác sẽ mô phỏng một người bạn vừa tham gia.
-            {plan.groupFund.monthlyCap != null && ` Gói Free: đã tạo ${groupsCreatedThisMonth}/${plan.groupFund.monthlyCap} nhóm trong tháng này.`}
           </span>
         </div>
       </div>
+
+      {plan.groupFund.monthlyCap != null && (
+        <div className={monthlyCapReached ? 'groupcart-free-limit-banner-v67 full' : 'groupcart-free-limit-banner-v67'}>
+          <Crown size={19} />
+          <span>Gói Free: đã tạo <b>{groupsCreatedThisMonth}/{plan.groupFund.monthlyCap}</b> nhóm trong tháng này{monthlyCapReached ? ' — đã đạt giới hạn' : ''}.</span>
+        </div>
+      )}
 
       {monthlyCapReached && (
         <div className="history-locked-page-v48 groupcart-cap-locked-v63">
@@ -298,15 +526,30 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
             </label>
             <label>
               <span>Sản phẩm bạn muốn góp</span>
-              <select value={form.productId} onChange={(e) => setForm((f) => ({ ...f, productId: e.target.value }))}>
-                {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+              <ProductPicker
+                products={products}
+                recentlyViewed={recentlyViewedProducts}
+                suggested={suggestedProducts}
+                value={products.find((p) => p.id === form.productId) || null}
+                onChange={(p) => setForm((f) => ({ ...f, productId: p.id }))}
+                placeholder="Gõ tên sản phẩm để tìm..."
+              />
             </label>
           </div>
-          <label>
-            <span>Tên hiển thị của bạn</span>
-            <input value={form.yourName} onChange={(e) => setForm((f) => ({ ...f, yourName: e.target.value }))} placeholder="Ví dụ: Quân" />
-          </label>
+          <div className="groupcart-create-row-v58">
+            <label>
+              <span>Số lượng</span>
+              <input
+                type="number" min="1" step="1"
+                value={form.quantity}
+                onChange={(e) => setForm((f) => ({ ...f, quantity: Math.max(1, Math.round(Number(e.target.value) || 1)) }))}
+              />
+            </label>
+            <label>
+              <span>Tên hiển thị của bạn</span>
+              <input value={form.yourName} onChange={(e) => setForm((f) => ({ ...f, yourName: e.target.value }))} placeholder="Ví dụ: Quân" />
+            </label>
+          </div>
 
           <div className="groupcart-visibility-field-v58">
             <span>Chế độ hiển thị giỏ chung</span>
@@ -395,7 +638,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                 <span className="groupcart-avatar-v58">{member.avatar}</span>
                 <span className="groupcart-member-info-v58">
                   <b>{member.name}</b>
-                  <small>{member.productLabel}</small>
+                  <small>{member.productLabel}{member.quantity > 1 ? ` × ${member.quantity}` : ''}</small>
                 </span>
                 <span className="groupcart-member-amount-v58">{formatCurrency(member.amount, currency)}</span>
               </button>
@@ -403,12 +646,157 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           })}
         </div>
 
+        <div className="groupcart-card-actions-v67">
+          <button className="secondary groupcart-view-btn-v67" type="button" onClick={() => openDetail(group, 'view')}>
+            <Eye size={16} /> Xem nhóm
+          </button>
+          <button className="secondary groupcart-edit-btn-v67" type="button" onClick={() => openDetail(group, 'edit')}>
+            <Pencil size={16} /> Chỉnh sửa
+          </button>
+        </div>
+
         <button className="secondary full groupcart-invite-btn-v58" type="button" onClick={() => copyInviteLink(group)}>
           {copiedId === group.id ? <><Check size={16} /> Đã sao chép link!</> : <><Copy size={16} /> Mời bạn bè tham gia</>}
         </button>
-
-        {renderSettlement(group)}
       </article>
+    );
+  }
+
+  // v67 — Màn hình phóng to thành trang riêng (giống các trang khác của web) thay vì
+  // hiện lồng trong thẻ nhỏ. mode "view": xem đầy đủ danh sách + phần chốt nhóm/QR
+  // (chỉ hiện ở đây, không hiện ở thẻ thu gọn ngoài danh sách nữa). mode "edit":
+  // quản lý sản phẩm/số lượng — ai cũng chỉnh được số lượng hoặc thêm sản phẩm mới,
+  // nhưng chỉ chủ nhóm (nhóm do chính trình duyệt này tạo) mới được xoá hẳn 1 thành viên.
+  function renderGroupDetail(group, mode) {
+    const stats = computeGroupStats(group);
+    const isOwner = customGroups.some((g) => g.id === group.id);
+
+    return (
+      <section className="standalone-page-v45 groupcart-detail-page-v67">
+        <button className="standalone-back-v45" onClick={() => setDetailView(null)}><ArrowLeft size={18} /> Quay lại danh sách nhóm</button>
+
+        <div className="groupcart-detail-head-v67">
+          <div>
+            <span className="groupcart-store-tag-v58">{group.storeName}</span>
+            <h1>{group.title}</h1>
+            <span className="groupcart-owner-v58">Tạo bởi {group.ownerName}{isOwner ? ' · Bạn là chủ nhóm này' : ''}</span>
+          </div>
+          <div className="groupcart-detail-tabs-v67">
+            <button type="button" className={mode === 'view' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'view' })}><Eye size={15} /> Xem nhóm</button>
+            <button type="button" className={mode === 'edit' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'edit' })}><Pencil size={15} /> Chỉnh sửa</button>
+          </div>
+        </div>
+
+        <div className="groupcart-progress-wrap-v58 groupcart-detail-progress-v67">
+          <div className="groupcart-progress-bar-v58">
+            <div className="groupcart-progress-fill-v58" style={{ width: `${stats.progressPct}%` }} />
+          </div>
+          <div className="groupcart-progress-labels-v58">
+            <b>{formatCurrency(stats.total, currency)}</b>
+            <span>/ {formatCurrency(stats.threshold, currency)} để freeship</span>
+          </div>
+        </div>
+
+        {mode === 'view' ? (
+          <>
+            <div className="groupcart-members-v58 groupcart-detail-members-v67">
+              {group.members.map((member) => {
+                const product = products.find((p) => p.id === member.productId);
+                return (
+                  <button
+                    type="button"
+                    key={member.id}
+                    className="groupcart-member-row-v58"
+                    onClick={() => product && onOpenProduct?.(product)}
+                    disabled={!product}
+                  >
+                    <span className="groupcart-avatar-v58">{member.avatar}</span>
+                    <span className="groupcart-member-info-v58">
+                      <b>{member.name}</b>
+                      <small>{member.productLabel}{member.quantity > 1 ? ` × ${member.quantity}` : ''}</small>
+                    </span>
+                    <span className="groupcart-member-amount-v58">{formatCurrency(member.amount, currency)}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button className="secondary full groupcart-invite-btn-v58" type="button" onClick={() => copyInviteLink(group)}>
+              {copiedId === group.id ? <><Check size={16} /> Đã sao chép link!</> : <><Copy size={16} /> Mời bạn bè tham gia</>}
+            </button>
+
+            {renderSettlement(group)}
+          </>
+        ) : (
+          <div className="groupcart-edit-panel-v67">
+            <p className="groupcart-edit-hint-v67">
+              Mọi thành viên đều có thể đổi số lượng hoặc thêm sản phẩm mới vào nhóm này.{' '}
+              {isOwner ? 'Vì bạn là chủ nhóm, bạn có thể xoá hẳn 1 thành viên khỏi nhóm.' : 'Chỉ chủ nhóm mới có thể xoá hẳn 1 thành viên khỏi nhóm.'}
+            </p>
+
+            <div className="groupcart-edit-list-v67">
+              {group.members.map((member) => {
+                const product = products.find((p) => p.id === member.productId);
+                return (
+                  <div key={member.id} className="groupcart-edit-row-v67">
+                    <span className="groupcart-avatar-v58">{member.avatar}</span>
+                    <span className="groupcart-edit-row-info-v67">
+                      <b>{member.name}</b>
+                      <small>{member.productLabel}</small>
+                    </span>
+                    <div className="groupcart-qty-stepper-v67">
+                      <button type="button" onClick={() => changeQuantity(group, member.id, -1)} disabled={member.quantity <= 1} aria-label="Giảm số lượng"><Minus size={14} /></button>
+                      <span>{member.quantity}</span>
+                      <button type="button" onClick={() => changeQuantity(group, member.id, 1)} aria-label="Tăng số lượng"><Plus size={14} /></button>
+                    </div>
+                    <span className="groupcart-member-amount-v58">{formatCurrency(member.amount, currency)}</span>
+                    {isOwner && (
+                      <button type="button" className="groupcart-remove-member-btn-v67" onClick={() => removeGroupMember(group, member.id, member.name)} aria-label={`Xoá ${member.name} khỏi nhóm`}>
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                    {!product && <ShieldAlert size={14} className="groupcart-edit-row-warn-v67" />}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="groupcart-add-product-card-v67">
+              <p><PlusCircle size={16} /> Thêm sản phẩm mới vào nhóm</p>
+              <div className="groupcart-create-row-v58">
+                <label>
+                  <span>Tên hiển thị</span>
+                  <input value={addProductForm.name} onChange={(e) => setAddProductForm((f) => ({ ...f, name: e.target.value }))} placeholder="Ví dụ: Khang" />
+                </label>
+                <label>
+                  <span>Sản phẩm</span>
+                  <ProductPicker
+                    products={products}
+                    recentlyViewed={recentlyViewedProducts}
+                    suggested={suggestedProducts}
+                    value={products.find((p) => p.id === addProductForm.productId) || null}
+                    onChange={(p) => setAddProductForm((f) => ({ ...f, productId: p.id }))}
+                    placeholder="Gõ tên sản phẩm để tìm..."
+                  />
+                </label>
+              </div>
+              <div className="groupcart-create-row-v58">
+                <label>
+                  <span>Số lượng</span>
+                  <input
+                    type="number" min="1" step="1"
+                    value={addProductForm.quantity}
+                    onChange={(e) => setAddProductForm((f) => ({ ...f, quantity: Math.max(1, Math.round(Number(e.target.value) || 1)) }))}
+                  />
+                </label>
+                <div className="groupcart-add-product-submit-wrap-v67">
+                  <button type="button" className="primary full" onClick={() => submitAddProduct(group)}>Thêm vào nhóm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
     );
   }
 
@@ -467,9 +855,13 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                       type="text"
                       inputMode="numeric"
                       placeholder="VD: 19035829999"
+                      className={settleBankDraft.accountNo && !accountNoValid ? 'groupcart-input-invalid-v67' : ''}
                       value={settleBankDraft.accountNo}
                       onChange={(e) => setSettleBankDraft((d) => ({ ...d, accountNo: e.target.value.replace(/\D/g, '') }))}
                     />
+                    {settleBankDraft.accountNo && !accountNoValid && (
+                      <small className="groupcart-field-error-v67"><ShieldAlert size={12} /> Số tài khoản không đúng định dạng (cần 6-19 chữ số) — nhập lại giúp mình nhé.</small>
+                    )}
                   </label>
                 </div>
                 <label>
@@ -481,6 +873,30 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                     onChange={(e) => setSettleBankDraft((d) => ({ ...d, accountName: e.target.value }))}
                   />
                 </label>
+                <label className="groupcart-remember-account-v67">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(settleBankDraft.remember)}
+                    onChange={(e) => setSettleBankDraft((d) => ({ ...d, remember: e.target.checked }))}
+                  />
+                  <span>Lưu tài khoản này cho những lần chia tiền sau</span>
+                </label>
+                {hasSavedAccount && (
+                  <button
+                    type="button"
+                    className="groupcart-forget-account-v67"
+                    onClick={() => {
+                      clearSavedAccount();
+                      setHasSavedAccount(false);
+                      setSettleBankDraft((d) => ({ ...d, remember: false }));
+                    }}
+                  >
+                    Xoá tài khoản đã lưu trên máy này
+                  </button>
+                )}
+                <small className="groupcart-account-note-v67">
+                  Lưu ý: CartWise chỉ kiểm tra được <b>định dạng</b> số tài khoản, chưa thể xác minh tài khoản có thật sự tồn tại hay không vì việc đó cần kết nối API riêng (có phí) của từng ngân hàng. Bạn tự kiểm tra kỹ số tài khoản trước khi chia sẻ mã QR cho cả nhóm nhé.
+                </small>
               </div>
               <div className="groupcart-settle-modes-v63">
                 <p>Chọn cách chia tiền cho nhóm này:</p>
@@ -488,7 +904,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                   <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'even'); setSettleOpenId(null); }}>Chia đều</button>
                   <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Tự nhập (giữ số tiền đã góp)</button>
                 </div>
-                {!canStartSettlement() && <small className="groupcart-settle-hint-v64">Nhập đủ ngân hàng, số tài khoản và tên chủ tài khoản để tạo QR.</small>}
+                {!canStartSettlement() && <small className="groupcart-settle-hint-v64">Nhập đủ ngân hàng, số tài khoản đúng định dạng và tên chủ tài khoản để tạo QR.</small>}
               </div>
             </>
           )}
@@ -512,6 +928,10 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           <b>Yêu cầu thanh toán ({settlement.mode === 'even' ? 'chia đều' : 'tự nhập'})</b>
           <span>{paidCount}/{settlement.requests.length} đã thanh toán</span>
         </div>
+
+        <button type="button" className="ghost groupcart-settle-redo-v67" onClick={() => requestRedoSettlement(group.id)}>
+          <RotateCcw size={14} /> Đổi lại cách chia tiền
+        </button>
 
         <div className="groupcart-settle-list-v63">
           {settlement.requests.map((req) => (

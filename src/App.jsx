@@ -16,9 +16,11 @@ import Profile from './pages/Profile.jsx';
 import CheckHistory from './pages/CheckHistory.jsx';
 import PurchaseHistory from './pages/PurchaseHistory.jsx';
 import GroupCart from './pages/GroupCart.jsx';
+import CartPanel from './components/CartPanel.jsx';
 import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
 import { applyLanguageToDom } from './utils/uiTranslator.js';
+import { loadCart, saveCart, isInCart } from './data/cart.js';
 
 const savedSettings = JSON.parse(localStorage.getItem('cartwise-settings') || '{}');
 const savedUser = JSON.parse(localStorage.getItem('cartwise-user') || 'null');
@@ -41,6 +43,10 @@ function App() {
   const [language, setLanguage] = useState(savedSettings.language || 'vi');
   const [currency, setCurrency] = useState(savedSettings.currency || 'VND');
   const [planId, setPlanId] = useState(savedPlan);
+  // v67 — Giỏ hàng so sánh: sản phẩm người dùng bấm "Thêm vào giỏ hàng" trong khung
+  // so sánh sản phẩm, xem lại được từ icon giỏ hàng cạnh nút Đăng nhập ở navbar.
+  const [cartItems, setCartItems] = useState(loadCart);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const t = translations[language] || translations.vi;
 
@@ -107,6 +113,19 @@ function App() {
     setSelectedProduct(product);
   }
 
+  function addToCart(product) {
+    if (!product || isInCart(cartItems, product.id)) return;
+    const next = [{ productId: product.id, name: product.name, image: product.image, addedAt: new Date().toISOString() }, ...cartItems];
+    setCartItems(next);
+    saveCart(next);
+  }
+
+  function removeFromCart(productId) {
+    const next = cartItems.filter((item) => item.productId !== productId);
+    setCartItems(next);
+    saveCart(next);
+  }
+
   function saveSettings(next) {
     setProfile(next.profile);
     setLanguage(next.language);
@@ -141,6 +160,8 @@ function App() {
         onOpenPurchaseHistory={() => navigate('purchase-history')}
         onOpenGroupCart={() => navigate('group-cart')}
         planId={planId}
+        cartCount={cartItems.length}
+        onOpenCart={() => setCartOpen(true)}
       />
 
       <main>
@@ -206,8 +227,20 @@ function App() {
           onClose={() => setSelectedProduct(null)}
           planId={planId}
           onOpenUpgrade={() => { setSelectedProduct(null); navigate('upgrade'); }}
+          inCart={isInCart(cartItems, selectedProduct.id)}
+          onAddToCart={() => addToCart(selectedProduct)}
         />
       )}
+
+      <CartPanel
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        items={cartItems}
+        products={products}
+        currency={currency}
+        onRemove={removeFromCart}
+        onOpenProduct={handleOpenProduct}
+      />
 
       {settingsOpen && (
         <SettingsPanel

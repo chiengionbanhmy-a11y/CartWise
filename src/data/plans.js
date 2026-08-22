@@ -18,7 +18,7 @@ export const PLAN_DETAILS = {
     buySignal: { enabled: false },
     spendingAdvisor: { enabled: false },
     savingsCounter: { variant: 'simple', maxBadges: 0 },
-    groupFund: { monthlyCap: 3, qr: true }
+    groupFund: { monthlyCap: 2, qr: true }
   },
   student: {
     id: 'student',

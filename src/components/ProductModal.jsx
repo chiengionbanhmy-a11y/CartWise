@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight } from 'lucide-react';
+import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check } from 'lucide-react';
 import CawiRobot from './CawiRobot.jsx';
 import AIReviewSummary from './AIReviewSummary.jsx';
 import BuySignalCard from './BuySignalCard.jsx';
@@ -106,7 +106,7 @@ function PriceHistoryChart({ data, currency }) {
   );
 }
 
-function ProductModal({ product, currency, onCurrencyChange, onClose, planId = 'free', onOpenUpgrade }) {
+function ProductModal({ product, currency, onCurrencyChange, onClose, planId = 'free', onOpenUpgrade, inCart = false, onAddToCart }) {
   const plan = getPlan(planId);
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
   const [voucherByStore, setVoucherByStore] = useState({});
@@ -359,6 +359,15 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               <span>{product.category}</span>
               <span>{product.subCategory}</span>
             </div>
+
+            <button
+              type="button"
+              className={inCart ? 'product-add-cart-btn-v67 added' : 'product-add-cart-btn-v67'}
+              onClick={() => !inCart && onAddToCart?.()}
+              disabled={inCart}
+            >
+              {inCart ? <><Check size={16} /> Đã có trong giỏ hàng</> : <><ShoppingCart size={16} /> Thêm vào giỏ hàng</>}
+            </button>
 
             <div className="quick-convert premium-convert">
               <h4>Đơn vị hiển thị</h4>

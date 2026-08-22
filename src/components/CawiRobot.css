@@ -283,6 +283,9 @@
 .cw22-msg.user { align-self: flex-end; background: linear-gradient(135deg, #ff9654, #f4c542); color: #142034; font-weight: 800; }
 .cw22-quick { padding: 0 18px 14px; display: flex; gap: 10px; flex-wrap: wrap; max-height: 132px; overflow-y: auto; flex: 0 0 auto; }
 .cw22-quick button { border-radius: 999px; border: 1px solid #d4dfef; background: #fff; color: #1d2a45; font-weight: 800; padding: 10px 14px; cursor: pointer; }
+/* v67 — nút "Xem thêm" mở rộng danh sách câu hỏi gợi ý, kiểu viền đứt để phân biệt
+   với các câu hỏi thật (giữ tối đa 5-6 câu mặc định, tránh làm rối khung chat). */
+.cw22-quick-more { border-style: dashed !important; background: #f8fafc !important; color: #64748b !important; }
 .cw22-input { display: flex; align-items: center; gap: 10px; padding: 12px 18px 16px; background: #fff; flex: 0 0 auto; }
 .cw22-input input { flex: 1; min-width: 0; border: none; outline: none; border-radius: 999px; background: #1f2b3f; color: #fff; padding: 16px 22px; font-size: 16px; font-family: inherit; }
 .cw22-input input::placeholder { color: rgba(255,255,255,.75); }

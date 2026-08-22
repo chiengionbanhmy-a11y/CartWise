@@ -5,12 +5,25 @@ import './CawiRobot.css';
 
 const floatingStops = ['118px', '32vh', '54vh', 'calc(100vh - 220px)'];
 
+// v67 — Chỉ hiện tối đa 5-6 câu gợi ý mặc định, các câu còn lại (thường là các
+// tính năng mới) ẩn sau nút "Xem thêm" để khung chat không bị rối.
 const quickQuestions = [
   'Sản phẩm nào rẻ nhất?',
   'Cách đổi tiền tệ?',
   'Cách mua sản phẩm?',
   'Robot có thể giúp gì?',
   'Tìm ưu đãi hot'
+];
+
+const moreQuestions = [
+  'Cách ghép đơn cùng bạn bè?',
+  'Tên trong mã QR thanh toán hiện ở đâu?',
+  'Chọn nhầm cách chia tiền thì sao?',
+  'Gói Free tạo được mấy nhóm ghép đơn?',
+  'Cách thêm sản phẩm vào giỏ hàng?',
+  'Xoá sản phẩm trong giỏ hàng thế nào?',
+  'Có lưu được số tài khoản ngân hàng không?',
+  'Sao chỉnh sửa được nhóm ghép đơn?'
 ];
 
 const themes = [
@@ -120,6 +133,38 @@ function getBotReply(text) {
     return 'Rất vui được hỗ trợ bạn. Nếu cần, bạn cứ hỏi thêm về sản phẩm, chi phí dự kiến hoặc cách dùng CartWise nhé!';
   }
 
+  if (/(ghep don|nhom gop tien|freeship|dong gop|di cung ban be)/.test(normalized)) {
+    return 'Vào mục "Ghép Đơn Cùng Bạn Bè", tạo giỏ chung mới (chọn sàn, sản phẩm, số lượng), rồi mời bạn bè bằng link. Khi đủ ngưỡng freeship, bấm "Xem nhóm" để chốt nhóm và tạo mã QR yêu cầu thanh toán; bấm "Chỉnh sửa" nếu muốn đổi số lượng, thêm sản phẩm hoặc (nếu bạn là chủ nhóm) xoá thành viên.';
+  }
+
+  if (/(ten trong ma qr|ten qua qr|ten hien tren anh qr|qr co ten khong)/.test(normalized)) {
+    return 'Ở chế độ "Tự nhập" của Ghép Đơn Cùng Bạn Bè, CartWise tự ghép tên người cần chuyển ngay vào ảnh mã QR (ngay dưới logo VietQR, phía trên ô mã QR) — kể cả khi bạn bấm vào ảnh để mở tab mới hoặc lưu ảnh về máy, tên vẫn còn nguyên trong ảnh.';
+  }
+
+  if (/(chon nham cach chia tien|doi lai cach chia|huy chia deu|huy tu nhap|doi che do chia tien)/.test(normalized)) {
+    return 'Sau khi đã chốt nhóm theo "Chia đều" hoặc "Tự nhập", bạn vào "Xem nhóm" của nhóm đó, bấm nút "Đổi lại cách chia tiền" trong phần yêu cầu thanh toán. Lưu ý việc này sẽ xoá trạng thái đã/chưa thanh toán hiện tại và cần chốt nhóm lại từ đầu.';
+  }
+
+  if (/(goi free tao duoc may nhom|gioi han nhom|bao nhieu nhom mot thang)/.test(normalized)) {
+    return 'Gói Free hiện chỉ tạo tối đa 2 nhóm ghép đơn mỗi tháng — dòng thông báo màu cam ở đầu trang Ghép Đơn Cùng Bạn Bè sẽ tự hiện số nhóm bạn đã tạo. Nâng cấp CartWise Plus Student trở lên để tạo không giới hạn số nhóm.';
+  }
+
+  if (/(them san pham vao gio hang|them vao gio hang)/.test(normalized)) {
+    return 'Mở một sản phẩm bất kỳ để xem khung so sánh, rồi bấm nút "Thêm vào giỏ hàng" ngay dưới tên sản phẩm. Giỏ hàng so sánh khác với Ghép Đơn Cùng Bạn Bè nhé — đây chỉ là nơi lưu lại sản phẩm bạn đang cân nhắc.';
+  }
+
+  if (/(xoa san pham trong gio hang|xoa gio hang|vuot de xoa)/.test(normalized)) {
+    return 'Mở giỏ hàng bằng icon giỏ hàng cạnh nút Đăng nhập, rồi vuốt (hoặc kéo bằng chuột) sản phẩm sang trái, hoặc bấm nút thùng rác. CartWise luôn hỏi lại "Đồng ý xoá?" trước khi xoá thật, để tránh xoá nhầm.';
+  }
+
+  if (/(luu so tai khoan|luu tai khoan ngan hang|luu tai khoan cho lan sau)/.test(normalized)) {
+    return 'Khi nhập tài khoản nhận tiền để tạo mã QR trong Ghép Đơn Cùng Bạn Bè, tick vào ô "Lưu tài khoản này cho những lần chia tiền sau" — lần chốt nhóm kế tiếp sẽ tự điền lại. Lưu ý CartWise chỉ kiểm tra được định dạng số tài khoản, chưa xác minh được tài khoản có thật sự tồn tại hay không.';
+  }
+
+  if (/(chinh sua nhom|them so luong|xoa thanh vien|doi so luong san pham)/.test(normalized)) {
+    return 'Ở mỗi nhóm ghép đơn, bấm nút "Chỉnh sửa" để phóng to màn hình quản lý: ai cũng đổi được số lượng hoặc thêm sản phẩm mới, nhưng chỉ chủ nhóm (người tạo nhóm trên trình duyệt đó) mới xoá được hẳn 1 thành viên khỏi nhóm.';
+  }
+
   if (matchedProduct) {
     return `${buildBestStoreReply(matchedProduct)} Nếu muốn, bạn có thể hỏi tiếp về voucher, ship hoặc nơi mua của sản phẩm này.`;
   }
@@ -128,7 +173,9 @@ function getBotReply(text) {
     return 'CartWise không chỉ nhìn giá niêm yết. Web sẽ cộng thêm phí vận chuyển ước tính để tạo tổng chi phí dự kiến. Voucher cá nhân được tách riêng để bảng so sánh công bằng không bị sai lệch.';
   }
 
-  return 'Mình có thể chưa hiểu hết ý bạn, nhưng vẫn sẵn sàng hỗ trợ. Bạn thử hỏi ngắn gọn hơn về sản phẩm cụ thể, nơi mua rẻ hơn, cách đổi tiền tệ, voucher hoặc flash sale nhé.';
+  // v67 — Cawi Robo chỉ trả lời được các câu hỏi có sẵn (đã liệt kê ở gợi ý bên
+  // dưới khung chat) — nói rõ giới hạn này thay vì cố trả lời chung chung.
+  return 'Câu này mình chưa hỗ trợ được — Cawi Robo hiện chỉ trả lời được các câu hỏi có sẵn trong danh sách gợi ý bên dưới khung chat (bấm "Xem thêm" để thấy đầy đủ). Bạn thử chọn 1 câu gợi ý, hoặc hỏi lại bằng từ khoá đơn giản hơn về sản phẩm, giá, ghép đơn hoặc giỏ hàng nhé.';
 }
 
 function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi Robo!' }) {
@@ -137,6 +184,7 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
   const [sleeping, setSleeping] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showMoreQuestions, setShowMoreQuestions] = useState(false);
   const [bubbleVisible, setBubbleVisible] = useState(true);
   const [bubbleText, setBubbleText] = useState(message);
   const [themeIndex, setThemeIndex] = useState(() => Number(localStorage.getItem('cawi-theme') || 0));
@@ -577,6 +625,11 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
           </div>
           <div className="cw22-quick">
             {quickQuestions.map((q) => <button key={q} type="button" onClick={() => sendMessage(q)}>{q}</button>)}
+            {showMoreQuestions
+              ? moreQuestions.map((q) => <button key={q} type="button" onClick={() => sendMessage(q)}>{q}</button>)
+              : moreQuestions.length > 0 && (
+                <button type="button" className="cw22-quick-more" onClick={() => setShowMoreQuestions(true)}>Xem thêm</button>
+              )}
           </div>
           <form className="cw22-input" onSubmit={(event) => { event.preventDefault(); sendMessage(input); }}>
             <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Hỏi Cawi Robo về giá, voucher, phí ship..." />

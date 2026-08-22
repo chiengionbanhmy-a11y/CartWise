@@ -1,23 +1,17 @@
-import { Info } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Info, Loader2 } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { buildVietQrUrl } from '../utils/vietqr.js';
+import { composeQrWithName } from '../utils/qrCompose.js';
 
-// v64 — Mã QR yêu cầu thanh toán, dùng chuẩn VietQR liên ngân hàng (NAPAS 247).
-// Thay cho PaymentQrMock (giao diện mô phỏng) trước đây — mã QR ở đây là THẬT,
-// tạo trực tiếp từ ngân hàng + số tài khoản người dùng tự nhập khi chốt nhóm
-// (không exclusive với bất kỳ ngân hàng nào, xem src/utils/vietqr.js).
+// v67 — Ghép tên người cần chuyển thẳng vào file ảnh QR (canvas), thay vì chỉ
+// dán nhãn đè bằng CSS như v66. Ảnh đang hiển thị trên trang VÀ ảnh mở ra ở tab
+// mới khi bấm vào mã QR giờ là CÙNG MỘT ảnh đã ghép tên — không còn dòng chữ
+// tên đứng tách riêng bên ngoài khung QR nữa.
 //
-// Số tiền luôn hiển thị bằng VND (không theo currency hiển thị của app) vì
-// giao dịch chuyển khoản thật luôn phải là VND, kể cả khi người dùng đang xem
-// giá bằng USD/ngoại tệ khác ở những nơi khác trong app.
-//
-// Trạng thái thanh toán KHÔNG được xác nhận tự động — trưởng nhóm tự đánh dấu
-// thủ công sau khi nhận được tiền (đúng như đã nêu trong báo cáo cải tiến).
-//
-// `shared`: dùng cho chế độ "Chia đều" khi mọi thành viên trả đúng cùng 1 số
-// tiền — lúc đó chỉ cần tạo 1 mã QR chung thay vì lặp lại cùng 1 mã QR cho
-// từng người. Ngay trên ảnh QR luôn có nhãn tên (người/nhóm) để phân biệt rõ
-// mã nào của ai khi nhiều mã QR khác nhau hiển thị gần nhau lúc thanh toán.
+// Nếu trình duyệt không ghép được (ảnh của VietQR không cho phép đọc lại pixel
+// qua CORS), tự động dùng lại ảnh gốc + dán nhãn tên bằng CSS như cách cũ, để
+// tính năng QR luôn hoạt động được trong mọi trường hợp.
 function PaymentQr({ label, memberName, amount, bin, bankShortName, accountNo, accountName, groupTitle, shared = false }) {
   const displayLabel = label || memberName;
   const qrUrl = buildVietQrUrl({
@@ -28,21 +22,50 @@ function PaymentQr({ label, memberName, amount, bin, bankShortName, accountNo, a
     addInfo: shared ? `${groupTitle} chia deu` : `${groupTitle} ${memberName}`
   });
 
+  const [composedUrl, setComposedUrl] = useState(null);
+  const [composeState, setComposeState] = useState('loading'); // loading | done | failed
+
+  useEffect(() => {
+    let cancelled = false;
+    setComposedUrl(null);
+    setComposeState('loading');
+    composeQrWithName(qrUrl, displayLabel)
+      .then((dataUrl) => {
+        if (!cancelled) {
+          setComposedUrl(dataUrl);
+          setComposeState('done');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setComposeState('failed');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [qrUrl, displayLabel]);
+
+  // Trong lúc chờ ghép xong vẫn hiển thị ảnh QR gốc bình thường (không chặn quét
+  // mã) — chỉ thay bằng bản đã ghép tên ngay khi có kết quả.
+  const finalSrc = composedUrl || qrUrl;
+
   return (
     <div className="payment-qr-v64">
       <div className="payment-qr-badge-v64">{bankShortName}</div>
-      <a href={qrUrl} target="_blank" rel="noreferrer" className="payment-qr-image-wrap-v64">
-        <img src={qrUrl} alt={`Mã QR chuyển khoản cho ${displayLabel}`} loading="lazy" />
-        {/* v66 — nhãn tên ngay dưới logo VietQR, phía trên ô mã QR, để khi ảnh này
-            được gửi/chụp lại vào nhóm chat, mọi người nhận ra ngay đây là mã của ai
-            mà không cần xem phần chữ bên dưới ảnh. */}
-        <span className="payment-qr-name-tag-top-v66">{displayLabel}</span>
-        <span className="payment-qr-name-tag-v64">{displayLabel}</span>
+      <a href={finalSrc} target="_blank" rel="noreferrer" className="payment-qr-image-wrap-v64">
+        <img src={finalSrc} alt={`Mã QR chuyển khoản cho ${displayLabel}${composeState === 'done' ? ' (đã có tên trong ảnh)' : ''}`} loading="lazy" />
+        {composeState === 'loading' && (
+          <span className="payment-qr-composing-v67"><Loader2 size={12} className="spin" /> Đang ghép tên vào ảnh…</span>
+        )}
+        {composeState === 'failed' && (
+          // Phương án dự phòng: trình duyệt không ghép được tên vào ảnh (thường do
+          // giới hạn CORS từ VietQR) — vẫn dán nhãn tên đè bằng CSS như bản trước.
+          <span className="payment-qr-name-tag-v64">{displayLabel}</span>
+        )}
       </a>
       <div className="payment-qr-info-v64">
         <b>{shared ? 'Yêu cầu thanh toán chung (chia đều)' : 'Yêu cầu thanh toán'}</b>
         <span>{shared ? `Mỗi người quét mã này, chuyển ${formatCurrency(amount, 'VND')}` : `${displayLabel} → ${formatCurrency(amount, 'VND')}`}</span>
-        <small>Quét bằng app ngân hàng bất kỳ hỗ trợ VietQR</small>
+        <small>Quét bằng app ngân hàng bất kỳ hỗ trợ VietQR{composeState === 'done' ? ' · Bấm vào ảnh để mở tab mới, đã có tên ngay trong ảnh' : ''}</small>
       </div>
       <div className="payment-qr-disclaimer-v64">
         <Info size={13} />

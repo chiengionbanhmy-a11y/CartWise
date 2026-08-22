@@ -39,11 +39,13 @@ http://localhost:5173
 - Sửa Điểm bán: `src/pages/Stores.jsx`
 - Sửa Về chúng tôi: `src/pages/About.jsx`
 - Sửa tóm tắt đánh giá AI: `src/data/reviews.js` (dữ liệu), `src/components/AIReviewSummary.jsx` (giao diện)
-- Sửa Ghép Đơn Cùng Bạn Bè: `src/data/groupCarts.js` (dữ liệu/ngưỡng freeship), `src/pages/GroupCart.jsx` (giao diện + chốt nhóm/QR), `src/components/PaymentQr.jsx` + `src/utils/vietqr.js` (mã QR VietQR thật, nhãn tên trên/dưới ảnh QR)
+- Sửa Ghép Đơn Cùng Bạn Bè: `src/data/groupCarts.js` (dữ liệu/ngưỡng freeship), `src/pages/GroupCart.jsx` (giao diện, xem nhóm/chỉnh sửa, số lượng, chốt nhóm/QR, lưu tài khoản), `src/components/PaymentQr.jsx` + `src/utils/vietqr.js` + `src/utils/qrCompose.js` (mã QR VietQR thật, ghép tên vào ảnh)
 - Sửa Cawi Tín Hiệu Mua: `src/data/products.js` hàm `getBuySignal`, `src/components/BuySignalCard.jsx`
 - Sửa Cawi Cố Vấn Chi Tiêu / Bộ đếm tiết kiệm: `src/data/purchases.js`, `src/components/SpendingAdvisorCard.jsx`, `src/components/SavingsCounter.jsx`
 - Sửa Cawi Đánh Giá Tổng Hợp: `src/data/reviews.js` hàm `getCrossPlatformBreakdown` (hiển thị qua nút "Xem đánh giá chi tiết" trong `ProductModal.jsx`)
-- Sửa quyền lợi từng gói (Free/Student/Plus): `src/data/plans.js`
+- Sửa quyền lợi từng gói (Free/Student/Plus), giới hạn số nhóm/tháng: `src/data/plans.js`
+- Sửa Giỏ hàng so sánh: `src/data/cart.js` (lưu trữ), `src/components/CartPanel.jsx` (giao diện + vuốt để xoá), nút "Thêm vào giỏ hàng" trong `src/components/ProductModal.jsx`, icon giỏ hàng trong `src/components/Navbar.jsx`
+- Sửa câu hỏi mẫu Cawi Robo: `src/components/CawiRobot.jsx` (`quickQuestions`, `moreQuestions`, `getBotReply`)
 
 ## Cách deploy để có link web thật bằng Vercel
 
