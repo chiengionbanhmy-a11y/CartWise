@@ -113,7 +113,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
         </svg>
 
         <button type="button" className="cart-nav-btn-v69" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
-          <ShoppingCart size={27} strokeWidth={2.3} color="url(#cartwise-cart-gradient-v71)" />
+          <ShoppingCart size={32} strokeWidth={2.3} color="url(#cartwise-cart-gradient-v71)" />
           {cartCount > 0 && <span>{cartCount}</span>}
         </button>
 
