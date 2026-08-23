@@ -19,7 +19,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 main { max-width: 1220px; margin: 0 auto; padding: 22px; }
 
 .navbar { position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 24px; background: rgba(255,255,255,.86); backdrop-filter: blur(18px); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 12px; border: 0; background: transparent; color: var(--text); text-align: left; }
+.brand { display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--text); text-align: left; }
 .brand-logo { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 15px; background: var(--black); color: white; font-weight: 900; box-shadow: 0 12px 30px rgba(0,0,0,.18); }
 .brand strong { display: block; font-size: 20px; letter-spacing: -.03em; }
 .brand small { display: block; color: var(--muted); margin-top: 2px; }
@@ -414,17 +414,21 @@ main { max-width: 1280px; }
   background: rgba(255,255,255,.84);
 }
 .brand-logo { display:none !important; }
+/* v74 — Logo thu nhỏ (52px -> 42px) và bớt khoảng cách/đệm quanh thanh nav (gap,
+   padding nút) để "Về chúng tôi" và menu 3 gạch/chuông thông báo đủ chỗ nằm chung
+   1 hàng ở màn hình laptop thường (~1280px), thay vì "Về chúng tôi" bị rớt xuống
+   hàng 2 một mình như trước. */
 .brand-logo-image {
-  width: 52px;
-  height: 52px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 10px 22px rgba(17,24,39,.16));
 }
 .brand strong { font-size: 22px; }
 .brand small { font-size: 12px; letter-spacing: .02em; text-transform: none; }
-.nav-links { gap: 10px; }
-.nav-links button { font-size: 17px; padding: 12px 16px; }
+.nav-links { gap: 6px; }
+.nav-links button { font-size: 17px; padding: 10px 12px; }
 .auth-trigger, .settings-trigger { min-height: 44px; }
 .section-block, .about-card, .settings-panel, .auth-card, .product-modal {
   border-radius: 28px;
@@ -8358,6 +8362,9 @@ option {
    ======================================================= */
 .nav-actions-v43 {
   position: relative;
+  /* v74 — Bớt khoảng cách giữa các nút (Đăng nhập/Đăng ký/chuông/menu 3 gạch) để
+     nhường thêm chỗ cho thanh nav-links, cùng mục đích với phần thu gọn logo ở trên. */
+  gap: 6px;
 }
 
 .nav-popover-host-v43 {
