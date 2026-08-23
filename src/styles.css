@@ -12612,3 +12612,165 @@ option {
   .savings-achv-map-castle-icon-v72 { font-size: 28px; }
   .savings-achv-map-node-v72 { width: 30px; height: 30px; font-size: 13px; }
 }
+
+/* =======================================================
+   v76 — "Cawi Đố Giá": minigame đoán chi phí dự kiến rẻ nhất của sản phẩm thật.
+   ======================================================= */
+.priceguess-hero-v76 h1 { font-size: clamp(36px, 6vw, 60px); }
+
+.priceguess-rules-v76 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.priceguess-rules-v76 article {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(226,232,240,.9);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+}
+
+.priceguess-rules-icon-v76 {
+  width: 38px; height: 38px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: rgba(251,146,60,.14); color: var(--primary-dark);
+  margin-bottom: 2px;
+}
+
+.priceguess-rules-v76 strong { font-size: 15.5px; color: #172033; }
+.priceguess-rules-v76 span { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.priceguess-best-v76 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #172033, #2d3a58);
+  color: #fff;
+}
+
+.priceguess-best-v76 div { display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.priceguess-best-v76 span { font-size: 12px; color: rgba(255,255,255,.7); font-weight: 700; }
+.priceguess-best-v76 strong { font-size: 24px; font-weight: 900; }
+
+.priceguess-start-btn-v76 {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 15px 34px; font-size: 16px; border-radius: 999px;
+}
+
+.priceguess-topbar-v76 {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+
+.priceguess-progress-v76 { display: flex; flex-direction: column; gap: 6px; min-width: 160px; flex: 1 1 200px; }
+.priceguess-progress-v76 span { font-size: 12.5px; font-weight: 800; color: var(--muted); }
+.priceguess-progress-bar-v76 { height: 8px; border-radius: 999px; background: #eef2f7; overflow: hidden; }
+.priceguess-progress-bar-v76 div { height: 100%; background: linear-gradient(90deg, #fb923c, #f59e0b); border-radius: 999px; transition: width .3s ease; }
+
+.priceguess-stats-pill-v76 { display: flex; align-items: center; gap: 10px; }
+.priceguess-stats-pill-v76 span {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 999px; background: #fff;
+  border: 1px solid rgba(226,232,240,.9); font-weight: 900; font-size: 13.5px; color: #172033;
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+.priceguess-streak-v76 { color: #ea580c !important; border-color: rgba(234,88,12,.3) !important; }
+
+.priceguess-card-v76 {
+  border-radius: 30px;
+  border: 1px solid rgba(226,232,240,.92);
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15,23,42,.09);
+  padding: clamp(20px, 4vw, 34px);
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 28px;
+  /* v76 fix — cột đáp án (2x2) thường thấp hơn cột hình sản phẩm, nếu để mặc định
+     "stretch" sẽ tạo 1 khoảng trắng rỗng lớn phía dưới 4 ô đáp án trông thiếu chỉn
+     chu. Canh giữa theo chiều dọc để phần thừa chia đều trên/dưới, nhìn cân đối hơn. */
+  align-items: center;
+}
+
+.priceguess-product-v76 { display: flex; flex-direction: column; gap: 10px; }
+.priceguess-product-img-v76 {
+  width: 100%; aspect-ratio: 1 / 1; border-radius: 22px; overflow: hidden;
+  background: #f8fafc; border: 1px solid rgba(226,232,240,.9);
+}
+.priceguess-product-img-v76 img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 10px; }
+.priceguess-product-v76 h2 { font-size: 19px; margin: 2px 0 0; color: #172033; line-height: 1.35; }
+.priceguess-question-v76 { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin: 4px 0 0; }
+
+.priceguess-options-v76 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-content: start;
+}
+
+.priceguess-option-v76 {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 20px 14px;
+  border-radius: 18px;
+  border: 2px solid rgba(226,232,240,.95);
+  background: #f8fafc;
+  font-weight: 900; font-size: 16px; color: #172033;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.priceguess-option-v76:hover:not(:disabled) { border-color: rgba(251,146,60,.55); transform: translateY(-2px); }
+.priceguess-option-v76:disabled { cursor: default; }
+.priceguess-option-v76.correct { background: rgba(34,197,94,.12); border-color: #22c55e; color: #15803d; }
+.priceguess-option-v76.wrong { background: rgba(239,68,68,.1); border-color: #ef4444; color: #b91c1c; }
+.priceguess-option-v76.muted { opacity: .5; }
+
+.priceguess-feedback-v76 {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  margin-top: 6px; padding: 16px 20px; border-radius: 18px;
+  background: rgba(148,163,184,.1);
+}
+.priceguess-feedback-v76.correct { background: rgba(34,197,94,.1); }
+.priceguess-feedback-v76.wrong { background: rgba(239,68,68,.08); }
+.priceguess-feedback-v76 p { margin: 0; font-size: 14px; font-weight: 700; color: #172033; flex: 1 1 260px; line-height: 1.5; }
+
+.priceguess-result-v76 {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px;
+  padding: clamp(30px, 6vw, 56px) 20px;
+  border-radius: 30px;
+  background: linear-gradient(160deg, #172033, #2d3a58 70%, #c9963e 160%);
+  color: #fff;
+}
+.priceguess-result-emoji-v76 { font-size: 56px; line-height: 1; }
+.priceguess-result-v76 h1 { font-size: clamp(24px, 4vw, 34px); margin: 0; max-width: 560px; }
+.priceguess-newbest-badge-v76 {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.16); padding: 6px 14px; border-radius: 999px; font-weight: 900; font-size: 13px;
+}
+.priceguess-result-stats-v76 {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;
+  width: 100%; max-width: 480px; margin-top: 8px;
+}
+.priceguess-result-stats-v76 div { display: flex; flex-direction: column; gap: 4px; }
+.priceguess-result-stats-v76 span { font-size: 12px; color: rgba(255,255,255,.7); font-weight: 700; }
+.priceguess-result-stats-v76 strong { font-size: 26px; font-weight: 900; }
+.priceguess-result-best-v76 { color: rgba(255,255,255,.85); font-size: 13.5px; margin: 4px 0 0; }
+.priceguess-result-actions-v76 { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.priceguess-result-actions-v76 button { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; }
+.priceguess-result-actions-v76 .ghost { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); color: #fff; }
+
+@media (max-width: 760px) {
+  .priceguess-rules-v76,
+  .priceguess-best-v76,
+  .priceguess-result-stats-v76 { grid-template-columns: 1fr; }
+  .priceguess-card-v76 { grid-template-columns: 1fr; }
+  .priceguess-product-img-v76 { max-width: 220px; margin: 0 auto; }
+  .priceguess-options-v76 { grid-template-columns: 1fr; }
+}

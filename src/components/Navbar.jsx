@@ -15,11 +15,15 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   // v73 — Bỏ mục "Điểm bán" khỏi thanh nav (theo yêu cầu, để thanh ngang gọn hơn và
   // đủ chỗ hiện đầy đủ chữ các mục còn lại, không cần cắt bớt/ẩn chữ nữa). Trang
   // Stores.jsx vẫn còn nguyên trong code, chỉ là không còn link dẫn tới từ thanh nav.
+  // v76 — Thêm "Cawi Đố Giá" (minigame đoán giá sản phẩm thật) vào thanh nav. Thêm
+  // mục thứ 6 có thể khiến thanh nav xuống 2 hàng ở màn hình hẹp hơn — đây là hành vi
+  // AN TOÀN đã chọn từ v73 (flex-wrap, không cắt/ẩn chữ mục nào), không phải lỗi.
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['savings-achievements', 'Thành tựu tiết kiệm'],
+    ['price-game', 'Cawi Đố Giá'],
     ['about', t.about]
   ];
 

@@ -17,6 +17,7 @@ import CheckHistory from './pages/CheckHistory.jsx';
 import PurchaseHistory from './pages/PurchaseHistory.jsx';
 import GroupCart from './pages/GroupCart.jsx';
 import SavingsAchievements from './pages/SavingsAchievements.jsx';
+import PriceGuessGame from './pages/PriceGuessGame.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
@@ -224,6 +225,11 @@ function App() {
         {page === 'savings-achievements' && (
           <SavingsAchievements
             currency={currency}
+            onBack={() => navigate('home')}
+          />
+        )}
+        {page === 'price-game' && (
+          <PriceGuessGame
             onBack={() => navigate('home')}
           />
         )}
