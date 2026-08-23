@@ -36,7 +36,7 @@ http://localhost:5173
 - Sửa cài đặt: `src/components/SettingsPanel.jsx`
 - Sửa trang chủ: `src/pages/Home.jsx`
 - Sửa Flash Sale: `src/pages/FlashSale.jsx`
-- Sửa Điểm bán: `src/pages/Stores.jsx`
+- Sửa Điểm bán: `src/pages/Stores.jsx` (từ v73, trang này không còn link từ thanh nav nữa, nhưng file/route vẫn còn nguyên)
 - Sửa Về chúng tôi: `src/pages/About.jsx`
 - Sửa tóm tắt đánh giá AI: `src/data/reviews.js` (dữ liệu), `src/components/AIReviewSummary.jsx` (giao diện)
 - Sửa Ghép Đơn Cùng Bạn Bè: `src/data/groupCarts.js` (dữ liệu/ngưỡng freeship), `src/pages/GroupCart.jsx` (giao diện, xem nhóm/chỉnh sửa, số lượng, chốt nhóm/QR, lưu tài khoản), `src/components/PaymentQr.jsx` + `src/utils/vietqr.js` + `src/utils/qrCompose.js` (mã QR VietQR thật, ghép tên vào ảnh)
@@ -44,7 +44,7 @@ http://localhost:5173
 - Sửa Cawi Cố Vấn Chi Tiêu / Bộ đếm tiết kiệm: `src/data/purchases.js`, `src/components/SpendingAdvisorCard.jsx`, `src/components/SavingsCounter.jsx`
 - Sửa Cawi Đánh Giá Tổng Hợp: `src/data/reviews.js` hàm `getCrossPlatformBreakdown` (hiển thị qua nút "Xem đánh giá chi tiết" trong `ProductModal.jsx`)
 - Sửa quyền lợi từng gói (Free/Student/Plus), giới hạn số nhóm/tháng: `src/data/plans.js`
-- Sửa Giỏ hàng so sánh: `src/data/cart.js` (lưu trữ), `src/components/CartPanel.jsx` (giao diện toàn màn hình + vuốt để xoá + chế độ "Sửa" chọn nhiều/xoá hết + icon Cawi Robo trong header giỏ hàng), nút "Thêm vào giỏ hàng" trong `src/components/ProductModal.jsx`, icon giỏ hàng (gradient xanh than–xanh lá) trong `src/components/Navbar.jsx`
+- Sửa Giỏ hàng so sánh: `src/data/cart.js` (lưu trữ), `src/components/CartPanel.jsx` (giao diện toàn màn hình + vuốt để xoá + chế độ "Sửa" chọn nhiều/xoá hết + icon Cawi Robo trong header giỏ hàng), nút "Thêm vào giỏ hàng" trong `src/components/ProductModal.jsx`. Từ v73, không còn icon giỏ hàng riêng trên thanh nav — mở giỏ hàng qua dòng "Giỏ hàng so sánh" trong menu 3 gạch (`src/components/Navbar.jsx`)
 - Sửa câu hỏi mẫu Cawi Robo: `src/components/CawiRobot.jsx` (`quickQuestions`, `moreQuestions`, `getBotReply`)
 - Sửa mốc/huy hiệu "Thành tựu tiết kiệm": `src/data/purchases.js` (`SAVINGS_MILESTONES`), `src/pages/SavingsAchievements.jsx` (trang bản đồ thành tựu), `src/components/SavingsCounter.jsx` (khối tiết kiệm ở trang chủ)
 
