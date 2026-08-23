@@ -27,6 +27,10 @@ main { max-width: 1220px; margin: 0 auto; padding: 22px; }
 .nav-links button, .ghost { border: 1px solid transparent; background: transparent; color: var(--text); padding: 10px 14px; border-radius: 999px; font-weight: 700; }
 .nav-links button:hover, .ghost:hover { background: #f1f5f9; }
 .nav-links .nav-active { background: var(--black); color: white; }
+/* v73 — Bỏ hẳn mục "Điểm bán" khỏi thanh nav (xem navs trong Navbar.jsx) để thanh
+   ngang gọn hơn. Tất cả chữ trên thanh nav luôn hiện rõ đầy đủ, không cắt bớt/ẩn
+   bớt chữ. Nếu có lúc không đủ chỗ ở màn hình hẹp hơn, flex-wrap ở .nav-links (dòng
+   phía trên) sẽ tự xuống dòng chứ không bao giờ cắt chữ. */
 .primary, .secondary, .dark-btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 800; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
 .primary { background: linear-gradient(135deg, var(--primary), #facc15); color: #111827; box-shadow: 0 14px 32px rgba(251,146,60,.28); }
 .primary:hover, .secondary:hover, .dark-btn:hover { transform: translateY(-2px); }
@@ -8390,6 +8394,139 @@ option {
   border: 2px solid #fff;
 }
 
+/* v67-v72 — Icon giỏ hàng so sánh từng nằm cạnh nút Đăng nhập ở navbar (đã trải
+   qua nhiều lần chỉnh: to hơn, đổi màu gradient, đổi nền...). */
+/* v73 — Bỏ hẳn icon giỏ hàng khỏi thanh nav trên cùng theo yêu cầu, nhường chỗ cho
+   nút thông báo (chuông) và nút menu 3 gạch — giỏ hàng vẫn mở được bình thường qua
+   dòng "Giỏ hàng so sánh" trong menu 3 gạch (xem cawi-cart-side-btn-v71 trong
+   CartPanel.jsx cho icon Cawi Robo bên trong khung giỏ hàng, không đổi gì ở đó).
+   Class .cart-nav-btn-v69 không còn được dùng ở đâu nên xoá hẳn CSS cho gọn. */
+
+/* v69 — Icon Cawi Robo mở khung chat, dùng icon vẽ sẵn (không phải ảnh mascot) để
+   luôn gọn, đúng cỡ, không bị vỡ layout hay lộ nền xấu như ảnh PNG trước đó. */
+/* v71 — Icon này không còn cố định trên thanh nav nữa (khi mở giỏ hàng, khung giỏ
+   hàng che mất icon trên nav nên đặt ở đó vô nghĩa). Chuyển hẳn vào trong header của
+   khung giỏ hàng (đứng ngay bên cạnh chữ "Giỏ hàng"), chỉ xuất hiện khi giỏ hàng
+   đang mở — dùng đúng vị trí trong luồng flex của header (không phải nút nổi
+   position:fixed) để không bao giờ bị đè lên nút đóng, kể cả khi khung giỏ hàng
+   chiếm hết chiều rộng màn hình trên di động. Kích cỡ/nền tròn xám kế thừa mặc định
+   từ `.cart-panel-head-v67 button`, ở đây chỉ cần chỉnh màu icon + hiệu ứng "nảy vào". */
+.cawi-cart-side-btn-v71 {
+  color: #172033;
+  animation: cawiNavPopIn-v71 .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes cawiNavPopIn-v71 {
+  from { opacity: 0; transform: scale(.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Nút "Thêm vào giỏ hàng" trong khung so sánh sản phẩm */
+.product-add-cart-btn-v67 {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1.5px solid var(--primary-dark); background: #fff; color: var(--primary-dark);
+  font-weight: 900; font-size: 13.5px; padding: 10px 16px; border-radius: 999px; margin-top: 4px;
+}
+.product-add-cart-btn-v67:hover { background: rgba(251,146,60,.08); }
+.product-add-cart-btn-v67.added { border-color: rgba(34,197,94,.5); color: #15803d; background: rgba(240,253,244,.7); cursor: default; }
+
+/* Giỏ hàng so sánh — panel trượt từ bên phải */
+.cart-panel-backdrop-v67 {
+  position: fixed; inset: 0; background: rgba(15,23,42,.42); z-index: 3200;
+  display: flex; justify-content: flex-end; backdrop-filter: blur(2px);
+}
+.cart-panel-v67 {
+  width: min(460px, 100vw); height: 100%; background: #fff; box-shadow: -24px 0 60px rgba(15,23,42,.22);
+  display: flex; flex-direction: column; padding: 20px; gap: 12px; overflow-y: auto;
+  animation: cw67-cart-slide-in .22s ease; position: relative;
+}
+@keyframes cw67-cart-slide-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.cart-panel-head-v67 { display: flex; align-items: center; justify-content: space-between; }
+.cart-panel-head-v67 span { display: inline-flex; align-items: center; gap: 8px; font-weight: 900; font-size: 18px; }
+.cart-panel-head-v67 button { background: #f1f5f9; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; flex: 0 0 auto; }
+.cart-panel-hint-v67 { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 0; }
+.cart-panel-empty-v67 { display: grid; justify-items: center; gap: 10px; padding: 40px 10px; color: var(--muted); text-align: center; }
+.cart-panel-empty-v67 svg { color: #cbd5e1; }
+.cart-panel-list-v67 { display: grid; gap: 10px; padding-bottom: 8px; }
+
+/* v69 — Giỏ hàng: màn hình dạng "toàn màn hình" giống app mua sắm thật, có chế độ
+   "Sửa" cho phép chọn nhiều sản phẩm để xoá cùng lúc hoặc xoá hết giỏ hàng. */
+.cart-panel-fullscreen-v69 { width: min(480px, 100vw); }
+.cart-panel-head-v69 { justify-content: flex-start; gap: 10px; }
+.cart-panel-head-v69 span:first-of-type { flex: 1; justify-content: center; }
+.cart-panel-head-back-v69 { background: #f1f5f9; }
+.cart-panel-edit-toggle-v69 {
+  border: 0; background: transparent; color: var(--primary-dark); font-weight: 900; font-size: 14.5px;
+  width: auto; height: auto; border-radius: 999px; padding: 8px 12px;
+}
+.cart-panel-edit-toggle-v69:hover { background: rgba(251,146,60,.1); }
+.cart-panel-edit-toggle-spacer-v69 { width: 34px; height: 34px; flex: 0 0 auto; }
+
+.cart-row-wrap-v69,
+.cart-row-wrap-v67.edit-mode-v69 { overflow: visible; }
+.cart-row-wrap-v67.edit-mode-v69 .cart-row-v67 { cursor: pointer; }
+.cart-row-check-v69 {
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #cbd5e1;
+  background: #fff; display: grid; place-items: center; color: #fff;
+}
+.row-selected-v69 { border-color: rgba(234,88,12,.45) !important; background: rgba(255,247,237,.7) !important; }
+.row-selected-v69 .cart-row-check-v69 { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+.cart-panel-bulkbar-v69 {
+  position: sticky; bottom: 0; margin: 6px -20px -20px; padding: 14px 20px;
+  background: #fff; border-top: 1px solid var(--line); display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; box-shadow: 0 -12px 24px rgba(15,23,42,.05);
+}
+.cart-panel-selectall-v69 {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent;
+  font-weight: 750; font-size: 13px; color: #172033; flex: 0 0 auto;
+}
+.cart-panel-selectall-box-v69 {
+  width: 20px; height: 20px; border-radius: 6px; border: 2px solid #cbd5e1; background: #fff;
+  display: grid; place-items: center; color: #fff;
+}
+.cart-panel-selectall-box-v69.checked { background: var(--primary-dark); border-color: var(--primary-dark); }
+.cart-panel-bulkdelete-v69 {
+  display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 999px;
+  background: #dc2626; color: #fff; font-weight: 900; font-size: 13.5px; padding: 11px 18px;
+  white-space: nowrap;
+}
+.cart-panel-bulkdelete-v69:hover { background: #b91c1c; }
+
+.cart-panel-bulkconfirm-backdrop-v69 {
+  position: absolute; inset: 0; background: rgba(15,23,42,.32); display: flex; align-items: center;
+  justify-content: center; padding: 24px; z-index: 5; border-radius: inherit;
+}
+.cart-panel-bulkconfirm-v69 {
+  background: #fff; border-radius: 20px; padding: 20px; display: flex; flex-direction: column;
+  gap: 14px; text-align: center; box-shadow: 0 24px 60px rgba(15,23,42,.22); max-width: 320px;
+}
+.cart-panel-bulkconfirm-v69 span { font-weight: 750; font-size: 14px; color: #172033; }
+.cart-panel-bulkconfirm-v69 div { display: flex; gap: 10px; justify-content: center; }
+
+.cart-row-wrap-v67 { position: relative; border-radius: 18px; overflow: hidden; }
+.cart-row-delete-bg-v67 {
+  position: absolute; inset: 0; background: linear-gradient(90deg, #fecaca, #ef4444); color: #fff;
+  display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding-right: 18px; font-weight: 900;
+}
+.cart-row-v67 {
+  position: relative; display: flex; align-items: center; gap: 10px; background: #fff;
+  border: 1px solid var(--line); border-radius: 18px; padding: 10px; touch-action: pan-y;
+  transition: transform .15s ease;
+}
+.cart-row-thumb-v67 { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 14px; overflow: hidden; background: #f8fafc; }
+.cart-row-thumb-v67 img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cart-row-info-v67 { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
+.cart-row-info-v67 b { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.cart-row-info-v67 span { color: var(--primary-dark); font-weight: 800; font-size: 12.5px; }
+.cart-row-remove-v67 { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: #fef2f2; color: #dc2626; display: grid; place-items: center; }
+.cart-row-confirm-v67 {
+  position: absolute; inset: 0; background: rgba(255,255,255,.98); border: 1px solid rgba(220,38,38,.3);
+  border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 10px; text-align: center; z-index: 2;
+}
+.cart-row-confirm-v67 span { font-size: 12.5px; font-weight: 700; color: #172033; }
+.cart-row-confirm-v67 div { display: flex; gap: 8px; }
+
 .notification-panel-v43,
 .hamburger-panel-v43 {
   position: absolute;
@@ -11525,17 +11662,26 @@ option {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 26px;
-  padding: 20px;
+  padding: 22px;
   box-shadow: 0 14px 34px rgba(15,23,42,.07);
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
+.groupcart-card-v58::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #172033, #16a34a);
+}
+.groupcart-card-v58:hover { transform: translateY(-4px); box-shadow: 0 22px 46px rgba(15,23,42,.13); }
 
 .groupcart-card-v58.complete {
   border-color: rgba(34,197,94,.35);
   background: linear-gradient(180deg, rgba(240,253,244,.7), #fff 30%);
 }
+.groupcart-card-v58.complete::before { background: linear-gradient(90deg, #16a34a, #facc15); }
 
 .groupcart-card-head-v58 { display: grid; gap: 4px; }
 
@@ -11608,11 +11754,12 @@ option {
 .groupcart-status-v58 b { color: var(--primary-dark); }
 .groupcart-status-v58.done { background: rgba(240,253,244,.9); border-color: rgba(34,197,94,.3); color: #15803d; font-weight: 800; }
 
-.groupcart-members-v58 { display: grid; gap: 8px; }
+.groupcart-members-v58 { display: grid; gap: 8px; min-width: 0; }
 
 .groupcart-member-row-v58 {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 10px;
   border: 1px solid var(--line);
   background: #fff;
@@ -11627,15 +11774,16 @@ option {
 
 .groupcart-avatar-v58 {
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #ffedd5;
-  color: #9a3412;
+  background: linear-gradient(135deg, #172033, #16a34a);
+  color: #fff;
   font-weight: 900;
   font-size: 13px;
+  box-shadow: 0 4px 10px rgba(15,23,42,.22);
 }
 
 .groupcart-member-info-v58 {
@@ -11657,9 +11805,176 @@ option {
   gap: 8px;
 }
 
+/* ======================= v67 — Ghép Đơn Cùng Bạn Bè: các bổ sung mới ======================= */
+
+/* Banner giới hạn gói Free — tách riêng khỏi đoạn text mô tả demo, để to/nổi bật hơn
+   hẳn, tự động không hiện với gói không giới hạn số nhóm (điều kiện đã xử lý ở JS). */
+.groupcart-free-limit-banner-v67 {
+  max-width: 1180px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(251,146,60,.16), rgba(234,88,12,.10));
+  border: 1.5px solid rgba(234,88,12,.35);
+  color: #9a3412;
+  font-size: 15.5px;
+  font-weight: 800;
+}
+.groupcart-free-limit-banner-v67 svg { flex: 0 0 auto; color: #ea580c; }
+.groupcart-free-limit-banner-v67 b { font-size: 17px; }
+.groupcart-free-limit-banner-v67.full { background: linear-gradient(135deg, rgba(239,68,68,.16), rgba(185,28,28,.10)); border-color: rgba(185,28,28,.4); color: #991b1b; }
+.groupcart-free-limit-banner-v67.full svg { color: #dc2626; }
+
+/* Ô tìm sản phẩm dạng gõ tên + dropdown gợi ý (đã xem gần đây / gợi ý theo lịch sử xem) */
+.groupcart-product-picker-v67 { position: relative; }
+.groupcart-product-picker-v67 input {
+  width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 11px 13px;
+  background: #fff; font-weight: 700; color: var(--text);
+}
+.groupcart-product-suggest-v67 {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20;
+  background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(15,23,42,.14); padding: 8px; max-height: 260px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.groupcart-product-suggest-v67 button {
+  text-align: left; padding: 9px 10px; border-radius: 10px; background: transparent;
+  font-weight: 700; font-size: 13.5px; color: var(--text);
+}
+.groupcart-product-suggest-v67 button:hover { background: #f8fafc; }
+.groupcart-product-suggest-group-v67 { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+.groupcart-product-suggest-group-v67 small { padding: 4px 10px; color: var(--muted); font-weight: 900; text-transform: uppercase; font-size: 10.5px; letter-spacing: .04em; }
+.groupcart-product-suggest-empty-v67 { padding: 9px 10px; color: var(--muted); font-size: 13px; font-weight: 600; }
+
+/* 2 nút hành động trên mỗi thẻ nhóm: Xem nhóm / Chỉnh sửa */
+/* v72 — margin-top:auto đẩy cả cụm nút (Xem nhóm/Chỉnh sửa + Mời bạn bè tham gia)
+   xuống sát đáy thẻ, bất kể phần nội dung phía trên (số thành viên, độ dài tên...)
+   dài ngắn khác nhau giữa các thẻ — nhờ đó khi nhiều thẻ xếp hàng ngang (CSS Grid
+   tự giãn các thẻ trong cùng 1 hàng bằng chiều cao thẻ cao nhất), các nút luôn thẳng
+   hàng ngang nhau ở cùng 1 mức, không bị lệch trên/dưới giữa các thẻ nữa. */
+.groupcart-card-actions-v67 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+.groupcart-view-btn-v67, .groupcart-edit-btn-v67 {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 44px; text-align: center;
+}
+.groupcart-invite-btn-v58 { height: 44px; }
+
+/* v72 — Khung chi tiết nhóm (Xem nhóm / Chỉnh sửa) giờ hiện dạng MODAL phóng to đè
+   lên trên danh sách, không còn "chuyển hẳn sang trang khác" như bản cũ — bấm ra
+   ngoài lớp nền mờ hoặc nút đóng (X) để quay lại, danh sách phía sau vẫn còn nguyên,
+   chỉ bị mờ/tối đi. */
+.groupcart-detail-backdrop-v72 {
+  /* v72 fix — Cawi Robo (.cw22-widget) nổi ở z-index 2600, cần đặt modal này cao hơn
+     (giống .cart-panel-backdrop-v67 dùng 3200) để con vật không đè lên nội dung modal. */
+  position: fixed; inset: 0; z-index: 3200; background: rgba(15,23,42,.6); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-start; justify-content: center; overflow-y: auto;
+  padding: 40px 16px; animation: groupcart-detail-fade-v72 .18s ease;
+}
+@keyframes groupcart-detail-fade-v72 { from { opacity: 0; } to { opacity: 1; } }
+.groupcart-detail-panel-v72 {
+  position: relative; width: min(760px, 100%); background: #fff; border-radius: 28px;
+  padding: 32px; box-shadow: 0 30px 70px rgba(15,23,42,.35); margin: auto 0;
+  animation: groupcart-detail-pop-v72 .22s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes groupcart-detail-pop-v72 { from { opacity: 0; transform: scale(.94) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.groupcart-detail-close-v72 {
+  position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%;
+  background: #f1f5f9; border: 0; display: grid; place-items: center; color: #172033; z-index: 2;
+}
+.groupcart-detail-close-v72:hover { background: #e2e8f0; }
+@media (max-width: 640px) {
+  .groupcart-detail-backdrop-v72 { padding: 0; align-items: stretch; }
+  .groupcart-detail-panel-v72 { width: 100%; min-height: 100%; border-radius: 0; margin: 0; padding: 18px 16px 28px; }
+  .groupcart-edit-row-v67 { gap: 7px; padding: 9px 8px; }
+  .groupcart-member-amount-v58 { font-size: 12px; }
+  .groupcart-qty-stepper-v67 { gap: 5px; }
+}
+
+/* Trang chi tiết nhóm phóng to (Xem nhóm / Chỉnh sửa) */
+.groupcart-detail-head-v67 {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 18px; padding-right: 44px;
+}
+.groupcart-detail-head-v67 h1 { margin: 6px 0 4px; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.03em; }
+.groupcart-detail-tabs-v67 { display: inline-flex; gap: 6px; background: #f1f5f9; padding: 5px; border-radius: 999px; }
+.groupcart-detail-tabs-v67 button {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px;
+  font-weight: 800; font-size: 13.5px; color: #475569; background: transparent;
+}
+.groupcart-detail-tabs-v67 button.active { background: var(--black); color: #fff; }
+.groupcart-detail-progress-v67 { max-width: 480px; margin-bottom: 20px; }
+.groupcart-detail-members-v67 { margin-bottom: 16px; }
+
+/* v72 — min-width:0 trên các item lồng trong grid: mặc định CSS Grid cho item
+   min-width:auto, nghĩa là item sẽ không co lại nhỏ hơn kích thước "tự nhiên" của
+   nội dung bên trong nó (kể cả khi nội dung đó có white-space:nowrap, như tên sản
+   phẩm trong .groupcart-edit-row-info-v67) — khiến hàng bị tràn ngang ra ngoài khung
+   modal trên màn hình hẹp thay vì co lại/rút gọn bằng dấu "...". min-width:0 cho
+   phép item co đúng theo chiều rộng khung chứa. */
+.groupcart-edit-panel-v67 { display: grid; gap: 18px; min-width: 0; }
+.groupcart-edit-hint-v67 {
+  background: rgba(255,247,237,.8); border: 1px solid rgba(251,146,60,.3); border-radius: 16px;
+  padding: 12px 16px; color: #7c3a10; font-weight: 700; font-size: 13.5px; margin: 0;
+}
+.groupcart-edit-list-v67 { display: grid; gap: 8px; min-width: 0; }
+.groupcart-edit-row-v67 {
+  display: flex; align-items: center; gap: 10px; border: 1px solid var(--line);
+  background: #fff; border-radius: 16px; padding: 10px 12px; min-width: 0;
+}
+.groupcart-edit-row-info-v67 { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.groupcart-edit-row-info-v67 b { font-size: 13.5px; }
+.groupcart-edit-row-info-v67 small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.groupcart-edit-row-warn-v67 { color: #d97706; flex: 0 0 auto; }
+
+.groupcart-qty-stepper-v67 { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.groupcart-qty-stepper-v67 button {
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: #f8fafc;
+  display: grid; place-items: center; color: #172033;
+}
+.groupcart-qty-stepper-v67 button:disabled { opacity: .4; cursor: not-allowed; }
+.groupcart-qty-stepper-v67 span { min-width: 18px; text-align: center; font-weight: 900; font-size: 13.5px; }
+
+.groupcart-remove-member-btn-v67 {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(220,38,38,.25);
+  background: rgba(254,242,242,.9); color: #dc2626; display: grid; place-items: center; flex: 0 0 auto;
+}
+.groupcart-remove-member-btn-v67:hover { background: rgba(254,226,226,.95); }
+
+.groupcart-add-product-card-v67 {
+  border: 1px dashed rgba(148,163,184,.6); border-radius: 18px; padding: 16px; display: grid; gap: 12px;
+  background: rgba(248,250,252,.7);
+}
+.groupcart-add-product-card-v67 > p { display: flex; align-items: center; gap: 7px; margin: 0; font-weight: 900; color: #172033; }
+.groupcart-add-product-submit-wrap-v67 { display: flex; align-items: flex-end; }
+.groupcart-add-product-submit-wrap-v67 button { width: 100%; }
+
+/* Nút đổi lại cách chia tiền (huỷ chia đều/tự nhập đã chọn để chọn lại) */
+.groupcart-settle-redo-v67 {
+  display: inline-flex; align-items: center; gap: 6px; width: auto; padding: 8px 14px;
+  font-size: 12.5px; margin-bottom: 4px;
+}
+
+/* Xác thực định dạng số tài khoản + tuỳ chọn lưu tài khoản cho lần sau */
+.groupcart-input-invalid-v67 { border-color: #dc2626 !important; background: rgba(254,242,242,.6); }
+.groupcart-field-error-v67 { display: flex; align-items: center; gap: 4px; color: #dc2626; font-weight: 700; font-size: 11.5px; }
+.groupcart-remember-account-v67 {
+  display: flex !important; flex-direction: row !important; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: #334155;
+}
+.groupcart-remember-account-v67 input { width: 16px; height: 16px; accent-color: var(--primary-dark); }
+.groupcart-forget-account-v67 {
+  justify-self: start; background: transparent; color: var(--muted); font-size: 12px; font-weight: 700;
+  text-decoration: underline; padding: 0;
+}
+.groupcart-account-note-v67 { display: flex; align-items: flex-start; gap: 5px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
 @media (max-width: 760px) {
   .groupcart-create-row-v58 { grid-template-columns: 1fr; }
   .groupcart-toolbar-v58 { flex-direction: column; align-items: flex-start; }
+  .groupcart-card-actions-v67 { grid-template-columns: 1fr; }
 }
 
 /* =======================================================
@@ -11840,6 +12155,38 @@ option {
 }
 .savings-counter-share-v63:hover { transform: translateY(-2px); }
 
+/* v69 — Bỏ 2 lớp nền chồng lên nhau: khối này trước đây nằm trong 1 khối
+   ".section-block" ngoài (có nền + viền + bóng riêng) rồi lại có nền riêng của chính
+   nó bên trong — giờ chỉ giữ đúng 1 lớp nền (của chính khối tiết kiệm). Cần !important
+   vì ".section-block" có vài rule nền !important ở các bản trước (hiệu ứng kính mờ theo
+   breakpoint) — nếu không thêm !important ở đây thì các rule đó vẫn thắng. */
+.savings-counter-section-v63.section-block {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  padding: 0 !important; border-radius: 0 !important;
+}
+
+/* v69 — Căn giữa toàn khối: số tiền tiết kiệm to nhất/nổi bật nhất, ngay dưới là
+   thanh tiến trình, dưới nữa là tên thành tựu hiện tại (chỉ 1 cái, không phải dãy
+   huy hiệu như trước). */
+.savings-counter-v69-centered { align-items: center; text-align: center; }
+.savings-counter-v69-centered .savings-counter-progress-wrap-v63 { width: min(440px, 100%); }
+.savings-counter-value-v69 { font-size: clamp(42px, 8vw, 66px); margin: 2px 0; }
+
+.savings-counter-current-achv-v69 {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 22px;
+  border-radius: 20px; background: linear-gradient(135deg, #fff7ed, #fef3e2);
+  border: 1.5px solid rgba(234,88,12,.28); box-shadow: 0 10px 26px rgba(234,88,12,.1);
+}
+.savings-counter-current-achv-v69.locked { background: #f8fafc; border-color: var(--line); box-shadow: none; }
+.savings-counter-current-achv-label-v69 { font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #c2410c; }
+.savings-counter-current-achv-v69.locked .savings-counter-current-achv-label-v69 { color: var(--muted); }
+.savings-counter-current-achv-name-v69 { font-size: 17px; font-weight: 900; color: #172033; }
+.savings-counter-map-link-v69 {
+  display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent;
+  color: var(--primary-dark); font-weight: 800; font-size: 13px; padding: 4px 6px;
+}
+.savings-counter-map-link-v69:hover { text-decoration: underline; }
+
 /* ---- Cawi Tín Hiệu Mua ---- */
 .buy-signal-card-v63 {
   margin-top: 14px;
@@ -11970,6 +12317,18 @@ option {
   background: rgba(2,6,23,.86); color: #fff; font-size: 11px; font-weight: 800;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 4px 12px rgba(2,6,23,.25);
 }
+/* v67 — ảnh QR giờ được ghép (burn-in) tên trực tiếp vào file ảnh bằng canvas
+   (xem src/utils/qrCompose.js) nên không cần dán nhãn CSS đè lên ảnh nữa trong
+   trường hợp bình thường. Nhãn nhỏ dưới đây chỉ hiện tạm trong lúc đang ghép. */
+.payment-qr-composing-v67 {
+  position: absolute; left: 50%; top: 15%; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 5px;
+  max-width: calc(100% - 20px); padding: 4px 11px; border-radius: 999px;
+  background: rgba(2,6,23,.72); color: #fff; font-size: 10.5px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.payment-qr-composing-v67 .spin { animation: cw67-spin .8s linear infinite; }
+@keyframes cw67-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .payment-qr-info-v64 { display: flex; flex-direction: column; gap: 2px; }
 .payment-qr-info-v64 span { color: #334155; font-weight: 650; font-size: 12.5px; }
 .payment-qr-info-v64 small { color: var(--muted); }
@@ -11988,3 +12347,143 @@ option {
 .groupcart-manual-qr-name-btn-v63 span:first-of-type { flex: 1; text-align: left; }
 .groupcart-manual-qr-hint-v63 { color: var(--primary-dark); font-size: 12px; font-weight: 800; }
 .groupcart-manual-qr-name-btn-v63.open { border-color: rgba(251,146,60,.4); background: rgba(255,247,237,.7); }
+
+/* =======================================================
+   v69 — Trang "Thành tựu tiết kiệm" (bản đồ cột mốc kiểu game)
+   ======================================================= */
+.savings-achv-hero-v69 { display: flex; flex-direction: column; gap: 8px; }
+.savings-achv-overview-v69 {
+  margin-top: 18px; padding: 20px; border-radius: 22px; background: rgba(255,255,255,.85);
+  border: 1px solid rgba(226,232,240,.9); display: flex; flex-direction: column; gap: 10px; max-width: 520px;
+}
+.savings-achv-overview-top-v69 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.savings-achv-overview-top-v69 span { color: var(--muted); font-weight: 750; font-size: 13px; }
+.savings-achv-overview-top-v69 strong { font-size: clamp(24px, 4vw, 32px); color: #14532d; letter-spacing: -.03em; }
+.savings-achv-overview-bar-v69 { height: 18px; border-radius: 999px; background: #f1f5f9; border: 1px solid var(--line); overflow: hidden; box-shadow: inset 0 1px 3px rgba(15,23,42,.08); }
+.savings-achv-overview-bar-v69 div {
+  height: 100%; border-radius: 999px; min-width: 18px;
+  background: linear-gradient(90deg, #22c55e, #a78bfa 60%, #facc15);
+  box-shadow: 0 0 12px rgba(34,197,94,.45); transition: width .6s ease;
+}
+.savings-achv-overview-pct-v69 { color: var(--muted); font-weight: 700; font-size: 13px; }
+
+.savings-achv-path-v69 { display: flex; flex-direction: column; margin-top: 28px; max-width: 620px; }
+
+.savings-achv-node-v69 { position: relative; display: flex; gap: 18px; padding-bottom: 34px; }
+.savings-achv-node-v69:last-child { padding-bottom: 0; }
+.savings-achv-node-line-v69 {
+  position: absolute; left: 27px; top: 56px; bottom: 0; width: 3px; border-radius: 3px; background: var(--line);
+}
+.savings-achv-node-v69.done .savings-achv-node-line-v69 { background: linear-gradient(180deg, var(--green), rgba(34,197,94,.25)); }
+
+.savings-achv-node-icon-v69 {
+  flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 24px; background: #f1f5f9; color: #94a3b8; border: 3px solid #e2e8f0; z-index: 1;
+}
+.savings-achv-node-v69.done .savings-achv-node-icon-v69 { background: linear-gradient(135deg, #22c55e, #15803d); color: #fff; border-color: rgba(34,197,94,.35); box-shadow: 0 10px 24px rgba(34,197,94,.28); }
+.savings-achv-node-v69.current .savings-achv-node-icon-v69 {
+  background: linear-gradient(135deg, #fb923c, #ea580c); color: #fff; border-color: rgba(234,88,12,.35);
+  box-shadow: 0 0 0 6px rgba(251,146,60,.18), 0 10px 26px rgba(234,88,12,.3); animation: savings-node-pulse-v69 2.2s ease-in-out infinite;
+}
+@keyframes savings-node-pulse-v69 {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(251,146,60,.18), 0 10px 26px rgba(234,88,12,.3); }
+  50% { box-shadow: 0 0 0 11px rgba(251,146,60,.1), 0 10px 26px rgba(234,88,12,.3); }
+}
+
+.savings-achv-node-body-v69 { flex: 1; padding-top: 4px; display: flex; flex-direction: column; gap: 3px; }
+.savings-achv-node-tag-v69 { font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: #94a3b8; }
+.savings-achv-node-v69.done .savings-achv-node-tag-v69 { color: #16a34a; }
+.savings-achv-node-v69.current .savings-achv-node-tag-v69 { color: #c2410c; }
+.savings-achv-node-body-v69 h3 { font-size: 18px; margin: 0; color: #172033; }
+.savings-achv-node-v69.locked .savings-achv-node-body-v69 h3 { color: #94a3b8; }
+.savings-achv-node-amount-v69 { color: var(--muted); font-weight: 700; font-size: 13px; }
+.savings-achv-node-progress-v69 { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; max-width: 340px; }
+.savings-achv-node-progress-bar-v69 { height: 9px; border-radius: 999px; background: #f1f5f9; border: 1px solid var(--line); overflow: hidden; }
+.savings-achv-node-progress-bar-v69 div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--green)); }
+.savings-achv-node-progress-v69 small { color: var(--muted); font-weight: 700; font-size: 12px; }
+
+/* v72 — Khung "bản đồ trò chơi" sinh động: nền trời đêm (sao + trăng + dãy núi mờ),
+   con đường cong SVG chạy zigzag qua các mốc, tô sáng dần theo % tiến trình thật,
+   toà lâu đài + cúp ở đỉnh, ghim "BẠN Ở ĐÂY" tại đúng mốc đang hướng tới. Thuần
+   trang trí — không có văn bản đè lên ảnh nên không lo vỡ layout ở màn hình hẹp;
+   chi tiết từng mốc vẫn đọc ở danh sách bên dưới (giữ nguyên, xem phía trên). */
+.savings-achv-map-v72 {
+  position: relative; margin-top: 26px; border-radius: 26px; overflow: hidden;
+  aspect-ratio: 400 / 560; max-width: 460px;
+  background: radial-gradient(120% 90% at 15% 0%, #2a2359 0%, #16123a 45%, #0b0a1f 100%);
+  box-shadow: 0 20px 50px rgba(11,10,31,.4), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.savings-achv-map-stars-v72 {
+  position: absolute; inset: 0; opacity: .85; pointer-events: none;
+  background-image:
+    radial-gradient(1.6px 1.6px at 10% 8%, #fff, transparent 60%),
+    radial-gradient(1.2px 1.2px at 24% 22%, #fff, transparent 60%),
+    radial-gradient(1.4px 1.4px at 62% 6%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 78% 16%, #fff, transparent 60%),
+    radial-gradient(1.6px 1.6px at 40% 12%, #fff, transparent 60%),
+    radial-gradient(1.2px 1.2px at 88% 34%, #fff, transparent 60%),
+    radial-gradient(1.4px 1.4px at 8% 46%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 55% 40%, #fff, transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 62%, #fff, transparent 60%),
+    radial-gradient(1.1px 1.1px at 70% 58%, #fff, transparent 60%);
+}
+.savings-achv-map-moon-v72 {
+  position: absolute; top: 22px; left: 22px; width: 46px; height: 46px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fefce8, #fde68a 55%, #f59e0b 100%);
+  box-shadow: 0 0 34px 8px rgba(253,224,71,.35);
+}
+.savings-achv-map-mountains-v72 {
+  position: absolute; left: -4%; right: -4%; bottom: 0; height: 16%;
+  background: linear-gradient(180deg, rgba(15,17,45,0), rgba(9,9,26,.85) 70%);
+  clip-path: polygon(0% 100%, 0% 55%, 12% 20%, 24% 50%, 38% 10%, 52% 48%, 66% 15%, 80% 45%, 92% 18%, 100% 40%, 100% 100%);
+  opacity: .65;
+}
+/* v72 — HUD đặt góc dưới-trái (không phải trên-phải) vì toà lâu đài + cúp cũng nằm
+   ở góc trên-phải theo đúng điểm cuối con đường — để 2 thứ khỏi đè lên nhau. */
+.savings-achv-map-hud-v72 {
+  position: absolute; bottom: 14px; left: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; z-index: 3;
+}
+.savings-achv-map-hud-level-v72 {
+  background: rgba(11,10,31,.6); border: 1px solid rgba(255,255,255,.18); color: #fde68a;
+  font-size: 11.5px; font-weight: 900; padding: 5px 11px; border-radius: 999px; backdrop-filter: blur(4px);
+}
+.savings-achv-map-hud-pct-v72 { color: #e9e5ff; font-size: 12px; font-weight: 800; opacity: .85; }
+.savings-achv-map-svg-v72 { position: absolute; inset: 0; width: 100%; height: 100%; }
+.savings-achv-map-castle-v72 {
+  position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; z-index: 2;
+  filter: drop-shadow(0 0 10px rgba(250,204,21,.25));
+}
+.savings-achv-map-castle-icon-v72 { font-size: 34px; line-height: 1; }
+.savings-achv-map-castle-trophy-v72 { font-size: 15px; margin-top: -6px; opacity: .55; filter: grayscale(.4); }
+.savings-achv-map-castle-v72.reached .savings-achv-map-castle-trophy-v72 { opacity: 1; filter: none; animation: savings-node-pulse-v69 1.8s ease-in-out infinite; }
+.savings-achv-map-node-v72 {
+  position: absolute; transform: translate(-50%, -50%); z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 15px; font-weight: 900; color: #fff; border: 2.5px solid rgba(255,255,255,.5);
+  background: #475569; box-shadow: 0 6px 16px rgba(0,0,0,.35);
+}
+.savings-achv-map-node-num-v72 {
+  position: absolute; top: -8px; left: -8px; width: 18px; height: 18px; border-radius: 50%;
+  background: #0b0a1f; border: 1.5px solid rgba(255,255,255,.4); color: #fff; font-size: 10px;
+  display: grid; place-items: center; font-weight: 900;
+}
+.savings-achv-map-node-v72.done { background: linear-gradient(135deg, #22c55e, #15803d); border-color: rgba(34,197,94,.7); }
+.savings-achv-map-node-v72.current {
+  background: linear-gradient(135deg, #a78bfa, #7c3aed); border-color: rgba(196,181,253,.9);
+  animation: savings-node-pulse-v69 2s ease-in-out infinite;
+}
+.savings-achv-map-node-v72.locked { background: #334155; color: #94a3b8; opacity: .8; }
+.savings-achv-map-pin-v72 {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; background: #fff; color: #172033; font-size: 10.5px; font-weight: 900;
+  padding: 4px 9px; border-radius: 999px; box-shadow: 0 6px 14px rgba(0,0,0,.35);
+}
+.savings-achv-map-pin-v72::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: #fff;
+}
+@media (max-width: 640px) {
+  .savings-achv-map-v72 { max-width: 100%; }
+  .savings-achv-map-castle-icon-v72 { font-size: 28px; }
+  .savings-achv-map-node-v72 { width: 30px; height: 30px; font-size: 13px; }
+}

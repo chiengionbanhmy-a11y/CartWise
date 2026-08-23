@@ -5,7 +5,15 @@
   --cw22-head-y: 0px;
   --cw22-head-tilt: 0deg;
   position: fixed;
-  z-index: 2600;
+  /* v73 fix — z-index cũ (2600) khiến icon Cawi Robo nổi đè lên TRÊN CẢ các khung mở
+     ra từ trong thanh nav (menu 3 gạch, thông báo...), vì .navbar tự tạo 1 "tầng xếp
+     lớp" riêng ở z-index 1000 — mọi thứ nằm trong navbar (dù tự đặt z-index cao đến
+     đâu) đều bị giới hạn trong tầng 1000 đó khi so với các phần tử NGOÀI navbar như
+     robot này. Hạ z-index robot xuống dưới 1000 để nó luôn nằm dưới toàn bộ thanh
+     nav (kể cả các khung mở ra từ nav), đúng tinh thần "để icon note phụ, không che
+     nội dung chính" — vẫn nổi trên nội dung trang bình thường (không có z-index) như
+     trước. */
+  z-index: 900;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

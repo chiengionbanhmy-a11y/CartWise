@@ -12,10 +12,12 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
 
   // v69 — Thêm "Thành tựu tiết kiệm" ngay cạnh "Ghép Đơn Cùng Bạn Bè", dẫn tới trang
   // bản đồ cột mốc tiết kiệm kiểu game (đã đạt / còn phía trước).
+  // v73 — Bỏ mục "Điểm bán" khỏi thanh nav (theo yêu cầu, để thanh ngang gọn hơn và
+  // đủ chỗ hiện đầy đủ chữ các mục còn lại, không cần cắt bớt/ẩn chữ nữa). Trang
+  // Stores.jsx vẫn còn nguyên trong code, chỉ là không còn link dẫn tới từ thanh nav.
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
-    ['stores', t.stores],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['savings-achievements', 'Thành tựu tiết kiệm'],
     ['about', t.about]
@@ -101,22 +103,10 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       </nav>
 
       <div className="nav-actions nav-actions-v43">
-        {/* v71 — Gradient xanh than -> xanh lá cho icon giỏ hàng: SVG icon (lucide) tô
-            màu bằng stroke="url(#...)"; defs chỉ cần khai báo 1 lần trên trang. */}
-        <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-          <defs>
-            <linearGradient id="cartwise-cart-gradient-v71" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#172033" />
-              <stop offset="100%" stopColor="#16a34a" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        <button type="button" className="cart-nav-btn-v69" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
-          <ShoppingCart size={32} strokeWidth={2.3} color="url(#cartwise-cart-gradient-v71)" />
-          {cartCount > 0 && <span>{cartCount}</span>}
-        </button>
-
+        {/* v73 — Bỏ icon giỏ hàng khỏi thanh nav trên cùng (theo yêu cầu), nhường
+            chỗ cho nút thông báo (chuông) và nút menu 3 gạch dịch chuyển vào đúng
+            chỗ đó. Giỏ hàng vẫn mở được bình thường qua dòng "Giỏ hàng so sánh"
+            trong menu 3 gạch (đã có sẵn ở dưới, không đổi gì thêm ở đó). */}
         {user ? (
           <>
             <button className="profile-pill" onClick={() => { closePanels(); onOpenProfile(); }}><span>{profile.avatar}</span>{profile.name}</button>

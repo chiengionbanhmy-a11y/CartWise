@@ -235,6 +235,7 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
             maxBadges={plan.savingsCounter.maxBadges}
             currency={currency}
             onOpenUpgrade={onOpenUpgrade}
+            onOpenAchievements={() => onNavigate('savings-achievements')}
           />
         </section>
       )}

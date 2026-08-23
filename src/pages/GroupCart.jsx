@@ -456,10 +456,6 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
 
   const activeDetailGroup = detailView ? allGroups.find((g) => g.id === detailView.groupId) : null;
 
-  if (activeDetailGroup) {
-    return renderGroupDetail(activeDetailGroup, detailView.mode);
-  }
-
   return (
     <section className="standalone-page-v45 groupcart-page-v58">
       <button className="standalone-back-v45" onClick={onBack}><ArrowLeft size={18} /> Quay lại</button>
@@ -590,6 +586,8 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           </div>
         </div>
       )}
+
+      {activeDetailGroup && renderGroupDetail(activeDetailGroup, detailView.mode)}
     </section>
   );
 
@@ -662,32 +660,38 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     );
   }
 
-  // v67 — Màn hình phóng to thành trang riêng (giống các trang khác của web) thay vì
-  // hiện lồng trong thẻ nhỏ. mode "view": xem đầy đủ danh sách + phần chốt nhóm/QR
-  // (chỉ hiện ở đây, không hiện ở thẻ thu gọn ngoài danh sách nữa). mode "edit":
-  // quản lý sản phẩm/số lượng — ai cũng chỉnh được số lượng hoặc thêm sản phẩm mới,
-  // nhưng chỉ chủ nhóm (nhóm do chính trình duyệt này tạo) mới được xoá hẳn 1 thành viên.
+  // v67 — Màn hình phóng to xem chi tiết/chỉnh sửa 1 nhóm.
+  // v72 — Đổi từ "chuyển hẳn sang trang mới" (return sớm thay cả cây JSX) sang dạng
+  // MODAL phóng to ngay trên danh sách hiện tại: nhóm được chọn hiện to hơn hẳn, đè
+  // lên trên với lớp nền mờ/tối phía sau (giống các popup khác trong app — CartPanel,
+  // ProductModal), bấm ra ngoài hoặc nút đóng để quay lại mà không "chuyển trang".
+  // mode "view": xem đầy đủ danh sách + phần chốt nhóm/QR. mode "edit": quản lý sản
+  // phẩm/số lượng — ai cũng chỉnh được số lượng hoặc thêm sản phẩm mới, nhưng chỉ chủ
+  // nhóm (nhóm do chính trình duyệt này tạo) mới được xoá hẳn 1 thành viên.
   function renderGroupDetail(group, mode) {
     const stats = computeGroupStats(group);
     const isOwner = customGroups.some((g) => g.id === group.id);
 
     return (
-      <section className="standalone-page-v45 groupcart-detail-page-v67">
-        <button className="standalone-back-v45" onClick={() => setDetailView(null)}><ArrowLeft size={18} /> Quay lại danh sách nhóm</button>
+      <div className="groupcart-detail-backdrop-v72" role="dialog" aria-modal="true" aria-label={group.title} onClick={() => setDetailView(null)}>
+        <section className="groupcart-detail-panel-v72" onClick={(event) => event.stopPropagation()}>
+          <button type="button" className="groupcart-detail-close-v72" onClick={() => setDetailView(null)} aria-label="Đóng">
+            <X size={18} />
+          </button>
 
-        <div className="groupcart-detail-head-v67">
-          <div>
-            <span className="groupcart-store-tag-v58">{group.storeName}</span>
-            <h1>{group.title}</h1>
-            <span className="groupcart-owner-v58">Tạo bởi {group.ownerName}{isOwner ? ' · Bạn là chủ nhóm này' : ''}</span>
+          <div className="groupcart-detail-head-v67">
+            <div>
+              <span className="groupcart-store-tag-v58">{group.storeName}</span>
+              <h1>{group.title}</h1>
+              <span className="groupcart-owner-v58">Tạo bởi {group.ownerName}{isOwner ? ' · Bạn là chủ nhóm này' : ''}</span>
+            </div>
+            <div className="groupcart-detail-tabs-v67">
+              <button type="button" className={mode === 'view' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'view' })}><Eye size={15} /> Xem nhóm</button>
+              <button type="button" className={mode === 'edit' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'edit' })}><Pencil size={15} /> Chỉnh sửa</button>
+            </div>
           </div>
-          <div className="groupcart-detail-tabs-v67">
-            <button type="button" className={mode === 'view' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'view' })}><Eye size={15} /> Xem nhóm</button>
-            <button type="button" className={mode === 'edit' ? 'active' : ''} onClick={() => setDetailView({ groupId: group.id, mode: 'edit' })}><Pencil size={15} /> Chỉnh sửa</button>
-          </div>
-        </div>
 
-        <div className="groupcart-progress-wrap-v58 groupcart-detail-progress-v67">
+          <div className="groupcart-progress-wrap-v58 groupcart-detail-progress-v67">
           <div className="groupcart-progress-bar-v58">
             <div className="groupcart-progress-fill-v58" style={{ width: `${stats.progressPct}%` }} />
           </div>
@@ -795,8 +799,9 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
               </div>
             </div>
           </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
     );
   }
 
