@@ -79,4 +79,4 @@ export function composeQrWithName(qrUrl, name) {
     img.onerror = () => reject(new Error('image-load-failed'));
     img.src = qrUrl;
   });
-} 
+}
