@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ShoppingCart, X, Trash2, ArrowLeft, Check } from 'lucide-react';
+import { ShoppingCart, X, Trash2, ArrowLeft, Check, Bot } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { getBestFinalStore, getFinalCost } from '../data/products.js';
 
@@ -122,6 +122,16 @@ function CartPanel({ open, onClose, items, products, currency, onRemove, onRemov
     setBulkConfirm(false);
   }
 
+  // v71 — Icon Cawi Robo giờ chỉ hiện khi giỏ hàng đang mở, đứng ngay bên cạnh
+  // (trong khung) giỏ hàng — không còn cố định trên nav (nav bị khung giỏ hàng che
+  // mất khi mở nên đặt ở đó vô nghĩa). Đặt hẳn trong header của khung giỏ hàng thay
+  // vì 1 nút nổi bên ngoài, để không bao giờ bị che/đè lên nút đóng trên di động khi
+  // khung giỏ hàng chiếm hết chiều rộng màn hình. Dùng chung sự kiện 'cawi-open-chat'
+  // mà CawiRobot.jsx đã lắng nghe sẵn ở mọi trang.
+  function openCawiChat() {
+    window.dispatchEvent(new CustomEvent('cawi-open-chat'));
+  }
+
   return (
     <div className="cart-panel-backdrop-v67" role="dialog" aria-modal="true" aria-label="Giỏ hàng so sánh" onClick={onClose}>
       <aside className="cart-panel-v67 cart-panel-fullscreen-v69" onClick={(event) => event.stopPropagation()}>
@@ -130,6 +140,9 @@ function CartPanel({ open, onClose, items, products, currency, onRemove, onRemov
             {editMode ? <ArrowLeft size={18} /> : <X size={18} />}
           </button>
           <span><ShoppingCart size={18} /> Giỏ hàng ({items.length})</span>
+          <button type="button" className="cawi-cart-side-btn-v71" onClick={openCawiChat} aria-label="Mở trợ lý Cawi Robo">
+            <Bot size={18} />
+          </button>
           {items.length > 0 ? (
             <button type="button" className="cart-panel-edit-toggle-v69" onClick={() => (editMode ? exitEditMode() : setEditMode(true))}>
               {editMode ? 'Xong' : 'Sửa'}

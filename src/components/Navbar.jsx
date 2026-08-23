@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, Bot } from 'lucide-react';
 
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
   const { page, t, user, profile, products } = appState;
@@ -29,9 +29,9 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
     onNavigate(key);
   }
 
-  // v69 — Mở khung chat Cawi Robo từ 1 icon cố định trên thanh nav (thay vì chỉ
-  // trông chờ người dùng tự bấm vào robot đang trôi nổi trên màn hình). CawiRobot.jsx
-  // lắng nghe sự kiện này ở mọi trang.
+  // v69 — Mở khung chat Cawi Robo qua sự kiện dùng chung, lắng nghe ở CawiRobot.jsx.
+  // v71 — Icon bấm nhanh mở chat không còn nằm cố định trên nav nữa (xem
+  // CartPanel.jsx), chỉ còn dùng ở đây cho mục "Trợ lý Cawi Robo" trong menu di động.
   function openCawiChat() {
     window.dispatchEvent(new CustomEvent('cawi-open-chat'));
   }
@@ -101,12 +101,19 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       </nav>
 
       <div className="nav-actions nav-actions-v43">
-        <button type="button" className="cawi-nav-btn-v69" onClick={openCawiChat} aria-label="Mở trợ lý Cawi Robo">
-          <img src="/robot-cawi-v4.png" alt="" />
-        </button>
+        {/* v71 — Gradient xanh than -> xanh lá cho icon giỏ hàng: SVG icon (lucide) tô
+            màu bằng stroke="url(#...)"; defs chỉ cần khai báo 1 lần trên trang. */}
+        <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+          <defs>
+            <linearGradient id="cartwise-cart-gradient-v71" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#172033" />
+              <stop offset="100%" stopColor="#16a34a" />
+            </linearGradient>
+          </defs>
+        </svg>
 
         <button type="button" className="cart-nav-btn-v69" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
-          <ShoppingCart size={27} strokeWidth={2.3} />
+          <ShoppingCart size={27} strokeWidth={2.3} color="url(#cartwise-cart-gradient-v71)" />
           {cartCount > 0 && <span>{cartCount}</span>}
         </button>
 
@@ -193,7 +200,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
               </button>
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); openCawiChat(); }}>
-                <img src="/robot-cawi-v4.png" alt="" className="menu-row-cawi-icon-v69" />
+                <Bot size={18} />
                 <span>Trợ lý Cawi Robo</span>
               </button>
 
