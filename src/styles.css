@@ -10718,6 +10718,94 @@ option {
   .hamburger-panel-v53 .menu-row-v43:last-child {
     border-bottom: 1px solid rgba(226,232,240,.88);
   }
+
+  .hamburger-panel-v53 .auth-login-row-v77,
+  .hamburger-panel-v53 .auth-account-row-v77 {
+    width: calc(100% - 68px);
+    margin-left: 34px;
+    margin-right: 34px;
+  }
+
+  .hamburger-panel-v53 .auth-login-row-v77 {
+    margin-top: 18px;
+    border-radius: 24px;
+    padding: 18px;
+    font-size: 18px;
+  }
+
+  .hamburger-panel-v53 .auth-account-row-v77 {
+    margin-top: 18px;
+    padding: 14px;
+  }
+}
+
+/* =======================================================
+   v77 — khối đăng nhập/tài khoản bên trong menu 3 gạch (thay cho cụm đăng
+   nhập/đăng ký/hồ sơ+đăng xuất đã bỏ khỏi thanh nav chính vì trông thừa).
+   Nút "Đăng nhập" cố tình nổi bật hơn hẳn các mục khác trong menu.
+   ======================================================= */
+.mobile-auth-block-v77 {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-login-row-v77 {
+  width: 100%;
+  border: 0;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--primary), #facc15);
+  color: #111827;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 950;
+  font-size: 17px;
+  box-shadow: 0 18px 38px rgba(251,146,60,.32);
+}
+
+.auth-account-row-v77 {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.auth-account-avatar-v77 {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ffedd5;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.auth-account-info-v77 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.auth-account-info-v77 strong {
+  font-size: 15px;
+  color: #172033;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auth-account-info-v77 small {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 700;
 }
 
 @media (min-width: 761px) {
@@ -12773,4 +12861,182 @@ option {
   .priceguess-card-v76 { grid-template-columns: 1fr; }
   .priceguess-product-img-v76 { max-width: 220px; margin: 0 auto; }
   .priceguess-options-v76 { grid-template-columns: 1fr; }
+}
+
+/* =======================================================
+   v78 — "Thử Thách Săn Deal": thay cho "Cawi Đố Giá" trên thanh nav. Game "thiết
+   thực" hơn — luyện đúng hành vi cốt lõi (so sánh giá thật + không vượt ngân sách)
+   thay vì chỉ đoán mò. Tái dùng ngôn ngữ thiết kế của v76 (thẻ luật chơi, khung
+   thống kê nền tối, màn kết quả gradient) để đồng bộ giao diện toàn app.
+   ======================================================= */
+.dealhunt-hero-v78 h1 { font-size: clamp(30px, 5vw, 50px); }
+
+.dealhunt-rules-v78 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.dealhunt-rules-v78 article {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(226,232,240,.9);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+}
+
+.dealhunt-rules-icon-v78 {
+  width: 38px; height: 38px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: rgba(251,146,60,.14); color: var(--primary-dark);
+  margin-bottom: 2px;
+}
+
+.dealhunt-rules-v78 strong { font-size: 15.5px; color: #172033; }
+.dealhunt-rules-v78 span { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.dealhunt-stats-v78 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #172033, #2d3a58);
+  color: #fff;
+}
+
+.dealhunt-stats-v78 div { display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.dealhunt-stats-v78 span { font-size: 12px; color: rgba(255,255,255,.7); font-weight: 700; }
+.dealhunt-stats-v78 strong { font-size: 21px; font-weight: 900; }
+
+.dealhunt-start-btn-v78 {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 15px 34px; font-size: 16px; border-radius: 999px;
+}
+
+.dealhunt-mission-head-v78 { margin-bottom: 18px; }
+.dealhunt-mission-eyebrow-v78 {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 900; color: var(--primary-dark);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.dealhunt-mission-head-v78 h2 { font-size: clamp(21px, 3.4vw, 28px); margin: 6px 0 4px; color: #172033; }
+.dealhunt-mission-head-v78 p { font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0; max-width: 640px; }
+
+.dealhunt-budget-bar-v78 {
+  padding: 16px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(226,232,240,.9);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+  margin-bottom: 20px;
+}
+.dealhunt-budget-top-v78 {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-size: 13.5px; font-weight: 800; color: #172033; margin-bottom: 10px;
+}
+.dealhunt-budget-top-v78 span:first-child { color: var(--muted); font-weight: 700; }
+.dealhunt-budget-top-v78 span.over { color: #dc2626; }
+.dealhunt-budget-track-v78 { height: 10px; border-radius: 999px; background: #eef2f7; overflow: hidden; }
+.dealhunt-budget-track-v78 div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #fb923c, #f59e0b); transition: width .25s ease, background .25s ease; }
+.dealhunt-budget-track-v78 div.over { background: linear-gradient(90deg, #f87171, #dc2626); }
+
+.dealhunt-items-v78 { display: grid; gap: 16px; margin-bottom: 20px; }
+
+.dealhunt-item-card-v78 {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(226,232,240,.92);
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(15,23,42,.07);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dealhunt-item-product-v78 { display: flex; align-items: center; gap: 14px; }
+.dealhunt-item-img-v78 {
+  width: 64px; height: 64px; border-radius: 14px; overflow: hidden; flex-shrink: 0;
+  background: #f8fafc; border: 1px solid rgba(226,232,240,.9);
+}
+.dealhunt-item-img-v78 img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 6px; }
+.dealhunt-item-product-v78 h3 { font-size: 15.5px; margin: 4px 0 0; color: #172033; line-height: 1.3; }
+
+.dealhunt-offers-v78 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+
+.dealhunt-offer-btn-v78 {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  border: 2px solid rgba(226,232,240,.95);
+  background: #f8fafc;
+  text-align: center;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.dealhunt-offer-btn-v78:hover:not(:disabled) { border-color: rgba(251,146,60,.55); transform: translateY(-2px); }
+.dealhunt-offer-btn-v78.selected { background: rgba(251,146,60,.14); border-color: var(--primary); }
+.dealhunt-offer-btn-v78.disabled { opacity: .45; cursor: not-allowed; }
+.dealhunt-offer-store-v78 { font-size: 12px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: .03em; }
+.dealhunt-offer-price-v78 { font-size: 15px; font-weight: 900; color: #172033; }
+.dealhunt-offer-ship-v78 { font-size: 10.5px; color: var(--muted); font-weight: 700; }
+.dealhunt-offer-check-v78 { position: absolute; top: 7px; right: 7px; color: var(--primary-dark); }
+
+.dealhunt-confirm-btn-v78 {
+  width: 100%;
+  padding: 15px;
+  font-size: 15.5px;
+  border-radius: 999px;
+}
+.dealhunt-confirm-btn-v78:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; transform: none; }
+
+.dealhunt-result-v78 {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+  padding: clamp(30px, 6vw, 56px) 20px;
+  border-radius: 30px;
+  background: linear-gradient(160deg, #172033, #2d3a58 70%, #c9963e 160%);
+  color: #fff;
+}
+.dealhunt-result-emoji-v78 { font-size: 56px; line-height: 1; }
+.dealhunt-result-v78 h1 { font-size: clamp(22px, 3.6vw, 32px); margin: 0; max-width: 560px; }
+.dealhunt-newbest-badge-v78 {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.16); padding: 6px 14px; border-radius: 999px; font-weight: 900; font-size: 13px;
+}
+.dealhunt-result-stats-v78 {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;
+  width: 100%; max-width: 480px; margin-top: 4px;
+}
+.dealhunt-result-stats-v78 div { display: flex; flex-direction: column; gap: 4px; }
+.dealhunt-result-stats-v78 span { font-size: 12px; color: rgba(255,255,255,.7); font-weight: 700; }
+.dealhunt-result-stats-v78 strong { font-size: 21px; font-weight: 900; }
+
+.dealhunt-budget-line-v78 { display: inline-flex; align-items: center; gap: 7px; font-weight: 800; font-size: 14px; margin: 2px 0; }
+.dealhunt-budget-line-v78.ok { color: #86efac; }
+.dealhunt-budget-line-v78.over { color: #fca5a5; }
+
+.dealhunt-saved-line-v78 { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: rgba(255,255,255,.92); margin: 2px 0; }
+.dealhunt-saved-line-v78 strong { color: #fde68a; }
+
+.dealhunt-score-v78 { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 6px; }
+.dealhunt-score-v78 span { font-size: 12px; color: rgba(255,255,255,.7); font-weight: 700; }
+.dealhunt-score-v78 strong { font-size: 34px; font-weight: 950; }
+
+.dealhunt-result-total-v78 { color: rgba(255,255,255,.85); font-size: 13.5px; margin: 4px 0 0; }
+.dealhunt-result-actions-v78 { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.dealhunt-result-actions-v78 button { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; }
+.dealhunt-result-actions-v78 .ghost { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); color: #fff; }
+
+@media (max-width: 760px) {
+  .dealhunt-rules-v78,
+  .dealhunt-stats-v78,
+  .dealhunt-result-stats-v78 { grid-template-columns: 1fr; }
+  .dealhunt-offers-v78 { grid-template-columns: 1fr; }
+  .dealhunt-offer-btn-v78 { flex-direction: row; justify-content: space-between; padding: 12px 14px; text-align: left; }
+  .dealhunt-offer-check-v78 { position: static; margin-left: auto; }
 }

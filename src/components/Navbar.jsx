@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
 
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
   const { page, t, user, profile, products } = appState;
@@ -18,12 +18,15 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   // v76 — Thêm "Cawi Đố Giá" (minigame đoán giá sản phẩm thật) vào thanh nav. Thêm
   // mục thứ 6 có thể khiến thanh nav xuống 2 hàng ở màn hình hẹp hơn — đây là hành vi
   // AN TOÀN đã chọn từ v73 (flex-wrap, không cắt/ẩn chữ mục nào), không phải lỗi.
+  // v78 — Thay "Cawi Đố Giá" bằng "Thử Thách Săn Deal" (theo yêu cầu, game thiết thực
+  // hơn — luyện đúng hành vi so sánh giá + ngân sách thay vì đoán mò). Vẫn giữ đúng
+  // 6 mục như v76, không thêm mục nào để không lo xuống thêm hàng.
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['savings-achievements', 'Thành tựu tiết kiệm'],
-    ['price-game', 'Cawi Đố Giá'],
+    ['deal-hunt', 'Thử Thách Săn Deal'],
     ['about', t.about]
   ];
 
@@ -104,17 +107,9 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
             chỗ cho nút thông báo (chuông) và nút menu 3 gạch dịch chuyển vào đúng
             chỗ đó. Giỏ hàng vẫn mở được bình thường qua dòng "Giỏ hàng so sánh"
             trong menu 3 gạch (đã có sẵn ở dưới, không đổi gì thêm ở đó). */}
-        {user ? (
-          <>
-            <button className="profile-pill" onClick={() => { closePanels(); onOpenProfile(); }}><span>{profile.avatar}</span>{profile.name}</button>
-            <button className="ghost" onClick={onLogout}>{t.logout}</button>
-          </>
-        ) : (
-          <>
-            <button className="ghost auth-trigger" onClick={onOpenLogin}>{t.login}</button>
-            <button className="primary small auth-trigger" onClick={onOpenRegister}>Đăng ký</button>
-          </>
-        )}
+        {/* v77 — Bỏ hẳn cụm đăng nhập/đăng ký (hoặc hồ sơ/đăng xuất) khỏi thanh nav
+            chính theo yêu cầu (thấy thừa) — dời toàn bộ vào trong menu 3 gạch, xem
+            khối "mobile-auth-block-v77" bên dưới. */}
 
         <div className="nav-popover-host-v43 nav-notification-host-v53">
           <button className="notification-button-v43" onClick={() => { setNoticeOpen((open) => !open); setMenuOpen(false); }} aria-label="Thông báo CartWise">
@@ -147,6 +142,40 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
               <div className="mobile-menu-head-v53">
                 <span>CartWise</span>
                 <button onClick={() => setMenuOpen(false)} aria-label="Đóng menu"><X size={22} /></button>
+              </div>
+
+              {/* v77 — Khối đăng nhập/tài khoản đặt ngay đầu menu 3 gạch, thay cho cụm
+                  đã bỏ khỏi thanh nav chính. Chưa đăng nhập: nút "Đăng nhập" được làm
+                  nổi bật hẳn (nền gradient cam giống các nút CTA chính trong app) vì
+                  đây là hành động quan trọng nhất, "Đăng ký" ở dưới dạng phụ. Đã đăng
+                  nhập: thẻ tài khoản (bấm vào xem hồ sơ) + dòng "Đăng xuất" dạng phụ. */}
+              <div className="mobile-auth-block-v77">
+                {user ? (
+                  <>
+                    <button className="auth-account-row-v77" onClick={() => { setMenuOpen(false); onOpenProfile(); }}>
+                      <span className="auth-account-avatar-v77">{profile.avatar}</span>
+                      <span className="auth-account-info-v77">
+                        <strong>{profile.name}</strong>
+                        <small>Xem hồ sơ</small>
+                      </span>
+                    </button>
+                    <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onLogout(); }}>
+                      <LogOut size={18} />
+                      <span>{t.logout}</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="auth-login-row-v77" onClick={() => { setMenuOpen(false); onOpenLogin(); }}>
+                      <User size={19} />
+                      <span>{t.login}</span>
+                    </button>
+                    <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenRegister(); }}>
+                      <UserPlus size={18} />
+                      <span>Đăng ký</span>
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="mobile-primary-nav-v53">

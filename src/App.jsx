@@ -18,6 +18,7 @@ import PurchaseHistory from './pages/PurchaseHistory.jsx';
 import GroupCart from './pages/GroupCart.jsx';
 import SavingsAchievements from './pages/SavingsAchievements.jsx';
 import PriceGuessGame from './pages/PriceGuessGame.jsx';
+import DealHuntGame from './pages/DealHuntGame.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
@@ -230,6 +231,15 @@ function App() {
         )}
         {page === 'price-game' && (
           <PriceGuessGame
+            onBack={() => navigate('home')}
+          />
+        )}
+        {/* v78 — "Thử Thách Săn Deal" thay cho "Cawi Đố Giá" trên thanh nav (theo yêu
+            cầu, game "thiết thực" hơn — luyện đúng hành vi so sánh giá + ngân sách).
+            Trang PriceGuessGame ở trên vẫn còn nguyên trong code, không xoá, chỉ là
+            không còn link dẫn tới từ thanh nav nữa (giống cách đã làm với Stores). */}
+        {page === 'deal-hunt' && (
+          <DealHuntGame
             onBack={() => navigate('home')}
           />
         )}
