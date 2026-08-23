@@ -16,6 +16,7 @@ import Profile from './pages/Profile.jsx';
 import CheckHistory from './pages/CheckHistory.jsx';
 import PurchaseHistory from './pages/PurchaseHistory.jsx';
 import GroupCart from './pages/GroupCart.jsx';
+import SavingsAchievements from './pages/SavingsAchievements.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
@@ -126,6 +127,21 @@ function App() {
     saveCart(next);
   }
 
+  // v69 — Xoá nhiều sản phẩm cùng lúc (chế độ "Sửa" trong giỏ hàng) hoặc xoá sạch
+  // toàn bộ giỏ hàng — cả 2 đều đi qua hộp xác nhận riêng trong CartPanel trước khi
+  // gọi tới đây, nên ở đây chỉ cần xoá thẳng.
+  function removeManyFromCart(productIds) {
+    const idSet = new Set(productIds);
+    const next = cartItems.filter((item) => !idSet.has(item.productId));
+    setCartItems(next);
+    saveCart(next);
+  }
+
+  function clearCart() {
+    setCartItems([]);
+    saveCart([]);
+  }
+
   function saveSettings(next) {
     setProfile(next.profile);
     setLanguage(next.language);
@@ -205,6 +221,12 @@ function App() {
             onOpenUpgrade={() => navigate('upgrade')}
           />
         )}
+        {page === 'savings-achievements' && (
+          <SavingsAchievements
+            currency={currency}
+            onBack={() => navigate('home')}
+          />
+        )}
       </main>
 
       {introOpen && <IntroPopup onClose={closeIntro} />}
@@ -239,6 +261,8 @@ function App() {
         products={products}
         currency={currency}
         onRemove={removeFromCart}
+        onRemoveMany={removeManyFromCart}
+        onClearAll={clearCart}
         onOpenProduct={handleOpenProduct}
       />
 

@@ -253,6 +253,17 @@ function CawiRobot({ mode = 'floating', message = 'Chào bạn, mình là Cawi R
     };
   }, []);
 
+  // v69 — Cho phép mở khung chat từ bên ngoài (icon Cawi Robo cố định trên thanh nav),
+  // không chỉ bằng cách bấm trực tiếp vào robot đang trôi nổi trên màn hình.
+  useEffect(() => {
+    const onExternalOpen = () => {
+      setChatOpen(true);
+      setBubbleVisible(false);
+    };
+    window.addEventListener('cawi-open-chat', onExternalOpen);
+    return () => window.removeEventListener('cawi-open-chat', onExternalOpen);
+  }, []);
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;

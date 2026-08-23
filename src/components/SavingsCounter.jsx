@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { PiggyBank, Share2, Check, Sparkles } from 'lucide-react';
+import { PiggyBank, Share2, Check, Map } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { getSavingsSummary, getSavingsMilestoneProgress } from '../data/purchases.js';
 
@@ -34,15 +34,18 @@ function useCountUp(target, durationMs = 1200) {
   return value;
 }
 
-function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = 'VND', onOpenUpgrade }) {
+function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = 'VND', onOpenUpgrade, onOpenAchievements }) {
   const [shared, setShared] = useState(false);
   const summary = getSavingsSummary();
   const milestone = getSavingsMilestoneProgress(summary.totalSaved);
   const animatedValue = useCountUp(variant === 'prominent' ? summary.totalSaved : summary.totalSaved, variant === 'prominent' ? 1200 : 0);
   const displayValue = variant === 'prominent' ? animatedValue : summary.totalSaved;
 
-  const visibleBadges = Number.isFinite(maxBadges) ? milestone.achieved.slice(-maxBadges) : milestone.achieved;
-  const hiddenBadgeCount = Math.max(0, milestone.achieved.length - visibleBadges.length);
+  // v69 — Làm rõ khối "Số tiền đã tiết kiệm": mỗi bậc chỉ hiện ĐÚNG 1 tên thành tựu
+  // (mốc mới nhất vừa đạt được), thay vì liệt kê cả dãy huy hiệu như bản cũ — tránh
+  // rối mắt và đúng yêu cầu "mỗi 1 bậc chỉ hiển thị 1 cái tên thành tựu".
+  const currentAchievement = milestone.achieved.length ? milestone.achieved[milestone.achieved.length - 1] : null;
+  const earlierAchievedCount = Math.max(0, milestone.achieved.length - 1);
 
   function shareResult() {
     const text = `Mình đã tiết kiệm được ${formatCurrency(summary.totalSaved, currency)} nhờ so sánh giá trên CartWise! 🎉`;
@@ -69,14 +72,14 @@ function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = '
     );
   }
 
+  // v69 — Thứ tự & mức độ nổi bật theo đúng yêu cầu: số tiền tiết kiệm to nhất, căn
+  // giữa, ngay dưới là thanh tiến trình, dưới nữa là tên thành tựu hiện tại (chỉ 1).
   return (
-    <section className="savings-counter-prominent-v63">
-      <div className="savings-counter-head-v63">
-        <span className="savings-counter-badge-v63"><PiggyBank size={16} /> Số tiền đã tiết kiệm</span>
-        <span className="savings-counter-hint-v63">Tính theo chênh lệch giữa giá đã mua và mức giá tham chiếu CartWise ghi nhận</span>
-      </div>
+    <section className="savings-counter-prominent-v63 savings-counter-v69-centered">
+      <span className="savings-counter-badge-v63"><PiggyBank size={16} /> Số tiền đã tiết kiệm</span>
 
-      <strong className="savings-counter-value-v63">{formatCurrency(displayValue, currency)}</strong>
+      <strong className="savings-counter-value-v63 savings-counter-value-v69">{formatCurrency(displayValue, currency)}</strong>
+      <span className="savings-counter-hint-v63">Tính theo chênh lệch giữa giá đã mua và mức giá tham chiếu CartWise ghi nhận</span>
 
       {milestone.next ? (
         <div className="savings-counter-progress-wrap-v63">
@@ -91,17 +94,17 @@ function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = '
         <span className="savings-counter-progress-label-v63">🎉 Đã đạt mọi mốc thành tích hiện có!</span>
       )}
 
-      {visibleBadges.length > 0 && (
-        <div className="savings-counter-badges-v63">
-          {visibleBadges.map((badge) => (
-            <span key={badge.label} className="savings-badge-chip-v63" title={badge.label}>{badge.icon} {badge.label}</span>
-          ))}
-          {hiddenBadgeCount > 0 && (
-            <button type="button" className="savings-badge-more-v63" onClick={onOpenUpgrade}>
-              <Sparkles size={13} /> +{hiddenBadgeCount} huy hiệu nữa ở CartWise Plus
-            </button>
-          )}
-        </div>
+      <div className={`savings-counter-current-achv-v69 ${currentAchievement ? 'unlocked' : 'locked'}`}>
+        <span className="savings-counter-current-achv-label-v69">{currentAchievement ? 'Thành tựu hiện tại' : 'Thành tựu tiếp theo'}</span>
+        <span className="savings-counter-current-achv-name-v69">
+          {currentAchievement ? `${currentAchievement.icon} ${currentAchievement.label}` : milestone.next ? `${milestone.next.icon} ${milestone.next.label}` : '👑 Huyền thoại tiết kiệm'}
+        </span>
+      </div>
+
+      {onOpenAchievements && (
+        <button type="button" className="savings-counter-map-link-v69" onClick={onOpenAchievements}>
+          <Map size={14} /> Xem bản đồ thành tựu{earlierAchievedCount > 0 ? ` (đã đạt ${milestone.achieved.length} mốc)` : ''}
+        </button>
       )}
 
       <button type="button" className="savings-counter-share-v63" onClick={shareResult}>

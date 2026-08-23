@@ -10,11 +10,14 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   const [rating, setRating] = useState(0);
   const [thanksOpen, setThanksOpen] = useState(false);
 
+  // v69 — Thêm "Thành tựu tiết kiệm" ngay cạnh "Ghép Đơn Cùng Bạn Bè", dẫn tới trang
+  // bản đồ cột mốc tiết kiệm kiểu game (đã đạt / còn phía trước).
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
     ['stores', t.stores],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
+    ['savings-achievements', 'Thành tựu tiết kiệm'],
     ['about', t.about]
   ];
 
@@ -24,6 +27,13 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       return;
     }
     onNavigate(key);
+  }
+
+  // v69 — Mở khung chat Cawi Robo từ 1 icon cố định trên thanh nav (thay vì chỉ
+  // trông chờ người dùng tự bấm vào robot đang trôi nổi trên màn hình). CawiRobot.jsx
+  // lắng nghe sự kiện này ở mọi trang.
+  function openCawiChat() {
+    window.dispatchEvent(new CustomEvent('cawi-open-chat'));
   }
 
   const dailySaleProducts = useMemo(() => {
@@ -91,8 +101,12 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       </nav>
 
       <div className="nav-actions nav-actions-v43">
-        <button type="button" className="cart-nav-btn-v67" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
-          <ShoppingCart size={20} />
+        <button type="button" className="cawi-nav-btn-v69" onClick={openCawiChat} aria-label="Mở trợ lý Cawi Robo">
+          <img src="/robot-cawi-v4.png" alt="" />
+        </button>
+
+        <button type="button" className="cart-nav-btn-v69" onClick={onOpenCart} aria-label="Xem giỏ hàng so sánh">
+          <ShoppingCart size={27} strokeWidth={2.3} />
           {cartCount > 0 && <span>{cartCount}</span>}
         </button>
 
@@ -176,6 +190,11 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
                 <ShoppingCart size={18} />
                 <span>Giỏ hàng so sánh{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+              </button>
+
+              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); openCawiChat(); }}>
+                <img src="/robot-cawi-v4.png" alt="" className="menu-row-cawi-icon-v69" />
+                <span>Trợ lý Cawi Robo</span>
               </button>
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>
