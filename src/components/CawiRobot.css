@@ -21,6 +21,17 @@
   font-family: "Times New Roman", Times, serif;
 }
 
+/* v75 — Khi khung chat đang mở (kể cả mở từ icon robot bên trong khung giỏ hàng đã
+   mở sẵn), nâng hẳn độ ưu tiên hiển thị của widget lên trên khung giỏ hàng
+   (.cart-panel-backdrop-v67, z-index 3200) và modal nhóm GroupCart
+   (.groupcart-detail-backdrop-v72, z-index 3200) — để khung chat luôn hiện thành 1
+   lớp đè lên phía trước, người dùng gõ câu hỏi ngay tại đó mà không cần đóng giỏ
+   hàng trước. Chỉ nâng khi chat-open (lớp .chat-open do CawiRobot.jsx tự gắn) — lúc
+   chat đóng, widget vẫn giữ z-index 900 như v73 để không che các khung mở từ nav. */
+.cw22-widget.chat-open {
+  z-index: 3300;
+}
+
 .cw22-floating {
   transition: top .55s ease, right .55s ease;
 }

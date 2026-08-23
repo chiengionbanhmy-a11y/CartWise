@@ -6688,30 +6688,108 @@ option {
   padding-top: 18px;
 }
 
-.team-grid-v30 {
+/* v75 — Thiết kế lại hẳn phần "Đội ngũ" trong Về chúng tôi: mỗi thành viên có ảnh
+   thật (đã cắt nền), tên đầy đủ, vai trò dạng nhãn màu, và danh sách nhiệm vụ cụ
+   thể ứng với vai trò đó — thay cho bản cũ (.team-grid-v30) chỉ có tên + 1 dòng vai
+   trò, trông đơn sơ. */
+.team-grid-v75 {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
-.team-card-v30 {
-  padding: 16px;
-  border-radius: 20px;
+@media (min-width: 900px) {
+  .team-grid-v75 {
+    /* Đúng 5 thành viên -> luôn hiện đủ 1 hàng trên màn hình rộng thay vì để lẻ 1
+       thẻ rớt xuống hàng riêng. */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.team-card-v75 {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
   border: 1px solid rgba(201,150,62,.16);
-  background: white;
-  box-shadow: 0 12px 26px rgba(29,36,51,.07);
+  background: linear-gradient(180deg, #fff, #fffaf2);
+  box-shadow: 0 14px 32px rgba(29,36,51,.08);
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
 
-.team-card-v30 strong {
+.team-card-v75:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 42px rgba(29,36,51,.13);
+}
+
+.team-card-photo-v75 {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(160deg, #172033 0%, #2d3a58 55%, #c9963e 140%);
+  overflow: hidden;
+}
+
+.team-card-photo-v75 img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
   display: block;
-  font-size: 18px;
-  color: #1d2433;
 }
 
-.team-card-v30 span {
-  color: #6c7280;
-  font-weight: 700;
+.team-card-body-v75 {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-card-body-v75 strong {
+  font-size: 17px;
+  color: #1d2433;
+  line-height: 1.3;
+}
+
+.team-card-role-v75 {
+  align-self: flex-start;
+  background: rgba(201,150,62,.14);
+  color: #9a6a1d;
+  font-weight: 800;
+  font-size: 12.5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.team-card-duties-v75 {
+  margin: 4px 0 0;
+  padding: 0 0 0 16px;
+  display: grid;
+  gap: 5px;
+}
+
+.team-card-duties-v75 li {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #5c6472;
+}
+
+@media (max-width: 680px) {
+  .team-grid-v75 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .team-card-photo-v75 { aspect-ratio: 3 / 4; }
+  .team-card-body-v75 { padding: 12px 12px 16px; }
+}
+
+@media (max-width: 460px) {
+  .team-grid-v75 {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1080px) {
@@ -6724,8 +6802,7 @@ option {
 @media (max-width: 680px) {
   .flash-grid-v30,
   .language-grid-v30,
-  .currency-convert-table,
-  .team-grid-v30 {
+  .currency-convert-table {
     grid-template-columns: 1fr !important;
   }
 
@@ -8533,6 +8610,47 @@ option {
 }
 .cart-row-confirm-v67 span { font-size: 12.5px; font-weight: 700; color: #172033; }
 .cart-row-confirm-v67 div { display: flex; gap: 8px; }
+
+/* v75 — Gộp góp ý mới nhất về khung giỏ hàng: chữ "Giỏ hàng (N)" to rõ hơn, nút
+   "Sửa" dịch nhẹ sang trái + có nền tròn cam nhạt luôn hiện sẵn (căn giữa đúng
+   quanh chữ, không lệch), bỏ nền xám/viền quanh từng dòng sản phẩm cho gọn và
+   hiện đại hơn, đồng thời phóng to chữ + khoảng cách trong toàn khung giỏ hàng vì
+   góp ý cho là hiện tại "hơi nhỏ". */
+.cart-panel-v67 { padding: 22px; gap: 14px; }
+.cart-panel-head-v69 span:first-of-type { font-size: 21px; gap: 10px; }
+.cart-panel-head-v69 span:first-of-type svg { width: 21px; height: 21px; }
+.cart-panel-edit-toggle-v69 {
+  background: rgba(251,146,60,.14);
+  padding: 10px 18px;
+  font-size: 15.5px;
+  margin-right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.cart-panel-edit-toggle-v69:hover { background: rgba(251,146,60,.24); }
+.cart-panel-hint-v67 { font-size: 13.5px; }
+
+.cart-panel-list-v67 { gap: 16px; }
+.cart-row-v67 {
+  /* v75 — Giữ nền trắng đục (không phải trong suốt) vì bên dưới mỗi dòng luôn có
+     sẵn 1 lớp nền đỏ ẩn (.cart-row-delete-bg-v67, dùng khi vuốt để xoá) — nếu để
+     .cart-row-v67 trong suốt, lớp đỏ đó sẽ lộ ra sau lưng ngay cả khi không vuốt.
+     Chỉ bỏ viền xám quanh từng dòng theo đúng góp ý, không bỏ nền. */
+  background: #fff;
+  border: none;
+  padding: 12px 6px;
+  gap: 16px;
+}
+.cart-row-thumb-v67 { width: 68px; height: 68px; border-radius: 16px; }
+.cart-row-info-v67 { gap: 4px; }
+.cart-row-info-v67 b { font-size: 16px; }
+.cart-row-info-v67 span { font-size: 14.5px; }
+.cart-row-remove-v67 { width: 38px; height: 38px; }
+.cart-row-remove-v67 svg { width: 18px; height: 18px; }
+.cart-row-wrap-v67:not(:last-child) { border-bottom: 1px solid var(--line); }
+.cart-row-check-v69 { width: 24px; height: 24px; }
 
 .notification-panel-v43,
 .hamburger-panel-v43 {

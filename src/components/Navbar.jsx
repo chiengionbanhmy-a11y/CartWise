@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, Bot } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
 
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
   const { page, t, user, profile, products } = appState;
@@ -29,13 +29,6 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
       return;
     }
     onNavigate(key);
-  }
-
-  // v69 — Mở khung chat Cawi Robo qua sự kiện dùng chung, lắng nghe ở CawiRobot.jsx.
-  // v71 — Icon bấm nhanh mở chat không còn nằm cố định trên nav nữa (xem
-  // CartPanel.jsx), chỉ còn dùng ở đây cho mục "Trợ lý Cawi Robo" trong menu di động.
-  function openCawiChat() {
-    window.dispatchEvent(new CustomEvent('cawi-open-chat'));
   }
 
   const dailySaleProducts = useMemo(() => {
@@ -189,10 +182,10 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
                 <span>Giỏ hàng so sánh{cartCount > 0 ? ` (${cartCount})` : ''}</span>
               </button>
 
-              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); openCawiChat(); }}>
-                <Bot size={18} />
-                <span>Trợ lý Cawi Robo</span>
-              </button>
+              {/* v75 — Bỏ hẳn dòng "Trợ lý Cawi Robo" khỏi menu 3 gạch theo yêu cầu.
+                  Robot vẫn mở chat bình thường qua icon nổi trên trang hoặc icon
+                  trong header khung giỏ hàng (cawi-cart-side-btn-v71), chỉ là không
+                  còn lối tắt riêng trong menu này nữa. */}
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>
                 <MessageSquare size={18} />

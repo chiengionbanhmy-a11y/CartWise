@@ -8,12 +8,60 @@ const tabs = [
   { id: 'robot', label: 'Robot CartWise' }
 ];
 
+// v75 — Cập nhật đội ngũ đầy đủ họ tên + vai trò + nhiệm vụ cụ thể ứng với từng vai
+// trò, kèm ảnh từng thành viên (đã cắt nền, để trong public/team/). Giữ đúng thứ tự
+// trái sang phải theo góp ý: Nhật Linh - Quý Đức - Lê Minh - Hà An - Minh Hữu.
 const teamMembers = [
-  { name: 'Nhật Linh', role: 'Leader / Product Direction' },
-  { name: 'Lê Minh', role: 'Research & Data' },
-  { name: 'Hà An', role: 'An là mặt trời nhỏ' },
-  { name: 'Hữu', role: 'Technology Support' },
-  { name: 'Đức', role: 'Design & Testing' }
+  {
+    name: 'Trần Nguyễn Nhật Linh',
+    role: 'AI & Media Lead / Leader',
+    photo: '/team/nhat-linh.png',
+    duties: [
+      'Điều phối tiến độ chung và định hướng chiến lược sản phẩm của cả nhóm',
+      'Phụ trách xây dựng trợ lý AI Cawi Robo',
+      'Phụ trách nội dung truyền thông, hình ảnh thương hiệu CartWise'
+    ]
+  },
+  {
+    name: 'Dương Quý Đức',
+    role: 'Researcher',
+    photo: '/team/quy-duc.png',
+    duties: [
+      'Nghiên cứu thị trường và khảo sát nhu cầu người dùng thực tế',
+      'Phân tích đối thủ cạnh tranh trong mảng so sánh giá',
+      'Tổng hợp dữ liệu để định hướng tính năng cho sản phẩm'
+    ]
+  },
+  {
+    name: 'Đỗ Vũ Lê Minh',
+    role: 'Designer',
+    photo: '/team/le-minh.png',
+    duties: [
+      'Thiết kế giao diện (UI/UX) cho toàn bộ website CartWise',
+      'Xây dựng bộ nhận diện thương hiệu, mascot Cawi Robo',
+      'Đảm bảo trải nghiệm người dùng trực quan, nhất quán'
+    ]
+  },
+  {
+    name: 'Nguyễn Hà An',
+    role: 'Business Analyst',
+    photo: '/team/ha-an.png',
+    duties: [
+      'Phân tích mô hình kinh doanh và bài toán tài chính của dự án',
+      'Đánh giá tính khả thi, xây dựng kế hoạch phát triển thị trường',
+      'Chuẩn bị số liệu, luận điểm cho phần thuyết trình gọi vốn'
+    ]
+  },
+  {
+    name: 'Nguyễn Minh Hữu',
+    role: 'Product Manager',
+    photo: '/team/minh-huu.png',
+    duties: [
+      'Quản lý lộ trình phát triển và ưu tiên tính năng sản phẩm',
+      'Kết nối, tổng hợp công việc giữa các thành viên trong nhóm',
+      'Đảm bảo sản phẩm bám sát đúng nhu cầu người dùng và mục tiêu nhóm'
+    ]
+  }
 ];
 
 const overviewHighlights = [
@@ -78,11 +126,19 @@ function About() {
             <p>{data.body}</p>
           )}
           {active === 'team' && (
-            <div className="team-grid-v30">
+            <div className="team-grid-v75">
               {teamMembers.map((member) => (
-                <article key={member.name} className="team-card-v30">
-                  <strong>{member.name}</strong>
-                  <span>{member.role}</span>
+                <article key={member.name} className="team-card-v75">
+                  <div className="team-card-photo-v75">
+                    <img src={member.photo} alt={member.name} loading="lazy" />
+                  </div>
+                  <div className="team-card-body-v75">
+                    <strong>{member.name}</strong>
+                    <span className="team-card-role-v75">{member.role}</span>
+                    <ul className="team-card-duties-v75">
+                      {member.duties.map((duty) => <li key={duty}>{duty}</li>)}
+                    </ul>
+                  </div>
                 </article>
               ))}
             </div>
