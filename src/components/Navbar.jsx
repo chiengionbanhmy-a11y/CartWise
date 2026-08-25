@@ -249,10 +249,14 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
               {/* v79 — Đổi số lượng giỏ hàng từ chữ số trong ngoặc (dễ bị lướt qua) sang
                   1 icon huy hiệu tròn đè lên icon giỏ hàng, giống hệt kiểu huy hiệu số
                   ở nút chuông thông báo — dễ nhận ra ngay cần phải hiện số lượng này. */}
+<<<<<<< HEAD
               {/* v80 — Icon giỏ hàng đã có riêng ở thanh nav trên cùng (bên trái nút
                   chuông) cho desktop. Dòng này vẫn giữ nguyên, chỉ ẩn đi trên desktop
                   (CSS `menu-row-cart-v80`) để làm lối vào giỏ hàng cho mobile. */}
               <button className="menu-row-v43 menu-row-cart-v80" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
+=======
+              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
+>>>>>>> 4d2aebbff18f4ec8dfb6079779d4d76c875af390
                 <span className="menu-row-icon-badge-wrap-v79">
                   <ShoppingCart size={18} />
                   {cartCount > 0 && <span className="menu-row-icon-badge-v79">{cartCount}</span>}
