@@ -37,7 +37,10 @@ function App() {
   ));
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [introOpen, setIntroOpen] = useState(() => sessionStorage.getItem('cartwise-intro-v55-closed') !== '1');
+  // v79 — "Sơ qua về CartWise" không còn tự động hiện ngay khi vào app nữa (theo yêu
+  // cầu) — giờ là 1 mục "Hướng dẫn sử dụng" tự chọn trong menu 3 gạch, người dùng
+  // xem được bất cứ lúc nào (hoặc không bao giờ xem) chứ không bị ép xem lần đầu.
+  const [guideOpen, setGuideOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(!setupComplete);
   const [setupDone, setSetupDone] = useState(setupComplete);
   const [authMode, setAuthMode] = useState(null);
@@ -64,9 +67,12 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function closeIntro() {
-    sessionStorage.setItem('cartwise-intro-v55-closed', '1');
-    setIntroOpen(false);
+  function openGuide() {
+    setGuideOpen(true);
+  }
+
+  function closeGuide() {
+    setGuideOpen(false);
   }
 
   function handleLogin(name) {
@@ -177,6 +183,7 @@ function App() {
         onOpenHistory={() => navigate('check-history')}
         onOpenPurchaseHistory={() => navigate('purchase-history')}
         onOpenGroupCart={() => navigate('group-cart')}
+        onOpenGuide={openGuide}
         planId={planId}
         cartCount={cartItems.length}
         onOpenCart={() => setCartOpen(true)}
@@ -245,9 +252,9 @@ function App() {
         )}
       </main>
 
-      {introOpen && <IntroPopup onClose={closeIntro} />}
+      {guideOpen && <IntroPopup onClose={closeGuide} />}
 
-      {setupDone && !introOpen && planId !== 'plus' && <PromoPopup onNavigate={navigate} products={products} />}
+      {setupDone && planId !== 'plus' && <PromoPopup onNavigate={navigate} products={products} />}
 
       {!selectedProduct && (
         <CawiRobot
@@ -295,7 +302,7 @@ function App() {
         />
       )}
 
-      {!introOpen && setupOpen && (
+      {setupOpen && (
         <SetupWizard
           initialLanguage={language}
           initialCurrency={currency}

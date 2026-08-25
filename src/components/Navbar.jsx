@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, HelpCircle } from 'lucide-react';
 
-function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
+function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart, onOpenGuide }) {
   const { page, t, user, profile, products } = appState;
   const [menuOpen, setMenuOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
@@ -21,12 +21,15 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   // v78 — Thay "Cawi Đố Giá" bằng "Thử Thách Săn Deal" (theo yêu cầu, game thiết thực
   // hơn — luyện đúng hành vi so sánh giá + ngân sách thay vì đoán mò). Vẫn giữ đúng
   // 6 mục như v76, không thêm mục nào để không lo xuống thêm hàng.
+  // v79 — Bỏ hẳn mục game "Thử Thách Săn Deal" khỏi thanh nav theo yêu cầu (không cần
+  // phần game nữa). Trang DealHuntGame.jsx (route 'deal-hunt') vẫn còn nguyên trong
+  // code, chỉ là không còn link dẫn tới từ thanh nav/menu 3 gạch nữa — đúng theo cách
+  // đã làm trước đây với trang Stores (v73) và Cawi Đố Giá (v78). Còn lại 5 mục.
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['savings-achievements', 'Thành tựu tiết kiệm'],
-    ['deal-hunt', 'Thử Thách Săn Deal'],
     ['about', t.about]
   ];
 
@@ -210,15 +213,29 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
                 <span>Lịch sử mua hàng</span>
               </button>
 
+              {/* v79 — Đổi số lượng giỏ hàng từ chữ số trong ngoặc (dễ bị lướt qua) sang
+                  1 icon huy hiệu tròn đè lên icon giỏ hàng, giống hệt kiểu huy hiệu số
+                  ở nút chuông thông báo — dễ nhận ra ngay cần phải hiện số lượng này. */}
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
-                <ShoppingCart size={18} />
-                <span>Giỏ hàng so sánh{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+                <span className="menu-row-icon-badge-wrap-v79">
+                  <ShoppingCart size={18} />
+                  {cartCount > 0 && <span className="menu-row-icon-badge-v79">{cartCount}</span>}
+                </span>
+                <span>Giỏ hàng so sánh</span>
               </button>
 
               {/* v75 — Bỏ hẳn dòng "Trợ lý Cawi Robo" khỏi menu 3 gạch theo yêu cầu.
                   Robot vẫn mở chat bình thường qua icon nổi trên trang hoặc icon
                   trong header khung giỏ hàng (cawi-cart-side-btn-v71), chỉ là không
                   còn lối tắt riêng trong menu này nữa. */}
+
+              {/* v79 — Thẻ giới thiệu "Sơ qua về CartWise" trước đây tự hiện ép buộc
+                  ngay lần đầu vào web. Giờ đổi thành 1 mục trong menu, để người dùng
+                  TỰ CHỌN có muốn xem hướng dẫn sử dụng hay không, không còn ép xem nữa. */}
+              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenGuide?.(); }}>
+                <HelpCircle size={18} />
+                <span>Hướng dẫn sử dụng</span>
+              </button>
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>
                 <MessageSquare size={18} />
