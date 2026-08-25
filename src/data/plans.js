@@ -4,13 +4,19 @@ export const PLAN_LEVELS = {
   plus: 2
 };
 
+// v80 — Theo yêu cầu, chỉnh lại đúng các mốc "Lịch sử kiểm tra giá" mở theo từng
+// gói: Free chỉ còn 7 ngày (bỏ mốc 30 ngày cũ); Plus Student mở tới 1 tháng (30
+// ngày); CartWise Plus mở cả 2 mốc 6 tháng (180 ngày) VÀ 1 năm (365 ngày) — bỏ
+// hẳn mốc 90 ngày cũ, thêm mới mốc 365 ngày (1 năm). Danh sách vẫn theo kiểu cộng
+// dồn (gói cao hơn luôn có đủ các mốc của gói thấp hơn + mốc riêng của mình) —
+// xem đúng 4 mốc lọc [7, 30, 180, 365] tương ứng trong `CheckHistory.jsx`.
 export const PLAN_DETAILS = {
   free: {
     id: 'free',
     name: 'Miễn phí',
     price: '0đ',
     priceLabel: 'Miễn phí',
-    priceHistoryDays: [7, 30],
+    priceHistoryDays: [7],
     purchaseAnalyticsDays: 7,
     adFree: false,
     features: ['So sánh tổng chi phí dự kiến', 'Flash Sale', 'Điểm bán', 'Lịch sử kiểm tra giá cơ bản'],
@@ -24,7 +30,7 @@ export const PLAN_DETAILS = {
     id: 'student',
     name: 'CartWise Plus Student',
     price: '19.000đ/tháng',
-    priceHistoryDays: [7, 30, 90, 180],
+    priceHistoryDays: [7, 30],
     purchaseAnalyticsDays: 30,
     adFree: false,
     features: ['Lịch sử kiểm tra giá dài hơn', 'Cảnh báo giảm giá', 'Ưu tiên tính năng mới'],
@@ -37,7 +43,7 @@ export const PLAN_DETAILS = {
     id: 'plus',
     name: 'CartWise Plus',
     price: '49.000đ/tháng',
-    priceHistoryDays: [7, 30, 90, 180],
+    priceHistoryDays: [7, 30, 180, 365],
     purchaseAnalyticsDays: 365,
     adFree: true,
     features: ['Lịch sử nâng cao', 'Cảnh báo thông minh', 'Thống kê mua sắm', 'Không quảng cáo'],

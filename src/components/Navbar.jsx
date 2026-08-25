@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, HelpCircle } from 'lucide-react';
 
-function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart }) {
+function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart, onOpenGuide }) {
   const { page, t, user, profile, products } = appState;
   const [menuOpen, setMenuOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
@@ -21,12 +21,15 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   // v78 — Thay "Cawi Đố Giá" bằng "Thử Thách Săn Deal" (theo yêu cầu, game thiết thực
   // hơn — luyện đúng hành vi so sánh giá + ngân sách thay vì đoán mò). Vẫn giữ đúng
   // 6 mục như v76, không thêm mục nào để không lo xuống thêm hàng.
+  // v79 — Bỏ hẳn mục game "Thử Thách Săn Deal" khỏi thanh nav theo yêu cầu (không cần
+  // phần game nữa). Trang DealHuntGame.jsx (route 'deal-hunt') vẫn còn nguyên trong
+  // code, chỉ là không còn link dẫn tới từ thanh nav/menu 3 gạch nữa — đúng theo cách
+  // đã làm trước đây với trang Stores (v73) và Cawi Đố Giá (v78). Còn lại 5 mục.
   const navs = [
     ['home', t.home],
     ['flash', t.flash],
     ['group-cart', 'Ghép Đơn Cùng Bạn Bè'],
     ['savings-achievements', 'Thành tựu tiết kiệm'],
-    ['deal-hunt', 'Thử Thách Săn Deal'],
     ['about', t.about]
   ];
 
@@ -110,6 +113,21 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
         {/* v77 — Bỏ hẳn cụm đăng nhập/đăng ký (hoặc hồ sơ/đăng xuất) khỏi thanh nav
             chính theo yêu cầu (thấy thừa) — dời toàn bộ vào trong menu 3 gạch, xem
             khối "mobile-auth-block-v77" bên dưới. */}
+        {/* v80 — Theo yêu cầu mới: đưa icon giỏ hàng ra lại thanh nav chính, đứng
+            NGAY BÊN TRÁI nút chuông thông báo; đưa cụm đăng nhập/đăng ký ra lại
+            thanh nav chính, đứng NGAY BÊN PHẢI nút chuông thông báo. Đây là bản
+            desktop (màn hình rộng) — ở mobile (≤760px) vẫn giữ nguyên cách truy cập
+            qua menu 3 gạch như trước (không hiện 2 cụm này ở thanh trên cùng trên
+            mobile để tránh chật chội, đúng quyết định responsive đã chọn từ v73/v77),
+            nên dòng "Giỏ hàng so sánh" và khối đăng nhập/đăng ký trong menu 3 gạch
+            vẫn được GIỮ NGUYÊN làm lối vào cho mobile — chỉ ẩn 2 mục đó đi trên
+            desktop (xem CSS `menu-row-cart-v80`, `auth-login-row-v77`, `auth-register-row-v80`
+            trong khối `@media (min-width: 761px)`) để tránh trùng lặp không cần thiết. */}
+
+        <button className="notification-button-v43 cart-nav-btn-v80" onClick={() => { onOpenCart?.(); closePanels(); }} aria-label="Giỏ hàng so sánh">
+          <ShoppingCart size={21} />
+          {cartCount > 0 && <span>{cartCount}</span>}
+        </button>
 
         <div className="nav-popover-host-v43 nav-notification-host-v53">
           <button className="notification-button-v43" onClick={() => { setNoticeOpen((open) => !open); setMenuOpen(false); }} aria-label="Thông báo CartWise">
@@ -129,6 +147,24 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
                 </button>
               ))}
             </div>
+          )}
+        </div>
+
+        <div className="nav-auth-cluster-v80">
+          {user ? (
+            <button className="profile-pill" onClick={() => { onOpenProfile(); closePanels(); }}>
+              <span>{profile.avatar}</span>
+              {profile.name}
+            </button>
+          ) : (
+            <>
+              <button className="primary nav-auth-login-v80" onClick={() => { onOpenLogin(); closePanels(); }}>
+                <User size={16} /> {t.login}
+              </button>
+              <button className="ghost auth-trigger nav-auth-register-v80" onClick={() => { onOpenRegister(); closePanels(); }}>
+                <UserPlus size={16} /> Đăng ký
+              </button>
+            </>
           )}
         </div>
 
@@ -170,7 +206,7 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
                       <User size={19} />
                       <span>{t.login}</span>
                     </button>
-                    <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenRegister(); }}>
+                    <button className="menu-row-v43 auth-register-row-v80" onClick={() => { setMenuOpen(false); onOpenRegister(); }}>
                       <UserPlus size={18} />
                       <span>Đăng ký</span>
                     </button>
@@ -210,15 +246,32 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
                 <span>Lịch sử mua hàng</span>
               </button>
 
-              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
-                <ShoppingCart size={18} />
-                <span>Giỏ hàng so sánh{cartCount > 0 ? ` (${cartCount})` : ''}</span>
+              {/* v79 — Đổi số lượng giỏ hàng từ chữ số trong ngoặc (dễ bị lướt qua) sang
+                  1 icon huy hiệu tròn đè lên icon giỏ hàng, giống hệt kiểu huy hiệu số
+                  ở nút chuông thông báo — dễ nhận ra ngay cần phải hiện số lượng này. */}
+              {/* v80 — Icon giỏ hàng đã có riêng ở thanh nav trên cùng (bên trái nút
+                  chuông) cho desktop. Dòng này vẫn giữ nguyên, chỉ ẩn đi trên desktop
+                  (CSS `menu-row-cart-v80`) để làm lối vào giỏ hàng cho mobile. */}
+              <button className="menu-row-v43 menu-row-cart-v80" onClick={() => { setMenuOpen(false); onOpenCart?.(); }}>
+                <span className="menu-row-icon-badge-wrap-v79">
+                  <ShoppingCart size={18} />
+                  {cartCount > 0 && <span className="menu-row-icon-badge-v79">{cartCount}</span>}
+                </span>
+                <span>Giỏ hàng so sánh</span>
               </button>
 
               {/* v75 — Bỏ hẳn dòng "Trợ lý Cawi Robo" khỏi menu 3 gạch theo yêu cầu.
                   Robot vẫn mở chat bình thường qua icon nổi trên trang hoặc icon
                   trong header khung giỏ hàng (cawi-cart-side-btn-v71), chỉ là không
                   còn lối tắt riêng trong menu này nữa. */}
+
+              {/* v79 — Thẻ giới thiệu "Sơ qua về CartWise" trước đây tự hiện ép buộc
+                  ngay lần đầu vào web. Giờ đổi thành 1 mục trong menu, để người dùng
+                  TỰ CHỌN có muốn xem hướng dẫn sử dụng hay không, không còn ép xem nữa. */}
+              <button className="menu-row-v43" onClick={() => { setMenuOpen(false); onOpenGuide?.(); }}>
+                <HelpCircle size={18} />
+                <span>Hướng dẫn sử dụng</span>
+              </button>
 
               <button className="menu-row-v43" onClick={() => { setMenuOpen(false); setFeedbackOpen(true); }}>
                 <MessageSquare size={18} />

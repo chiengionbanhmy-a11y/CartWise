@@ -154,9 +154,10 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
   const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '', remember: false });
   const [banks, setBanks] = useState(FALLBACK_BANKS);
   const [hasSavedAccount, setHasSavedAccount] = useState(() => Boolean(loadSavedAccount()));
-  // v64 — mỗi người 1 mã QR riêng, mặc định thu gọn (chỉ hiện tên), bấm vào mới hiện
-  // mã QR của đúng người đó. Lưu theo groupId -> memberId đang mở.
-  const [qrOpenMember, setQrOpenMember] = useState({});
+  // v79 — Mã QR thanh toán giờ hiện qua 1 popup toàn màn hình dùng chung (thay vì
+  // hiện nhỏ/thu gọn ngay trong khung nhóm) — bấm "Xem mã QR" ở chế độ chia đều hay
+  // ai góp nấy trả đều mở đúng popup này, chỉ khác dữ liệu truyền vào.
+  const [qrModal, setQrModal] = useState(null);
   // v67 — màn hình phóng to xem chi tiết / chỉnh sửa 1 nhóm (thay cho hiện mọi thứ
   // ngay trên thẻ nhóm thu gọn). mode: 'view' (xem nhóm + chốt nhóm/QR) hoặc
   // 'edit' (thêm/xoá/đổi số lượng sản phẩm, chủ nhóm mới được xoá thành viên).
@@ -289,10 +290,6 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       saveSettlements(merged);
       return merged;
     });
-  }
-
-  function toggleQrMember(groupId, memberId) {
-    setQrOpenMember((prev) => ({ ...prev, [groupId]: prev[groupId] === memberId ? null : memberId }));
   }
 
   const allGroups = useMemo(() => {
@@ -463,7 +460,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       <div className="standalone-hero-v45">
         <span className="eyebrow"><Users size={15} /> Ghép Đơn Cùng Bạn Bè</span>
         <h1>Ghép đơn cùng bạn bè và chia tiền rõ ràng</h1>
-        <p>Rủ bạn bè cùng góp đơn vào một nơi bán để cả nhóm đạt ngưỡng freeship, rồi chốt số tiền mỗi người cần trả — chia đều hoặc tự nhập, có yêu cầu thanh toán QR và bảng theo dõi ai đã trả, ai chưa.</p>
+        <p>Rủ bạn bè cùng góp đơn vào một nơi bán để cả nhóm đạt ngưỡng freeship, rồi chốt số tiền mỗi người cần trả — chia đều hoặc ai góp nấy trả, có yêu cầu thanh toán QR và bảng theo dõi ai đã trả, ai chưa.</p>
       </div>
 
       <div className="history-definition-card-v50 groupcart-explain-v58">
@@ -588,6 +585,19 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       )}
 
       {activeDetailGroup && renderGroupDetail(activeDetailGroup, detailView.mode)}
+
+      {/* v79 — Popup toàn màn hình cho mã QR thanh toán, đặt ở gốc component để luôn
+          hiện đè lên trên cả khung xem chi tiết nhóm (z-index cao hơn). */}
+      {qrModal && (
+        <div className="groupcart-qr-popup-backdrop-v79" role="dialog" aria-modal="true" aria-label="Mã QR thanh toán" onClick={() => setQrModal(null)}>
+          <div className="groupcart-qr-popup-panel-v79" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="groupcart-qr-popup-close-v79" onClick={() => setQrModal(null)} aria-label="Đóng mã QR">
+              <X size={20} />
+            </button>
+            <PaymentQr {...qrModal} />
+          </div>
+        </div>
+      )}
     </section>
   );
 
@@ -907,7 +917,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                 <p>Chọn cách chia tiền cho nhóm này:</p>
                 <div className="groupcart-settle-mode-buttons-v63">
                   <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'even'); setSettleOpenId(null); }}>Chia đều</button>
-                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Tự nhập (giữ số tiền đã góp)</button>
+                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Ai góp nấy trả</button>
                 </div>
                 {!canStartSettlement() && <small className="groupcart-settle-hint-v64">Nhập đủ ngân hàng, số tài khoản đúng định dạng và tên chủ tài khoản để tạo QR.</small>}
               </div>
@@ -930,7 +940,7 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       <div className="groupcart-settle-v63 active">
         <div className="groupcart-settle-dashboard-head-v63">
           <QrCode size={16} />
-          <b>Yêu cầu thanh toán ({settlement.mode === 'even' ? 'chia đều' : 'tự nhập'})</b>
+          <b>Yêu cầu thanh toán ({settlement.mode === 'even' ? 'chia đều' : 'ai góp nấy trả'})</b>
           <span>{paidCount}/{settlement.requests.length} đã thanh toán</span>
         </div>
 
@@ -954,51 +964,51 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
         {plan.groupFund.qr && unpaidRequests.length > 0 && (
           useSharedQr ? (
             // Chia đều, mọi người còn nợ đúng cùng 1 số tiền -> chỉ cần 1 mã QR chung,
-            // không cần tạo riêng cho từng thành viên.
-            <div className="groupcart-settle-qrs-v63">
-              <PaymentQr
-                label={`Cả nhóm "${group.title}"`}
-                amount={unpaidRequests[0].amount}
-                bin={settlement.bank.bin}
-                bankShortName={settlement.bank.shortName}
-                accountNo={settlement.accountNo}
-                accountName={settlement.accountName}
-                groupTitle={group.title}
-                shared
-              />
-            </div>
-          ) : (
-            // Tự nhập (hoặc chia đều nhưng lệch vài đồng do làm tròn): mỗi người một số
-            // tiền khác nhau -> danh sách tên có thể bấm để mở, chỉ hiện mã QR của đúng
-            // người vừa bấm (tránh lẫn lộn nhiều mã QR cùng lúc trên màn hình).
-            <div className="groupcart-manual-qr-list-v63">
-              {unpaidRequests.map((req) => {
-                const isQrOpen = qrOpenMember[group.id] === req.memberId;
-                return (
-                  <div key={req.memberId} className="groupcart-manual-qr-item-v63">
-                    <button
-                      type="button"
-                      className={isQrOpen ? 'groupcart-manual-qr-name-btn-v63 open' : 'groupcart-manual-qr-name-btn-v63'}
-                      onClick={() => toggleQrMember(group.id, req.memberId)}
-                    >
-                      <QrCode size={14} />
-                      <span>{req.name} — {formatCurrency(req.amount, 'VND')}</span>
-                      <span className="groupcart-manual-qr-hint-v63">{isQrOpen ? 'Ẩn mã QR' : 'Xem mã QR'}</span>
-                    </button>
-                    {isQrOpen && (
-                      <PaymentQr
-                        memberName={req.name}
-                        amount={req.amount}
-                        bin={settlement.bank.bin}
-                        bankShortName={settlement.bank.shortName}
-                        accountNo={settlement.accountNo}
-                        accountName={settlement.accountName}
-                        groupTitle={group.title}
-                      />
-                    )}
-                  </div>
-                );
+            // không cần tạo riêng cho từng thành viên. v79 — bấm mới mở mã QR, hiện to
+            // dạng popup toàn màn hình (xem khối "qrModal" ở cuối component) thay vì
+            // hiện thẳng nhỏ ngay trong khung nhóm như trước.
+            <button
+              type="button"
+              className="groupcart-qr-open-btn-v79"
+              onClick={() => setQrModal({
+                label: `Cả nhóm "${group.title}"`,
+                amount: unpaidRequests[0].amount,
+                bin: settlement.bank.bin,
+                bankShortName: settlement.bank.shortName,
+                accountNo: settlement.accountNo,
+                accountName: settlement.accountName,
+                groupTitle: group.title,
+                shared: true
               })}
+            >
+              <QrCode size={16} /> Xem mã QR thanh toán chung
+            </button>
+          ) : (
+            // Ai góp nấy trả (hoặc chia đều nhưng lệch vài đồng do làm tròn): mỗi người
+            // một số tiền khác nhau -> danh sách tên bấm để mở, mã QR của đúng người vừa
+            // bấm hiện to dạng popup toàn màn hình (dễ đưa điện thoại ra quét hơn hẳn so
+            // với hiện thu nhỏ ngay trong khung nhóm như bản trước).
+            <div className="groupcart-manual-qr-list-v63">
+              {unpaidRequests.map((req) => (
+                <button
+                  key={req.memberId}
+                  type="button"
+                  className="groupcart-manual-qr-name-btn-v63"
+                  onClick={() => setQrModal({
+                    memberName: req.name,
+                    amount: req.amount,
+                    bin: settlement.bank.bin,
+                    bankShortName: settlement.bank.shortName,
+                    accountNo: settlement.accountNo,
+                    accountName: settlement.accountName,
+                    groupTitle: group.title
+                  })}
+                >
+                  <QrCode size={14} />
+                  <span>{req.name} — {formatCurrency(req.amount, 'VND')}</span>
+                  <span className="groupcart-manual-qr-hint-v63">Xem mã QR</span>
+                </button>
+              ))}
             </div>
           )
         )}

@@ -18,12 +18,18 @@ function getHistoryItems(days) {
   return { items: Array.from(latestByProduct.values()), checkCount: filtered.length };
 }
 
+// v80 — Đổi 4 mốc lọc từ [7,30,90,180] sang [7,30,180,365] cho khớp đúng các mốc
+// mở theo gói mới (Free 7 ngày / Plus Student 1 tháng / CartWise Plus 6 tháng
+// và 1 năm) — xem giải thích đầy đủ trong `src/data/plans.js`. Nhãn hiện theo
+// đơn vị dễ hiểu (tháng/năm) thay vì luôn quy ra số ngày cho mốc dài.
+const RANGE_LABELS = { 7: '7 ngày', 30: '1 tháng', 180: '6 tháng', 365: '1 năm' };
+
 function CheckHistory({ currency, planId = 'free', onBack, onOpenUpgrade }) {
   const [range, setRange] = useState(7);
   const plan = getPlan(planId);
-  const tabs = [7, 30, 90, 180].map((value) => ({
+  const tabs = [7, 30, 180, 365].map((value) => ({
     value,
-    label: `${value} ngày`,
+    label: RANGE_LABELS[value],
     locked: !plan.priceHistoryDays.includes(value)
   }));
   const locked = !plan.priceHistoryDays.includes(range);
@@ -67,15 +73,15 @@ function CheckHistory({ currency, planId = 'free', onBack, onOpenUpgrade }) {
         <div className="history-locked-page-v48">
           <div>
             <span><Crown size={18} /> {planId === 'free' ? 'Gói trả phí' : 'Quyền lợi nâng cao'}</span>
-            <h2>Mở khóa lịch sử kiểm tra giá {range} ngày</h2>
-            <p>Gói CartWise Plus Student và CartWise Plus mở rộng lịch sử kiểm tra giá lên 90 và 180 ngày.</p>
+            <h2>Mở khóa lịch sử kiểm tra giá {RANGE_LABELS[range]}</h2>
+            <p>CartWise Plus Student mở rộng lịch sử kiểm tra giá lên 1 tháng; CartWise Plus mở rộng lên 6 tháng và 1 năm. Bản miễn phí xem được 7 ngày gần nhất.</p>
           </div>
           <button className="primary" onClick={onOpenUpgrade}>Xem gói nâng cấp</button>
         </div>
       ) : (
         <>
           <div className="history-summary-page-v48">
-            <article><span><CalendarDays size={17} /> Khoảng thời gian</span><strong>{range} ngày gần đây</strong></article>
+            <article><span><CalendarDays size={17} /> Khoảng thời gian</span><strong>{RANGE_LABELS[range]} gần đây</strong></article>
             <article><span><SearchCheck size={17} /> Sản phẩm đã kiểm tra</span><strong>{summary.items.length}</strong></article>
             <article><span><Clock3 size={17} /> Tổng lượt kiểm tra</span><strong>{summary.checkCount}</strong></article>
           </div>
@@ -83,7 +89,7 @@ function CheckHistory({ currency, planId = 'free', onBack, onOpenUpgrade }) {
           {summary.items.length === 0 ? (
             <div className="history-empty-page-v48">
               <SearchCheck size={46} />
-              <h2>Chưa có sản phẩm được kiểm tra trong {range} ngày gần đây</h2>
+              <h2>Chưa có sản phẩm được kiểm tra trong {RANGE_LABELS[range]} gần đây</h2>
               <p>Khi bạn mở bảng so sánh tổng chi phí của một sản phẩm, CartWise sẽ lưu lại thời điểm kiểm tra trong lịch sử này.</p>
               <button className="secondary" onClick={onBack}>Về trang chủ</button>
             </div>

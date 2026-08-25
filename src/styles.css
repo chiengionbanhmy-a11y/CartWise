@@ -8486,6 +8486,44 @@ option {
    CartPanel.jsx cho icon Cawi Robo bên trong khung giỏ hàng, không đổi gì ở đó).
    Class .cart-nav-btn-v69 không còn được dùng ở đâu nên xoá hẳn CSS cho gọn. */
 
+/* =======================================================
+   v80 — Đưa icon giỏ hàng + cụm đăng nhập/đăng ký ra lại thanh nav chính
+   (desktop), ngay cạnh nút chuông thông báo: giỏ hàng bên trái, đăng
+   nhập/đăng ký bên phải — theo đúng yêu cầu. `.cart-nav-btn-v80` dùng chung
+   class `.notification-button-v43` nên tự động có đúng hình tròn 48px + huy
+   hiệu số đỏ giống hệt nút chuông, không cần viết lại CSS.
+   ======================================================= */
+.nav-auth-cluster-v80 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-auth-login-v80 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  font-size: 14.5px;
+  white-space: nowrap;
+}
+.nav-auth-register-v80 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* Trên desktop, icon giỏ hàng + đăng nhập/đăng ký đã có ở thanh nav trên cùng
+   rồi — ẩn bớt các mục trùng lặp trong menu 3 gạch (mobile vẫn giữ nguyên,
+   xem media query max-width:760px ở trên) để menu đỡ lặp lại thông tin. */
+@media (min-width: 761px) {
+  .hamburger-panel-v53 .menu-row-cart-v80,
+  .hamburger-panel-v53 .auth-login-row-v77,
+  .hamburger-panel-v53 .auth-register-row-v80 {
+    display: none;
+  }
+}
+
 /* v69 — Icon Cawi Robo mở khung chat, dùng icon vẽ sẵn (không phải ảnh mascot) để
    luôn gọn, đúng cỡ, không bị vỡ layout hay lộ nền xấu như ảnh PNG trước đó. */
 /* v71 — Icon này không còn cố định trên thanh nav nữa (khi mở giỏ hàng, khung giỏ
@@ -8779,6 +8817,32 @@ option {
 
 .menu-row-v43 svg:last-child {
   margin-left: auto;
+}
+
+/* v79 — Huy hiệu số lượng tròn đè lên icon giỏ hàng trong menu 3 gạch, cùng kiểu
+   với huy hiệu số ở nút chuông thông báo (.notification-button-v43 span), chỉ thu
+   nhỏ lại cho vừa icon 18px nằm trong hàng menu. */
+.menu-row-icon-badge-wrap-v79 {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+.menu-row-icon-badge-wrap-v79 svg { margin-left: 0; }
+.menu-row-icon-badge-v79 {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 900;
+  border: 2px solid #f8fafc;
 }
 
 .menu-section-v43 {
@@ -9489,6 +9553,53 @@ option {
   font-weight: 700;
   line-height: 1.6;
   font-size: 18px;
+}
+
+/* v80 — Bảng so sánh nhỏ "Lịch sử kiểm tra giá theo từng gói" đặt ngay trên 2 thẻ
+   gói trả phí, để người xem thấy NGAY cả 3 bậc (kể cả bậc Miễn phí, vốn không có
+   thẻ riêng ở trang này) trong 1 hàng, thay vì phải tự suy luận từ chữ trong thẻ. */
+.upgrade-history-compare-v80 {
+  margin: 22px 0 28px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.86);
+  border: 1px solid rgba(226,232,240,.9);
+  box-shadow: 0 12px 28px rgba(15,23,42,.06);
+}
+.upgrade-history-compare-label-v80 {
+  display: block;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.upgrade-history-compare-row-v80 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.upgrade-history-compare-row-v80 > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid rgba(226,232,240,.9);
+}
+.upgrade-history-compare-row-v80 b {
+  font-size: 13.5px;
+  color: #172033;
+}
+.upgrade-history-compare-row-v80 span {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--primary-dark);
+}
+@media (max-width: 760px) {
+  .upgrade-history-compare-row-v80 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .premium-plans-page-v45 {
@@ -10595,7 +10706,12 @@ option {
   .navbar .auth-trigger,
   .navbar .profile-pill,
   .navbar .nav-actions-v43 > .ghost,
-  .navbar .nav-notification-host-v53 {
+  .navbar .nav-notification-host-v53,
+  /* v80 — Icon giỏ hàng + cụm đăng nhập/đăng ký mới thêm cạnh chuông thông báo
+     chỉ dành cho desktop; trên mobile vẫn giữ nguyên lối vào qua menu 3 gạch
+     (xem `menu-row-cart-v80`, `auth-login-row-v77` — luôn hiện trên mobile). */
+  .navbar .cart-nav-btn-v80,
+  .navbar .nav-auth-cluster-v80 {
     display: none !important;
   }
 
@@ -12560,6 +12676,46 @@ option {
 .groupcart-manual-qr-name-btn-v63 span:first-of-type { flex: 1; text-align: left; }
 .groupcart-manual-qr-hint-v63 { color: var(--primary-dark); font-size: 12px; font-weight: 800; }
 .groupcart-manual-qr-name-btn-v63.open { border-color: rgba(251,146,60,.4); background: rgba(255,247,237,.7); }
+
+/* v79 — Nút mở mã QR thanh toán chung (chế độ chia đều) — thay cho việc hiện mã QR
+   luôn sẵn trong khung nhóm, giờ phải bấm mới mở, và mở ra dạng popup to (xem khối
+   ngay bên dưới) thay vì hiện nhỏ tại chỗ. */
+.groupcart-qr-open-btn-v79 {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px 16px; border-radius: 14px; margin-top: 4px;
+  border: 1px solid rgba(251,146,60,.4); background: rgba(255,247,237,.7); color: var(--primary-dark);
+  font-weight: 800; font-size: 14px;
+}
+.groupcart-qr-open-btn-v79:hover { transform: translateY(-1px); }
+
+/* v79 — Popup mã QR thanh toán, hiển thị to, đè lên toàn màn hình (thay vì hiện nhỏ
+   ngay trong khung nhóm như bản trước) — dễ đưa điện thoại ra quét hơn hẳn. Z-index
+   cao hơn khung "xem chi tiết nhóm" (.groupcart-detail-backdrop-v72, 3200) để luôn
+   nổi lên trên, nhưng thấp hơn các modal thật sự toàn cục như đăng nhập (3400). */
+.groupcart-qr-popup-backdrop-v79 {
+  position: fixed; inset: 0; z-index: 3300;
+  background: rgba(15,23,42,.72); backdrop-filter: blur(6px);
+  display: grid; place-items: center; padding: 20px;
+}
+.groupcart-qr-popup-panel-v79 {
+  position: relative; width: min(380px, 100%);
+  padding-top: 46px;
+  animation: cw79-qr-pop-in .22s ease;
+}
+.groupcart-qr-popup-panel-v79 .payment-qr-v64 {
+  width: 100%; padding: 24px; border-radius: 28px; box-shadow: 0 30px 80px rgba(2,6,23,.4);
+}
+.groupcart-qr-popup-panel-v79 .payment-qr-info-v64 b { font-size: 16px; }
+.groupcart-qr-popup-panel-v79 .payment-qr-info-v64 span { font-size: 13.5px; }
+.groupcart-qr-popup-close-v79 {
+  position: absolute; top: 0; right: 0; width: 40px; height: 40px; border-radius: 50%;
+  border: 0; background: #fff; color: #172033; display: grid; place-items: center;
+  box-shadow: 0 10px 26px rgba(2,6,23,.35);
+}
+@keyframes cw79-qr-pop-in {
+  from { opacity: 0; transform: scale(.9); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 /* =======================================================
    v69 — Trang "Thành tựu tiết kiệm" (bản đồ cột mốc kiểu game)
