@@ -130,7 +130,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
     setSelectedHistoryStore('Shopee');
     setHistoryMenuOpen(false);
     setReviewPanelOpen(false);
-    setPurchaseReported(isPurchaseReported(product.id));
   }, [product]);
 
   const reviewData = useMemo(() => getReviewData(product.id), [product.id]);
