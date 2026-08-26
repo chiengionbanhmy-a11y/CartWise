@@ -12360,9 +12360,10 @@ option {
      trong CawiRobot.css. KHÔNG đặt !important cho top/right vì khi người dùng kéo thả,
      CawiRobot.jsx sẽ set left/top qua inline style — inline style (không !important) sẽ
      tự động thắng rule thường bên dưới, nhưng sẽ bị !important đè mất nếu ta lỡ đặt ở đây. */
-  position: absolute !important;
-  top: 2px;
-  right: 2px;
+  position: fixed !important;
+  top: 118px;
+  right: 20px;
+  left: auto;
   width: auto !important;
   min-height: 0 !important;
   align-items: flex-end !important;
@@ -13447,3 +13448,48 @@ option {
 .saved-account-box-v81 small { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .saved-account-empty-v81 { margin: 0; font-size: 13.5px; color: #64748b; line-height: 1.5; }
 .saved-account-delete-v81 { align-self: flex-start; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; color: #b91c1c; border-color: rgba(185,28,28,.3); }
+
+
+/* v82 — Purchase confirmation + monthly budget setup */
+.purchase-confirm-backdrop-v82, .budget-setup-backdrop-v82 { z-index: 5200 !important; }
+.purchase-confirm-card-v82, .budget-setup-card-v82 {
+  width: min(540px, calc(100vw - 28px));
+  border-radius: 28px;
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(210,222,240,.9);
+  box-shadow: 0 30px 80px rgba(15,23,42,.2);
+  padding: 28px;
+  font-family: "Times New Roman", Times, serif;
+}
+.purchase-confirm-card-v82 h2, .budget-setup-card-v82 h2 { margin: 8px 0 10px; color: #172033; line-height: 1.2; }
+.purchase-confirm-card-v82 p, .budget-setup-card-v82 p { color: #475569; line-height: 1.6; margin: 0 0 18px; }
+.purchase-confirm-product-v82 { display:flex; gap:14px; align-items:center; padding:14px; border:1px solid #e2e8f0; border-radius:18px; background:#f8fafc; margin:16px 0; }
+.purchase-confirm-product-v82 img { width:64px; height:64px; border-radius:14px; object-fit:cover; background:#fff; }
+.purchase-confirm-product-v82 div { display:flex; flex-direction:column; gap:5px; }
+.purchase-confirm-product-v82 b { color:#172033; }
+.purchase-confirm-product-v82 span { color:#64748b; font-size:13px; }
+.purchase-confirm-actions-v82 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.purchase-confirm-actions-v82 button { display:flex; justify-content:center; align-items:center; gap:7px; }
+.purchase-confirm-card-v82 > small, .budget-setup-card-v82 small { display:flex; align-items:center; gap:6px; margin-top:12px; color:#64748b; line-height:1.5; }
+.budget-setup-card-v82 { width:min(520px, calc(100vw - 28px)); text-align:left; }
+.budget-setup-icon-v82 { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ecfdf5; color:#047857; margin-bottom:12px; }
+.budget-input-label-v82 { display:block; font-weight:800; color:#334155; margin-bottom:7px; }
+.budget-input-shell-v82 { display:flex; align-items:center; border:1px solid #cbd5e1; border-radius:14px; background:#fff; overflow:hidden; }
+.budget-input-shell-v82:focus-within { border-color:#10b981; box-shadow:0 0 0 4px rgba(16,185,129,.12); }
+.budget-input-shell-v82 input { flex:1; border:0; outline:0; padding:14px 14px; font-size:18px; min-width:0; }
+.budget-input-shell-v82 span { padding:0 14px; color:#64748b; font-weight:800; }
+.budget-setup-card-v82 .primary.full { margin-top:16px; display:flex; justify-content:center; align-items:center; gap:7px; }
+.profile-budget-box-v82 { margin-top:18px; padding:18px; border:1px solid #d1fae5; border-radius:18px; background:linear-gradient(135deg,#f0fdf4,#fff); }
+.profile-budget-box-v82 h3 { display:flex; align-items:center; gap:8px; margin:0 0 10px; color:#14532d; }
+.profile-budget-value-v82 { color:#475569; font-weight:700; }
+.profile-budget-value-v82 strong { color:#14532d; }
+.profile-budget-bar-v82 { height:10px; border-radius:999px; background:#dcfce7; overflow:hidden; margin:12px 0 8px; }
+.profile-budget-bar-v82 span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#10b981,#059669); }
+.profile-budget-box-v82 small { color:#64748b; line-height:1.5; }
+@media (max-width: 560px) { .purchase-confirm-actions-v82 { grid-template-columns:1fr; } }
+
+.profile-budget-actions-v82 { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.profile-budget-actions-v82 .ghost { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.budget-setup-close-v82 { position:absolute; right:14px; top:14px; }
+.budget-setup-card-v82 { position:relative; }
+@media (max-width: 560px) { .profile-budget-actions-v82 { flex-direction:column; align-items:flex-start; } }

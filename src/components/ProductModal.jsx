@@ -8,7 +8,6 @@ import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from 
 import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore, getStoreDistanceLabel } from '../data/products.js';
 import { getReviewData } from '../data/reviews.js';
 import { getPlan } from '../data/plans.js';
-import { isPurchaseReported, addSelfReportedPurchase, removeSelfReportedPurchase } from '../data/purchases.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
@@ -107,7 +106,7 @@ function PriceHistoryChart({ data, currency }) {
   );
 }
 
-function ProductModal({ product, currency, onCurrencyChange, onClose, planId = 'free', onOpenUpgrade, inCart = false, onAddToCart }) {
+function ProductModal({ product, currency, onCurrencyChange, onClose, planId = 'free', onOpenUpgrade, inCart = false, onAddToCart, onStoreLinkClick }) {
   const plan = getPlan(planId);
   const [localCurrency, setLocalCurrency] = useState(currency || 'VND');
   const [voucherByStore, setVoucherByStore] = useState({});
@@ -121,8 +120,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
   const [deliveryBasis, setDeliveryBasis] = useState(() => JSON.parse(localStorage.getItem('cartwise-delivery-basis') || 'null'));
   const [manualAddress, setManualAddress] = useState(deliveryBasis?.address || '');
   const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
-  // v81 — Nút tự khai "Đã mua / Chưa mua" — xem giải thích đầy đủ trong data/purchases.js.
-  const [purchaseReported, setPurchaseReported] = useState(() => isPurchaseReported(product.id));
 
   useEffect(() => {
     setVoucherByStore({});
@@ -311,17 +308,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
       ? `${bestOnline?.storeName || 'Nền tảng online'} đang có tổng chi phí dự kiến thấp nhất theo dữ liệu online hiện có.`
       : `${bestOffline?.storeName || 'Cửa hàng trực tiếp'} đang có mức giá tham khảo tốt nhất trong nhóm cửa hàng trực tiếp.`;
 
-  function markPurchased() {
-    const referenceRow = bestSelected || bestOnline || bestOffline;
-    addSelfReportedPurchase(product, referenceRow?.basicTotal);
-    setPurchaseReported(true);
-  }
-
-  function markNotPurchased() {
-    removeSelfReportedPurchase(product.id);
-    setPurchaseReported(false);
-  }
-
   function renderRow(row, bestRow, compact = false) {
     const isUnavailable = row.available === false || row.basicTotal == null;
     const isBest = !isUnavailable && row.storeName === bestRow?.storeName;
@@ -355,7 +341,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             <span>Kết thúc ưu đãi sau <b>{formatCountdown(product.offerEndTime - now)}</b></span>
           </div>
         )}
-        {!compact && (isUnavailable ? <span className="buy-link soft disabled-link">Không có sản phẩm</span> : <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer">Mua tại đây</a>)}
+        {!compact && (isUnavailable ? <span className="buy-link soft disabled-link">Không có sản phẩm</span> : <a className="buy-link soft" href={row.storeUrl || '#'} target="_blank" rel="noreferrer" onClick={() => onStoreLinkClick?.(product, row)}>Mua tại đây</a>)}
       </article>
     );
   }
@@ -391,30 +377,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             >
               {inCart ? <><Check size={16} /> Đã có trong giỏ hàng</> : <><ShoppingCart size={16} /> Thêm vào giỏ hàng</>}
             </button>
-
-            {/* v81 — Tự khai đã mua sản phẩm này chưa, để "Thành tựu tiết kiệm" phản
-                ứng lại thay vì luôn đứng yên ở dữ liệu demo cố định. */}
-            <div className="self-report-purchase-v81">
-              <div className="self-report-toggle-v81">
-                <button
-                  type="button"
-                  className={purchaseReported ? 'active' : ''}
-                  onClick={markPurchased}
-                  aria-pressed={purchaseReported}
-                >
-                  <PackageCheck size={15} /> Đã mua
-                </button>
-                <button
-                  type="button"
-                  className={!purchaseReported ? 'active' : ''}
-                  onClick={markNotPurchased}
-                  aria-pressed={!purchaseReported}
-                >
-                  <PackageX size={15} /> Chưa mua
-                </button>
-              </div>
-              <small>Bạn tự khai để mở khoá "Thành tựu tiết kiệm" — dữ liệu minh hoạ, chưa liên kết tài khoản mua sắm thật.</small>
-            </div>
 
             <div className="quick-convert premium-convert">
               <h4>Đơn vị hiển thị</h4>

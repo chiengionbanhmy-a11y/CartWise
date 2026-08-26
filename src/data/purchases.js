@@ -16,6 +16,59 @@ export const demoPurchases = [
 // Ngân sách tháng minh hoạ dùng cho Cawi Cố Vấn Chi Tiêu (bản demo — chưa có form
 // người dùng tự khai ngân sách, ở bản chính thức sẽ lấy từ hồ sơ/cài đặt).
 export const DEMO_MONTHLY_BUDGET = 1500000;
+export const MONTHLY_BUDGET_KEY = 'cartwise-monthly-budget';
+
+export function getMonthlyBudget() {
+  const value = Number(localStorage.getItem(MONTHLY_BUDGET_KEY) || 0);
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+export function hasMonthlyBudget() {
+  return getMonthlyBudget() > 0;
+}
+
+export function setMonthlyBudget(amount) {
+  const value = Math.round(Number(amount));
+  if (!Number.isFinite(value) || value <= 0) return false;
+  if (hasMonthlyBudget()) return false;
+  localStorage.setItem(MONTHLY_BUDGET_KEY, String(value));
+  localStorage.setItem(`${MONTHLY_BUDGET_KEY}-edit-count`, '0');
+  return true;
+}
+
+export function getMonthlyBudgetEditCount() {
+  return Number(localStorage.getItem(`${MONTHLY_BUDGET_KEY}-edit-count`) || 0);
+}
+
+export function updateMonthlyBudgetOnce(amount) {
+  const value = Math.round(Number(amount));
+  if (!Number.isFinite(value) || value <= 0 || !hasMonthlyBudget() || getMonthlyBudgetEditCount() >= 1) return false;
+  localStorage.setItem(MONTHLY_BUDGET_KEY, String(value));
+  localStorage.setItem(`${MONTHLY_BUDGET_KEY}-edit-count`, '1');
+  return true;
+}
+
+export function getCurrentMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function getMonthlySpent() {
+  const monthKey = getCurrentMonthKey();
+  return getPurchaseRecords()
+    .filter((item) => item.selfReported && (item.monthKey || String(item.date || '').slice(0, 7)) === monthKey)
+    .reduce((sum, item) => sum + Number(item.paid || 0), 0);
+}
+
+export function getMonthlyBudgetSnapshot() {
+  const budget = getMonthlyBudget();
+  const spent = getMonthlySpent();
+  return {
+    budget,
+    spent,
+    remaining: Math.max(0, budget - spent),
+    percent: budget > 0 ? Math.min(999, Math.round((spent / budget) * 100)) : 0
+  };
+}
 
 export function getPurchaseRecords() {
   const stored = JSON.parse(localStorage.getItem('cartwise-purchase-history') || 'null');
@@ -52,9 +105,11 @@ export function addSelfReportedPurchase(product, paidAmount) {
     paid,
     reference,
     saved: Math.max(0, reference - paid),
-    selfReported: true
+    selfReported: true,
+    monthKey: getCurrentMonthKey()
   };
   persistPurchaseRecords([entry, ...existing]);
+  window.dispatchEvent(new CustomEvent('cartwise-purchase-updated', { detail: entry }));
   return entry;
 }
 
@@ -88,8 +143,8 @@ export function getPurchaseHistoryCoverageDays() {
 }
 
 // % ngân sách tháng đã dùng (tín hiệu 1 trong công thức Cố Vấn Chi Tiêu).
-export function getMonthlyBudgetUsage(monthlyBudget = DEMO_MONTHLY_BUDGET) {
-  const spentThisMonth = getPurchasesSince(30).reduce((sum, item) => sum + Number(item.paid || 0), 0);
+export function getMonthlyBudgetUsage(monthlyBudget = getMonthlyBudget() || DEMO_MONTHLY_BUDGET) {
+  const spentThisMonth = getMonthlySpent();
   return {
     spent: spentThisMonth,
     budget: monthlyBudget,

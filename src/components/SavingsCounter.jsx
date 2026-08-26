@@ -36,7 +36,14 @@ function useCountUp(target, durationMs = 1200) {
 
 function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = 'VND', onOpenUpgrade, onOpenAchievements }) {
   const [shared, setShared] = useState(false);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const refresh = () => setRevision((value) => value + 1);
+    window.addEventListener('cartwise-purchase-updated', refresh);
+    return () => window.removeEventListener('cartwise-purchase-updated', refresh);
+  }, []);
   const summary = getSavingsSummary();
+  void revision;
   const milestone = getSavingsMilestoneProgress(summary.totalSaved);
   const animatedValue = useCountUp(variant === 'prominent' ? summary.totalSaved : summary.totalSaved, variant === 'prominent' ? 1200 : 0);
   const displayValue = variant === 'prominent' ? animatedValue : summary.totalSaved;

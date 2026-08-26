@@ -9,6 +9,8 @@ import ProductModal from './components/ProductModal.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
 import SetupWizard from './components/SetupWizard.jsx';
 import LoginModal from './components/LoginModal.jsx';
+import BudgetSetupModal from './components/BudgetSetupModal.jsx';
+import PurchaseConfirmationModal from './components/PurchaseConfirmationModal.jsx';
 import Home from './pages/Home.jsx';
 import FlashSale from './pages/FlashSale.jsx';
 import Stores from './pages/Stores.jsx';
@@ -26,6 +28,7 @@ import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
 import { applyLanguageToDom } from './utils/uiTranslator.js';
 import { loadCart, saveCart, isInCart } from './data/cart.js';
+import { addSelfReportedPurchase, getMonthlyBudget, hasMonthlyBudget, setMonthlyBudget } from './data/purchases.js';
 
 const savedSettings = JSON.parse(localStorage.getItem('cartwise-settings') || '{}');
 const savedUser = JSON.parse(localStorage.getItem('cartwise-user') || 'null');
@@ -62,6 +65,8 @@ function App() {
   const [language, setLanguage] = useState(savedSettings.language || 'vi');
   const [currency, setCurrency] = useState(savedSettings.currency || 'VND');
   const [planId, setPlanId] = useState(savedPlan);
+  const [budgetPromptOpen, setBudgetPromptOpen] = useState(() => Boolean(user && !hasMonthlyBudget()));
+  const [pendingPurchase, setPendingPurchase] = useState(null);
   // v67 — Giỏ hàng so sánh: sản phẩm người dùng bấm "Thêm vào giỏ hàng" trong khung
   // so sánh sản phẩm, xem lại được từ icon giỏ hàng cạnh nút Đăng nhập ở navbar.
   const [cartItems, setCartItems] = useState(loadCart);
@@ -73,7 +78,7 @@ function App() {
   const t = translations[language] || translations.vi;
 
   const appState = useMemo(() => ({
-    page, t, products, user, profile, language, currency, planId
+    page, t, products, user, profile, language, currency, planId, monthlyBudget: getMonthlyBudget()
   }), [page, t, user, profile, language, currency, planId]);
 
   useEffect(() => applyLanguageToDom(language), [language]);
@@ -83,6 +88,24 @@ function App() {
   useEffect(() => {
     if (setupDone && visitCount <= 2) setWelcomeOpen(true);
   }, [setupDone, visitCount]);
+
+  useEffect(() => {
+    const onReturnToTab = () => {
+      if (!pendingPurchase) return;
+      setPendingPurchase((current) => ({ ...current, returnedAt: Date.now() }));
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') onReturnToTab();
+    };
+    window.addEventListener('focus', onReturnToTab);
+    window.addEventListener('pageshow', onReturnToTab);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onReturnToTab);
+      window.removeEventListener('pageshow', onReturnToTab);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [pendingPurchase]);
 
   function focusHomeSearch() {
     window.setTimeout(() => {
@@ -111,6 +134,7 @@ function App() {
     setProfile((prev) => ({ ...prev, name: newUser.name }));
     localStorage.setItem('cartwise-user', JSON.stringify(newUser));
     setAuthMode(null);
+    if (!hasMonthlyBudget()) setBudgetPromptOpen(true);
   }
 
   function handleLogout() {
@@ -180,6 +204,25 @@ function App() {
     saveCart([]);
   }
 
+  function handleStoreLinkClick(product, row) {
+    if (!product || !row || row.available === false || !row.storeUrl || row.storeUrl === '#') return;
+    setPendingPurchase({ product, row, startedAt: Date.now() });
+  }
+
+  function handlePurchaseConfirmed() {
+    if (!pendingPurchase?.product) return;
+    const paidAmount = Number(pendingPurchase.row?.basicTotal ?? pendingPurchase.row?.storePrice ?? 0);
+    const entry = addSelfReportedPurchase(pendingPurchase.product, paidAmount);
+    void entry;
+    setPendingPurchase(null);
+  }
+
+  function handleBudgetSave(amount) {
+    if (!setMonthlyBudget(amount)) return;
+    setBudgetPromptOpen(false);
+    window.dispatchEvent(new CustomEvent('cartwise-budget-updated'));
+  }
+
   function saveSettings(next) {
     setProfile(next.profile);
     setLanguage(next.language);
@@ -224,7 +267,7 @@ function App() {
         {page === 'flash' && <FlashSale appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'stores' && <Stores appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'about' && <About appState={appState} />}
-        {page === 'upgrade' && <Upgrade onBack={() => navigate('home')} onChoosePlan={(nextPlan) => { setPlanId(nextPlan); localStorage.setItem('cartwise-plan', nextPlan); navigate('home'); }} />}
+        {page === 'upgrade' && <Upgrade onBack={() => navigate('home')} onChoosePlan={(nextPlan) => { setPlanId(nextPlan); localStorage.setItem('cartwise-plan', nextPlan); navigate('home'); if (nextPlan === 'plus' && user && !hasMonthlyBudget()) setBudgetPromptOpen(true); }} />}
         {page === 'profile' && (
           <Profile
             user={user}
@@ -315,6 +358,7 @@ function App() {
           onOpenUpgrade={() => { setSelectedProduct(null); navigate('upgrade'); }}
           inCart={isInCart(cartItems, selectedProduct.id)}
           onAddToCart={() => addToCart(selectedProduct)}
+          onStoreLinkClick={handleStoreLinkClick}
         />
       )}
 
@@ -352,6 +396,16 @@ function App() {
       )}
 
       {authMode && <LoginModal mode={authMode} onClose={() => setAuthMode(null)} onLogin={handleLogin} onSwitchMode={setAuthMode} />}
+
+      {budgetPromptOpen && user && <BudgetSetupModal onSave={handleBudgetSave} />}
+
+      {pendingPurchase?.returnedAt && (
+        <PurchaseConfirmationModal
+          pendingPurchase={pendingPurchase}
+          onPurchased={handlePurchaseConfirmed}
+          onNotPurchased={() => setPendingPurchase(null)}
+        />
+      )}
     </div>
   );
 }

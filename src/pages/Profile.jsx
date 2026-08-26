@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { ArrowLeft, Banknote, KeyRound, Mail, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Banknote, KeyRound, Mail, ShieldCheck, Trash2, UserRound, Pencil } from 'lucide-react';
 import SavingsCounter from '../components/SavingsCounter.jsx';
 import { getPlan } from '../data/plans.js';
 import { loadSavedAccount, clearSavedAccount } from '../data/savedAccount.js';
+import { getMonthlyBudgetEditCount, getMonthlyBudgetSnapshot, updateMonthlyBudgetOnce } from '../data/purchases.js';
+import BudgetSetupModal from '../components/BudgetSetupModal.jsx';
 
 function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onOpenLogin, onOpenRegister }) {
   const [passwordDraft, setPasswordDraft] = useState({ old: '', next: '', confirm: '' });
@@ -10,6 +12,21 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
   // xem giải thích đầy đủ ở popup hỏi lưu tài khoản trong GroupCart.jsx.
   const [savedAccount, setSavedAccount] = useState(() => (user ? loadSavedAccount() : null));
   const plan = getPlan(planId);
+  const [budgetRevision, setBudgetRevision] = useState(0);
+  const [budgetEditOpen, setBudgetEditOpen] = useState(false);
+  const budget = getMonthlyBudgetSnapshot();
+  const budgetEditCount = getMonthlyBudgetEditCount();
+  void budgetRevision;
+
+  useEffect(() => {
+    const refresh = () => setBudgetRevision((value) => value + 1);
+    window.addEventListener('cartwise-budget-updated', refresh);
+    window.addEventListener('cartwise-purchase-updated', refresh);
+    return () => {
+      window.removeEventListener('cartwise-budget-updated', refresh);
+      window.removeEventListener('cartwise-purchase-updated', refresh);
+    };
+  }, []);
 
   const email = user?.email || localStorage.getItem('cartwise-email') || 'Chưa liên kết Gmail';
 
@@ -84,6 +101,23 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
               <button className="primary full" onClick={savePasswordDemo}>Lưu mật khẩu</button>
             </div>
 
+
+            <div className="profile-budget-box-v82">
+              <h3><Banknote size={18} /> Ngân sách chi tiêu tháng này</h3>
+              {budget.budget > 0 ? (
+                <>
+                  <div className="profile-budget-value-v82">Đã dùng <strong>{budget.spent.toLocaleString('vi-VN')}đ</strong> / {budget.budget.toLocaleString('vi-VN')}đ</div>
+                  <div className="profile-budget-bar-v82"><span style={{ width: `${Math.min(100, budget.percent)}%` }} /></div>
+                  <div className="profile-budget-actions-v82">
+                    <small>Còn lại {budget.remaining.toLocaleString('vi-VN')}đ. {budgetEditCount < 1 ? 'Bạn còn 1 lần chỉnh sửa ngân sách.' : 'Ngân sách đã khóa vì bạn đã dùng lần chỉnh sửa duy nhất.'}</small>
+                    {budgetEditCount < 1 && <button type="button" className="ghost" onClick={() => setBudgetEditOpen(true)}><Pencil size={14} /> Chỉnh sửa 1 lần</button>}
+                  </div>
+                </>
+              ) : (
+                <p className="saved-account-empty-v81">Bạn chưa khai báo ngân sách tháng này. CartWise sẽ yêu cầu nhập sau khi đăng nhập/đăng ký.</p>
+              )}
+            </div>
+
             <div className="saved-account-box-v81">
               <h3><Banknote size={18} /> Tài khoản ngân hàng đã lưu</h3>
               {savedAccount?.bank ? (
@@ -102,6 +136,21 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
             </div>
           </article>
         </div>
+      )}
+
+      {budgetEditOpen && budget.budget > 0 && budgetEditCount < 1 && (
+        <BudgetSetupModal
+          mode="edit"
+          initialValue={budget.budget}
+          onClose={() => setBudgetEditOpen(false)}
+          onSave={(amount) => {
+            if (updateMonthlyBudgetOnce(amount)) {
+              setBudgetEditOpen(false);
+              setBudgetRevision((value) => value + 1);
+              window.dispatchEvent(new CustomEvent('cartwise-budget-updated'));
+            }
+          }}
+        />
       )}
     </section>
   );
