@@ -921,3 +921,30 @@ export const getBuySignal = (product, storeName, historyDays = 180) => {
     current, min, max, average, percentile, history
   };
 };
+
+// v81 — Khoảng cách tới điểm bán trực tiếp gần bạn (icon + số km/m cạnh "Điểm bán",
+// giống ảnh tham khảo). CartWise chưa có toạ độ thật của từng chi nhánh cửa hàng
+// (cần API bản đồ/đối tác riêng ở bản chính thức), nên khoảng cách ở đây được tính
+// mô phỏng nhưng ỔN ĐỊNH theo đúng vị trí bạn đã cấp quyền — cùng 1 vị trí + cùng 1
+// cửa hàng luôn ra cùng 1 khoảng cách (không đổi lung tung mỗi lần mở lại).
+function hashSeed(text) {
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+export const getStoreDistanceMeters = (storeName, productId, coords) => {
+  if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) return null;
+  const seed = `${storeName}|${productId}|${coords.lat.toFixed(2)}|${coords.lng.toFixed(2)}`;
+  const hash = hashSeed(seed);
+  return 120 + (hash % 6880); // 120m — 7km, đủ thực tế cho khu vực đô thị
+};
+
+export const getStoreDistanceLabel = (storeName, productId, coords) => {
+  const meters = getStoreDistanceMeters(storeName, productId, coords);
+  if (meters == null) return null;
+  if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
+  return `${(meters / 1000).toFixed(1)} km`;
+};

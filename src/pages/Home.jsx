@@ -223,7 +223,9 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
         </div>
 
         <div className="hero-cta-row">
-          <button className="primary" onClick={focusSearchBox}>Thử so sánh ngay</button>
+          <button className="primary hero-cta-main-v81" onClick={focusSearchBox}>
+            <Search size={22} /> Thử so sánh ngay
+          </button>
           <button className="secondary" onClick={() => onNavigate('flash')}>Xem Flash Sale hôm nay</button>
         </div>
       </section>

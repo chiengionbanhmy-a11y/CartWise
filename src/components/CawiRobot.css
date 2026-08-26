@@ -623,3 +623,93 @@
 .cw22-wheel i {
   background: radial-gradient(circle at 35% 35%, #fff2c9, #f3c979 54%, #b3812f) !important;
 }
+
+/* =======================================================
+   v81 — thêm 1 lượt "dễ thương hoá" nữa theo đúng yêu cầu: mắt to
+   tròn hơn nữa kèm 2 lớp ánh sáng lấp lánh (long lanh hơn), lông mày
+   cong mềm kiểu cười thay vì xếch thẳng, má hồng đậm + rộng hơn, và
+   nụ cười cong rõ lên 2 khoé — vẫn giữ nguyên toàn bộ hành vi/tương
+   tác, chỉ đổi ngoại hình.
+   ======================================================= */
+.cw22-head {
+  border-width: 3.5px !important;
+  box-shadow:
+    inset 0 -6px 12px rgba(255,255,255,.6),
+    0 12px 22px rgba(15,23,42,.12),
+    0 0 0 6px rgba(255,235,240,.55) !important;
+}
+
+.cw22-eye {
+  top: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(15,23,42,.05);
+  box-shadow: inset 0 -2px 3px rgba(0,0,0,.05), 0 2px 4px rgba(255,255,255,.95);
+}
+.cw22-eye.left { left: 4px; }
+.cw22-eye.right { right: 4px; }
+
+.cw22-pupil {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 26%, #6a7ab0 0%, #232b42 55%, #0b0f18 100%);
+}
+
+.cw22-pupil::after {
+  content: '';
+  position: absolute;
+  width: 4.2px;
+  height: 4.2px;
+  left: 1.8px;
+  top: 1.4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 3.4px 3.6px 0 -1.2px rgba(255,255,255,.85);
+}
+
+.cw22-brow {
+  top: -1px;
+  width: 13px;
+  height: 4px;
+  border-radius: 999px 999px 0 0 / 999px 999px 0 0;
+  background: color-mix(in srgb, var(--cw22-ear-dark) 35%, #d19a6c) !important;
+  opacity: .5 !important;
+}
+.cw22-brow.left { transform: rotate(-18deg); }
+.cw22-brow.right { transform: rotate(18deg); }
+
+.cw22-cheek {
+  width: 18px;
+  height: 12px;
+  bottom: 4px;
+  background: radial-gradient(circle, rgba(255,120,162,.95), rgba(255,255,255,0) 74%);
+}
+.cw22-cheek.left { left: 0px; }
+.cw22-cheek.right { right: 0px; }
+
+.cw22-mouth {
+  bottom: 6px;
+  width: 20px;
+  height: 11px;
+  margin-left: -10px;
+  border-bottom: 4px solid #ff7aa2 !important;
+  border-radius: 0 0 26px 26px;
+  box-shadow: 0 0 10px rgba(255,122,162,.34) !important;
+}
+.cw22-mouth::before,
+.cw22-mouth::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ff7aa2;
+  opacity: .9;
+}
+.cw22-mouth::before { left: -2px; }
+.cw22-mouth::after { right: -2px; }

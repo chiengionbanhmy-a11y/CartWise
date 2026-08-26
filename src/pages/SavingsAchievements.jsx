@@ -48,6 +48,13 @@ function SavingsAchievements({ currency = 'VND', onBack }) {
         <span className="eyebrow">🏆 Thành tựu tiết kiệm</span>
         <h1>Bản đồ hành trình tiết kiệm của bạn</h1>
         <p>Mỗi mốc được mở khoá theo tổng số tiền bạn đã tiết kiệm khi mua sắm qua CartWise — so sánh giá càng kỹ, bạn càng lên bậc nhanh hơn.</p>
+        {/* v81 — Minh bạch nguồn dữ liệu: số liệu bắt đầu từ dữ liệu demo, cộng thêm
+            các sản phẩm bạn tự khai "Đã mua" ở khung so sánh sản phẩm. Bản chính thức
+            cần liên kết tài khoản mua sắm/API đối tác để ghi nhận đơn hàng thật, tự
+            động, không cần tự khai. */}
+        <p className="savings-achv-demo-note-v81">
+          <b>Dữ liệu minh hoạ:</b> số tiền bắt đầu từ 7 đơn hàng demo, cộng thêm các sản phẩm bạn bấm "Đã mua" khi xem so sánh giá. Ở bản chính thức, CartWise sẽ ghi nhận đơn hàng thật qua liên kết tài khoản mua sắm/API đối tác thay vì tự khai thủ công.
+        </p>
 
         <div className="savings-achv-overview-v69">
           <div className="savings-achv-overview-top-v69">

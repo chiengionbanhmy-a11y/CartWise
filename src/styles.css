@@ -13196,3 +13196,254 @@ option {
   .dealhunt-offer-btn-v78 { flex-direction: row; justify-content: space-between; padding: 12px 14px; text-align: left; }
   .dealhunt-offer-check-v78 { position: static; margin-left: auto; }
 }
+
+/* =======================================================
+   v81 — Loạt cải tiến vòng chung kết: gộp CSS cho tất cả các
+   thay đổi mới vào 1 khối cuối file, mỗi phần có chú thích riêng.
+   ======================================================= */
+
+/* --- 1) BuySignalCard: bỏ thanh min/max, khối khuyến nghị to & giữa --- */
+.buy-signal-verdict-v81 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 16px 14px;
+  border-radius: 18px;
+  margin: 2px 0;
+}
+.buy-signal-verdict-v81.good { background: rgba(34,197,94,.10); }
+.buy-signal-verdict-v81.warning { background: rgba(239,68,68,.09); }
+.buy-signal-verdict-v81.stable { background: rgba(59,130,246,.09); }
+.buy-signal-verdict-badge-v81 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 22px;
+  font-weight: 950;
+  padding: 6px 6px;
+  letter-spacing: -.2px;
+}
+.buy-signal-verdict-badge-v81.good { color: #15803d; }
+.buy-signal-verdict-badge-v81.warning { color: #b91c1c; }
+.buy-signal-verdict-badge-v81.stable { color: #1d4ed8; }
+.buy-signal-verdict-headline-v81 { font-size: 14.5px; font-weight: 700; color: #334155; max-width: 340px; }
+
+/* --- 2) Home: nút CTA "Thử so sánh ngay" nổi bật & to hơn --- */
+.hero-cta-main-v81 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 34px;
+  font-size: 17px;
+  font-weight: 900;
+  border-radius: 999px;
+  box-shadow: 0 16px 34px rgba(251,146,60,.34), 0 0 0 5px rgba(251,146,60,.10);
+  transform: scale(1);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.hero-cta-main-v81:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(251,146,60,.4), 0 0 0 6px rgba(251,146,60,.14);
+}
+@media (max-width: 640px) {
+  .hero-cta-main-v81 { width: 100%; justify-content: center; padding: 16px 22px; }
+}
+
+/* --- 3) Tự khai "Đã mua / Chưa mua" (ProductModal) --- */
+.self-report-purchase-v81 { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.self-report-toggle-v81 { display: flex; border-radius: 999px; background: #f1f5f9; padding: 4px; gap: 4px; }
+.self-report-toggle-v81 button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 10px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-weight: 800;
+  font-size: 13px;
+}
+.self-report-toggle-v81 button.active { background: #fff; box-shadow: 0 4px 10px rgba(15,23,42,.10); }
+.self-report-toggle-v81 button:first-child.active { color: #15803d; }
+.self-report-toggle-v81 button:last-child.active { color: #b91c1c; }
+.self-report-purchase-v81 small { color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+
+/* --- SavingsAchievements: dòng minh bạch dữ liệu demo --- */
+.savings-achv-demo-note-v81 {
+  font-size: 12.5px;
+  color: #92400e;
+  background: rgba(251,191,36,.14);
+  border: 1px solid rgba(251,191,36,.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  line-height: 1.55;
+}
+
+/* --- 4) LoginModal redesign --- */
+.auth-copy-v81 { display: flex; flex-direction: column; }
+.auth-visual-card-v81 { display: flex; flex-direction: column; gap: 14px; }
+.auth-visual-card-v81 img { width: 72px; height: 72px; margin-bottom: 0; }
+.auth-highlight-list-v81 { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.auth-highlight-list-v81 li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; font-weight: 650; color: #334155; line-height: 1.45; }
+.auth-highlight-list-v81 li svg { flex-shrink: 0; margin-top: 2px; color: var(--primary-dark, #ea580c); }
+.provider-phone-v81 { background: #eff6ff; color: #1d4ed8; }
+
+/* --- 5) Footer --- */
+.site-footer-v81 {
+  margin-top: 48px;
+  background: linear-gradient(180deg, #0f172a, #111827);
+  color: rgba(255,255,255,.86);
+}
+.site-footer-inner-v81 {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 44px 24px 28px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.3fr;
+  gap: 28px;
+}
+.site-footer-brand-v81 { display: flex; align-items: flex-start; gap: 12px; }
+.site-footer-brand-v81 img { width: 42px; height: 42px; border-radius: 12px; background: #fff; padding: 6px; flex-shrink: 0; }
+.site-footer-brand-v81 strong { display: block; font-size: 19px; color: #fff; margin-bottom: 6px; }
+.site-footer-brand-v81 span { font-size: 13px; color: rgba(255,255,255,.62); line-height: 1.55; }
+.site-footer-col-v81 { display: flex; flex-direction: column; gap: 9px; }
+.site-footer-col-v81 h4 { margin: 0 0 2px; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: rgba(255,255,255,.5); }
+.site-footer-col-v81 button {
+  background: transparent;
+  border: 0;
+  color: rgba(255,255,255,.82);
+  font-weight: 650;
+  font-size: 14px;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+.site-footer-col-v81 button:hover { color: #fbbf6b; }
+.site-footer-col-v81 span { font-size: 13.5px; color: rgba(255,255,255,.75); line-height: 1.5; }
+.site-footer-note-v81 { color: rgba(255,255,255,.52) !important; font-size: 12px !important; }
+.site-footer-bottom-v81 {
+  border-top: 1px solid rgba(255,255,255,.10);
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(255,255,255,.5);
+}
+@media (max-width: 900px) {
+  .site-footer-inner-v81 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .site-footer-inner-v81 { grid-template-columns: 1fr; }
+}
+
+/* --- 6) Popup chào mừng lần mở đầu (FirstVisitPopup) --- */
+.first-visit-backdrop-v81 {
+  position: fixed; inset: 0; z-index: 3400;
+  background: rgba(15,23,42,.55); backdrop-filter: blur(12px);
+  display: grid; place-items: center; padding: 22px;
+}
+.first-visit-card-v81 {
+  position: relative;
+  width: min(480px, 100%);
+  background: linear-gradient(160deg, #fff, #fff7ed 70%);
+  border-radius: 28px;
+  padding: 38px 32px 32px;
+  text-align: center;
+  box-shadow: 0 30px 70px rgba(15,23,42,.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.first-visit-logo-v81 { width: 60px; height: 60px; object-fit: contain; margin-bottom: 4px; }
+.first-visit-eyebrow-v81 {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--primary-dark, #ea580c);
+}
+.first-visit-card-v81 h2 { margin: 2px 0 0; font-size: 22px; line-height: 1.35; color: #111827; }
+.first-visit-card-v81 p { margin: 0; color: #475569; font-size: 14px; line-height: 1.55; }
+.first-visit-actions-v81 { display: flex; gap: 12px; margin-top: 14px; width: 100%; flex-wrap: wrap; }
+.first-visit-actions-v81 button { flex: 1; min-width: 160px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 16px; }
+
+/* --- 7) Khoảng cách tới điểm bán trực tiếp (ProductModal) --- */
+.store-distance-pill-v81 {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(59,130,246,.10);
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+/* --- 8) GroupCart: popup hỏi lưu tài khoản + link đăng nhập trong ghi chú --- */
+.groupcart-inline-login-v81 {
+  display: inline;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--primary-dark, #ea580c);
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.save-account-prompt-backdrop-v81 {
+  position: fixed; inset: 0; z-index: 3350;
+  background: rgba(15,23,42,.5); backdrop-filter: blur(8px);
+  display: grid; place-items: center; padding: 20px;
+}
+.save-account-prompt-card-v81 {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 24px;
+  padding: 30px 26px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 28px 60px rgba(15,23,42,.24);
+}
+.save-account-prompt-card-v81 svg { color: var(--primary-dark, #ea580c); }
+.save-account-prompt-card-v81 h3 { margin: 4px 0 0; font-size: 18px; color: #111827; }
+.save-account-prompt-card-v81 p { margin: 0; font-size: 13.5px; color: #64748b; line-height: 1.5; }
+.save-account-prompt-detail-v81 {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.save-account-prompt-detail-v81 span { font-size: 12.5px; color: #64748b; font-weight: 700; }
+.save-account-prompt-detail-v81 b { font-size: 16px; color: #111827; letter-spacing: .4px; }
+.save-account-prompt-actions-v81 { display: flex; gap: 10px; width: 100%; margin-top: 6px; }
+.save-account-prompt-actions-v81 button { flex: 1; }
+
+/* --- 9) Profile: tài khoản ngân hàng đã lưu --- */
+.saved-account-box-v81 {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.saved-account-box-v81 h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 15px; }
+.saved-account-bank-v81 { margin: 4px 0 0; font-weight: 800; color: #111827; }
+.saved-account-number-v81 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: .6px; color: #111827; }
+.saved-account-name-v81 { margin: 0; font-size: 13px; color: #64748b; }
+.saved-account-box-v81 small { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.saved-account-empty-v81 { margin: 0; font-size: 13.5px; color: #64748b; line-height: 1.5; }
+.saved-account-delete-v81 { align-self: flex-start; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; color: #b91c1c; border-color: rgba(185,28,28,.3); }

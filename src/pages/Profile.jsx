@@ -1,13 +1,23 @@
 import { useState } from 'react';
-import { ArrowLeft, KeyRound, Mail, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, Banknote, KeyRound, Mail, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import SavingsCounter from '../components/SavingsCounter.jsx';
 import { getPlan } from '../data/plans.js';
+import { loadSavedAccount, clearSavedAccount } from '../data/savedAccount.js';
 
 function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onOpenLogin, onOpenRegister }) {
   const [passwordDraft, setPasswordDraft] = useState({ old: '', next: '', confirm: '' });
+  // v81 — Hiện tài khoản ngân hàng đã lưu (nếu có) ngay trong hồ sơ, kèm nút xoá —
+  // xem giải thích đầy đủ ở popup hỏi lưu tài khoản trong GroupCart.jsx.
+  const [savedAccount, setSavedAccount] = useState(() => (user ? loadSavedAccount() : null));
   const plan = getPlan(planId);
 
   const email = user?.email || localStorage.getItem('cartwise-email') || 'Chưa liên kết Gmail';
+
+  function removeSavedAccount() {
+    if (!window.confirm('Xoá tài khoản ngân hàng đã lưu trên máy này?')) return;
+    clearSavedAccount();
+    setSavedAccount(null);
+  }
 
   function savePasswordDemo() {
     if (!passwordDraft.next || passwordDraft.next !== passwordDraft.confirm) {
@@ -72,6 +82,23 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
               <input type="password" placeholder="Mật khẩu mới" value={passwordDraft.next} onChange={(e) => setPasswordDraft({ ...passwordDraft, next: e.target.value })} />
               <input type="password" placeholder="Nhập lại mật khẩu mới" value={passwordDraft.confirm} onChange={(e) => setPasswordDraft({ ...passwordDraft, confirm: e.target.value })} />
               <button className="primary full" onClick={savePasswordDemo}>Lưu mật khẩu</button>
+            </div>
+
+            <div className="saved-account-box-v81">
+              <h3><Banknote size={18} /> Tài khoản ngân hàng đã lưu</h3>
+              {savedAccount?.bank ? (
+                <>
+                  <p className="saved-account-bank-v81">{savedAccount.bank.shortName} ({savedAccount.bank.code})</p>
+                  <p className="saved-account-number-v81">{savedAccount.accountNo}</p>
+                  <p className="saved-account-name-v81">{savedAccount.accountName}</p>
+                  <small>Dùng để tự điền khi chốt nhóm ghép đơn tạo mã QR trong "Ghép Đơn Cùng Bạn Bè".</small>
+                  <button type="button" className="ghost saved-account-delete-v81" onClick={removeSavedAccount}>
+                    <Trash2 size={15} /> Xoá tài khoản
+                  </button>
+                </>
+              ) : (
+                <p className="saved-account-empty-v81">Bạn chưa lưu tài khoản ngân hàng nào. Khi chốt nhóm ghép đơn trong "Ghép Đơn Cùng Bạn Bè", CartWise sẽ hỏi bạn có muốn lưu lại không.</p>
+              )}
             </div>
           </article>
         </div>

@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check } from 'lucide-react';
+import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, PackageCheck, PackageX, Navigation } from 'lucide-react';
 import CawiRobot from './CawiRobot.jsx';
 import AIReviewSummary from './AIReviewSummary.jsx';
 import BuySignalCard from './BuySignalCard.jsx';
 import SpendingAdvisorCard from './SpendingAdvisorCard.jsx';
 import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from '../data/currency.js';
-import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore } from '../data/products.js';
+import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore, getStoreDistanceLabel } from '../data/products.js';
 import { getReviewData } from '../data/reviews.js';
 import { getPlan } from '../data/plans.js';
+import { isPurchaseReported, addSelfReportedPurchase, removeSelfReportedPurchase } from '../data/purchases.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
@@ -120,6 +121,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
   const [deliveryBasis, setDeliveryBasis] = useState(() => JSON.parse(localStorage.getItem('cartwise-delivery-basis') || 'null'));
   const [manualAddress, setManualAddress] = useState(deliveryBasis?.address || '');
   const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
+  // v81 — Nút tự khai "Đã mua / Chưa mua" — xem giải thích đầy đủ trong data/purchases.js.
+  const [purchaseReported, setPurchaseReported] = useState(() => isPurchaseReported(product.id));
 
   useEffect(() => {
     setVoucherByStore({});
@@ -130,6 +133,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
     setSelectedHistoryStore('Shopee');
     setHistoryMenuOpen(false);
     setReviewPanelOpen(false);
+    setPurchaseReported(isPurchaseReported(product.id));
   }, [product]);
 
   const reviewData = useMemo(() => getReviewData(product.id), [product.id]);
@@ -307,10 +311,24 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
       ? `${bestOnline?.storeName || 'Nền tảng online'} đang có tổng chi phí dự kiến thấp nhất theo dữ liệu online hiện có.`
       : `${bestOffline?.storeName || 'Cửa hàng trực tiếp'} đang có mức giá tham khảo tốt nhất trong nhóm cửa hàng trực tiếp.`;
 
+  function markPurchased() {
+    const referenceRow = bestSelected || bestOnline || bestOffline;
+    addSelfReportedPurchase(product, referenceRow?.basicTotal);
+    setPurchaseReported(true);
+  }
+
+  function markNotPurchased() {
+    removeSelfReportedPurchase(product.id);
+    setPurchaseReported(false);
+  }
+
   function renderRow(row, bestRow, compact = false) {
     const isUnavailable = row.available === false || row.basicTotal == null;
     const isBest = !isUnavailable && row.storeName === bestRow?.storeName;
     const saleActive = !isUnavailable && row.channel === 'online' && product.flashSaleToday && product.offerEndTime && product.offerEndTime > now;
+    const distanceLabel = row.channel === 'offline' && deliveryBasis?.type === 'geo'
+      ? getStoreDistanceLabel(row.storeName, product.id, deliveryBasis.coords)
+      : null;
     return (
       <article className={isBest ? 'fair-cost-card best-basic channel-row-v31' : 'fair-cost-card channel-row-v31'} key={`${row.channel}-${row.storeName}`}>
         <div className="fair-cost-head">
@@ -318,6 +336,11 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
           <div>
             <b>{row.storeName}</b>
             <span className={isBest ? 'status-pill best' : 'status-pill'}>{isBest ? 'Tốt nhất' : 'Tham khảo'}</span>
+            {distanceLabel && (
+              <span className="store-distance-pill-v81" title="Khoảng cách minh hoạ dựa trên vị trí bạn đã cấp quyền">
+                <Navigation size={11} /> Cách bạn {distanceLabel}
+              </span>
+            )}
           </div>
         </div>
         <dl>
@@ -368,6 +391,30 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             >
               {inCart ? <><Check size={16} /> Đã có trong giỏ hàng</> : <><ShoppingCart size={16} /> Thêm vào giỏ hàng</>}
             </button>
+
+            {/* v81 — Tự khai đã mua sản phẩm này chưa, để "Thành tựu tiết kiệm" phản
+                ứng lại thay vì luôn đứng yên ở dữ liệu demo cố định. */}
+            <div className="self-report-purchase-v81">
+              <div className="self-report-toggle-v81">
+                <button
+                  type="button"
+                  className={purchaseReported ? 'active' : ''}
+                  onClick={markPurchased}
+                  aria-pressed={purchaseReported}
+                >
+                  <PackageCheck size={15} /> Đã mua
+                </button>
+                <button
+                  type="button"
+                  className={!purchaseReported ? 'active' : ''}
+                  onClick={markNotPurchased}
+                  aria-pressed={!purchaseReported}
+                >
+                  <PackageX size={15} /> Chưa mua
+                </button>
+              </div>
+              <small>Bạn tự khai để mở khoá "Thành tựu tiết kiệm" — dữ liệu minh hoạ, chưa liên kết tài khoản mua sắm thật.</small>
+            </div>
 
             <div className="quick-convert premium-convert">
               <h4>Đơn vị hiển thị</h4>

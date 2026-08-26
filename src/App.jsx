@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
 import PromoPopup from './components/PromoPopup.jsx';
 import IntroPopup from './components/IntroPopup.jsx';
+import FirstVisitPopup from './components/FirstVisitPopup.jsx';
 import CawiRobot from './components/CawiRobot.jsx';
 import ProductModal from './components/ProductModal.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
@@ -31,6 +33,17 @@ const savedPlan = localStorage.getItem('cartwise-plan') || 'free';
 
 const setupComplete = localStorage.getItem('cartwise-setup-v52-complete') === 'yes';
 
+// v81 — Đếm số lần mở web trên máy này (persist qua localStorage, không phải
+// sessionStorage) để chỉ tự động hiện popup chào mừng ở lần 1 và lần 2, từ lần 3 trở
+// đi thì thôi — đúng yêu cầu "mở lần thứ 3 rồi thì không cần hiện". Tính mỗi lần app
+// được mount (mỗi lần mở/tải lại trang) là 1 lần mở.
+const VISIT_COUNT_KEY = 'cartwise-visit-count-v81';
+function bumpVisitCount() {
+  const current = Number(localStorage.getItem(VISIT_COUNT_KEY) || '0') + 1;
+  localStorage.setItem(VISIT_COUNT_KEY, String(current));
+  return current;
+}
+
 function App() {
   const [page, setPage] = useState(() => (
     new URLSearchParams(window.location.search).get('join') ? 'group-cart' : 'home'
@@ -53,6 +66,9 @@ function App() {
   // so sánh sản phẩm, xem lại được từ icon giỏ hàng cạnh nút Đăng nhập ở navbar.
   const [cartItems, setCartItems] = useState(loadCart);
   const [cartOpen, setCartOpen] = useState(false);
+  // v81 — Popup chào mừng tự động, chỉ hiện ở lần mở web thứ 1 và thứ 2 trên máy này.
+  const [visitCount] = useState(bumpVisitCount);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   const t = translations[language] || translations.vi;
 
@@ -61,6 +77,20 @@ function App() {
   }), [page, t, user, profile, language, currency, planId]);
 
   useEffect(() => applyLanguageToDom(language), [language]);
+
+  // Chỉ tự mở popup chào mừng sau khi đã qua màn thiết lập ban đầu (setupDone), để
+  // không hiện chồng 2 popup cùng lúc — và chỉ ở lần mở thứ 1/2.
+  useEffect(() => {
+    if (setupDone && visitCount <= 2) setWelcomeOpen(true);
+  }, [setupDone, visitCount]);
+
+  function focusHomeSearch() {
+    window.setTimeout(() => {
+      const input = document.querySelector('.browser-search-shell input');
+      input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => input?.focus(), 360);
+    }, 80);
+  }
 
   function navigate(nextPage) {
     setPage(nextPage);
@@ -228,6 +258,7 @@ function App() {
             onBack={() => navigate('home')}
             onOpenProduct={handleOpenProduct}
             onOpenUpgrade={() => navigate('upgrade')}
+            onOpenLogin={() => setAuthMode('login')}
           />
         )}
         {page === 'savings-achievements' && (
@@ -252,9 +283,19 @@ function App() {
         )}
       </main>
 
+      <Footer onNavigate={navigate} />
+
       {guideOpen && <IntroPopup onClose={closeGuide} />}
 
-      {setupDone && planId !== 'plus' && <PromoPopup onNavigate={navigate} products={products} />}
+      {welcomeOpen && (
+        <FirstVisitPopup
+          onClose={() => setWelcomeOpen(false)}
+          onOpenGuide={() => { setWelcomeOpen(false); openGuide(); }}
+          onCompareNow={() => { setWelcomeOpen(false); navigate('home'); focusHomeSearch(); }}
+        />
+      )}
+
+      {!welcomeOpen && setupDone && planId !== 'plus' && <PromoPopup onNavigate={navigate} products={products} />}
 
       {!selectedProduct && (
         <CawiRobot
@@ -310,7 +351,7 @@ function App() {
         />
       )}
 
-      {authMode && <LoginModal mode={authMode} onClose={() => setAuthMode(null)} onLogin={handleLogin} />}
+      {authMode && <LoginModal mode={authMode} onClose={() => setAuthMode(null)} onLogin={handleLogin} onSwitchMode={setAuthMode} />}
     </div>
   );
 }

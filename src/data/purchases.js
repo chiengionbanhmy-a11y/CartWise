@@ -22,6 +22,48 @@ export function getPurchaseRecords() {
   return Array.isArray(stored) && stored.length ? stored : demoPurchases;
 }
 
+// v81 — Nút tự khai "Đã mua / Chưa mua" ở từng sản phẩm (Khối "Thành tựu tiết kiệm"
+// vốn chỉ chạy bằng dữ liệu demo cố định — số "Tổng đã tiết kiệm" không bao giờ đổi
+// dù người dùng thao tác gì). Cho phép người dùng TỰ khai đã mua 1 sản phẩm ngay
+// trong bản demo để bộ đếm/thành tựu thực sự phản ứng lại — vẫn ghi rõ đây là tự
+// khai (không xác minh được đơn hàng thật, cần liên kết tài khoản mua sắm/API đối
+// tác để làm được điều đó ở bản chính thức).
+function persistPurchaseRecords(records) {
+  localStorage.setItem('cartwise-purchase-history', JSON.stringify(records));
+}
+
+export function isPurchaseReported(productId) {
+  return getPurchaseRecords().some((item) => item.selfReported && item.productId === productId);
+}
+
+export function addSelfReportedPurchase(product, paidAmount) {
+  if (!product) return null;
+  const existing = getPurchaseRecords();
+  if (existing.some((item) => item.selfReported && item.productId === product.id)) return null;
+
+  const reference = Number(product.originalPrice || product.basePrice || paidAmount || 0);
+  const paid = Number(paidAmount || reference || 0);
+  const entry = {
+    id: `self-${product.id}-${Date.now()}`,
+    productId: product.id,
+    name: product.name,
+    category: product.category,
+    date: new Date().toISOString().slice(0, 10),
+    paid,
+    reference,
+    saved: Math.max(0, reference - paid),
+    selfReported: true
+  };
+  persistPurchaseRecords([entry, ...existing]);
+  return entry;
+}
+
+export function removeSelfReportedPurchase(productId) {
+  const existing = getPurchaseRecords();
+  const next = existing.filter((item) => !(item.selfReported && item.productId === productId));
+  persistPurchaseRecords(next);
+}
+
 export function getPurchasesSince(days) {
   const records = getPurchaseRecords();
   if (!Number.isFinite(days)) return records;

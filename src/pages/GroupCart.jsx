@@ -8,12 +8,12 @@ import { seedGroupCarts, computeGroupStats, freeshipThresholds, generateMockJoin
 import { getPlan } from '../data/plans.js';
 import PaymentQr from '../components/PaymentQr.jsx';
 import { fetchVietQrBanks, FALLBACK_BANKS } from '../utils/vietqr.js';
+import { loadSavedAccount, saveSavedAccount } from '../data/savedAccount.js';
 
 const EXTRA_KEY = 'cartwise-group-extra-members';
 const CUSTOM_KEY = 'cartwise-group-custom';
 const SETTLEMENT_KEY = 'cartwise-group-settlements'; // v64 — Ghép Đơn Cùng Bạn Bè: chia tiền + trạng thái đã/chưa thanh toán
 const MEMBER_OVERRIDES_KEY = 'cartwise-group-member-overrides'; // v67 — nhóm đã qua chỉnh sửa (thêm/xoá/đổi số lượng sản phẩm)
-const SAVED_ACCOUNT_KEY = 'cartwise-saved-bank-account'; // v67 — tài khoản nhận tiền đã lưu để dùng lại lần sau
 const LASTNAME_KEY = 'cartwise-group-lastname';
 
 function loadExtraMembers() {
@@ -39,19 +39,6 @@ function loadMemberOverrides() {
 }
 function saveMemberOverrides(map) {
   localStorage.setItem(MEMBER_OVERRIDES_KEY, JSON.stringify(map));
-}
-function loadSavedAccount() {
-  try {
-    return JSON.parse(localStorage.getItem(SAVED_ACCOUNT_KEY) || 'null');
-  } catch {
-    return null;
-  }
-}
-function saveSavedAccount(value) {
-  localStorage.setItem(SAVED_ACCOUNT_KEY, JSON.stringify(value));
-}
-function clearSavedAccount() {
-  localStorage.removeItem(SAVED_ACCOUNT_KEY);
 }
 function loadViewHistory() {
   try {
@@ -139,8 +126,8 @@ function ProductPicker({ products, recentlyViewed, suggested, value, onChange, p
   );
 }
 
-function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
-  const { products, currency, planId } = appState;
+function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade, onOpenLogin }) {
+  const { products, currency, planId, user } = appState;
   const plan = getPlan(planId);
   const [extraMembers, setExtraMembers] = useState(loadExtraMembers);
   const [customGroups, setCustomGroups] = useState(loadCustomGroups);
@@ -151,9 +138,14 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
   const [form, setForm] = useState({ title: '', storeName: 'Shopee', productId: products[0]?.id || '', quantity: 1, yourName: '', visibility: 'public' });
   const [settlements, setSettlements] = useState(loadSettlements);
   const [settleOpenId, setSettleOpenId] = useState(null);
-  const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '', remember: false });
+  const [settleBankDraft, setSettleBankDraft] = useState({ bankQuery: '', bank: null, accountNo: '', accountName: '' });
   const [banks, setBanks] = useState(FALLBACK_BANKS);
   const [hasSavedAccount, setHasSavedAccount] = useState(() => Boolean(loadSavedAccount()));
+  // v81 — Popup hỏi lưu tài khoản: hiện NGAY sau khi người dùng chọn xong cách chia
+  // tiền (thay cho ô tick "Lưu tài khoản" cũ nằm sẵn trong form). Chỉ hiện khi đã
+  // đăng nhập — tài khoản đã lưu giờ còn hiện được ở trang Hồ sơ nên cần gắn với 1
+  // người dùng cụ thể, không thể để ai cũng lưu được trên máy dùng chung.
+  const [savePromptGroup, setSavePromptGroup] = useState(null);
   // v79 — Mã QR thanh toán giờ hiện qua 1 popup toàn màn hình dùng chung (thay vì
   // hiện nhỏ/thu gọn ngay trong khung nhóm) — bấm "Xem mã QR" ở chế độ chia đều hay
   // ai góp nấy trả đều mở đúng popup này, chỉ khác dữ liệu truyền vào.
@@ -212,11 +204,11 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
     const opening = settleOpenId !== group.id;
     setSettleOpenId(opening ? group.id : null);
     if (opening) {
-      const saved = loadSavedAccount();
+      const saved = user ? loadSavedAccount() : null;
       if (saved?.bank) {
-        setSettleBankDraft({ bankQuery: saved.bankQuery || '', bank: saved.bank, accountNo: saved.accountNo || '', accountName: saved.accountName || group.ownerName || '', remember: true });
+        setSettleBankDraft({ bankQuery: saved.bankQuery || '', bank: saved.bank, accountNo: saved.accountNo || '', accountName: saved.accountName || group.ownerName || '' });
       } else {
-        setSettleBankDraft({ bankQuery: '', bank: null, accountNo: '', accountName: group.ownerName || '', remember: false });
+        setSettleBankDraft({ bankQuery: '', bank: null, accountNo: '', accountName: group.ownerName || '' });
       }
     }
   }
@@ -275,10 +267,39 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
       accountName: settleBankDraft.accountName.trim(),
       createdAt: new Date().toISOString()
     });
-    if (settleBankDraft.remember && settleBankDraft.bank) {
+  }
+
+  // v81 — Thay cho ô tick "Lưu tài khoản" cũ: bấm "Chia đều"/"Ai góp nấy trả" giờ
+  // chốt nhóm luôn, rồi NẾU đã đăng nhập và thông tin tài khoản khác với tài khoản đã
+  // lưu (hoặc chưa lưu tài khoản nào), mới hỏi thêm 1 popup có muốn lưu lại không.
+  // Chưa đăng nhập thì chốt nhóm bình thường, không hỏi lưu (đúng yêu cầu tính năng
+  // lưu tài khoản chỉ dùng được khi đã đăng nhập/đăng ký tài khoản app).
+  function isSameAsSavedAccount(saved, draft) {
+    if (!saved?.bank) return false;
+    return saved.bank.bin === draft.bank?.bin && saved.accountNo === draft.accountNo && saved.accountName === draft.accountName.trim();
+  }
+
+  function handleChooseSplitMode(group, mode) {
+    if (!canStartSettlement()) return;
+    const saved = user ? loadSavedAccount() : null;
+    if (user && !isSameAsSavedAccount(saved, settleBankDraft)) {
+      setSavePromptGroup({ group, mode });
+      return;
+    }
+    startSettlement(group, mode);
+    setSettleOpenId(null);
+  }
+
+  function confirmSaveAccountPrompt(shouldSave) {
+    if (!savePromptGroup) return;
+    const { group, mode } = savePromptGroup;
+    startSettlement(group, mode);
+    if (shouldSave) {
       saveSavedAccount({ bank: settleBankDraft.bank, bankQuery: settleBankDraft.bankQuery, accountNo: settleBankDraft.accountNo, accountName: settleBankDraft.accountName.trim() });
       setHasSavedAccount(true);
     }
+    setSavePromptGroup(null);
+    setSettleOpenId(null);
   }
 
   function togglePaid(groupId, memberId) {
@@ -598,6 +619,26 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
           </div>
         </div>
       )}
+
+      {/* v81 — Popup hỏi lưu tài khoản, hiện ngay sau khi chốt xong cách chia tiền
+          (thay cho ô tick nằm sẵn trong form trước đây). Chỉ hiện khi đã đăng nhập. */}
+      {savePromptGroup && (
+        <div className="save-account-prompt-backdrop-v81" role="dialog" aria-modal="true" aria-label="Lưu tài khoản ngân hàng">
+          <div className="save-account-prompt-card-v81">
+            <Wallet size={28} />
+            <h3>Lưu tài khoản này cho lần sau?</h3>
+            <p>CartWise sẽ tự điền lại đúng ngân hàng và số tài khoản này ở những lần chia tiền tiếp theo trên tài khoản CartWise của bạn.</p>
+            <div className="save-account-prompt-detail-v81">
+              <span>{settleBankDraft.bank ? `${settleBankDraft.bank.shortName} (${settleBankDraft.bank.code})` : ''}</span>
+              <b>{settleBankDraft.accountNo}</b>
+            </div>
+            <div className="save-account-prompt-actions-v81">
+              <button type="button" className="ghost" onClick={() => confirmSaveAccountPrompt(false)}>Không, lần sau nhập lại</button>
+              <button type="button" className="primary" onClick={() => confirmSaveAccountPrompt(true)}>Có, lưu lại</button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 
@@ -888,36 +929,22 @@ function GroupCart({ appState, onBack, onOpenProduct, onOpenUpgrade }) {
                     onChange={(e) => setSettleBankDraft((d) => ({ ...d, accountName: e.target.value }))}
                   />
                 </label>
-                <label className="groupcart-remember-account-v67">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(settleBankDraft.remember)}
-                    onChange={(e) => setSettleBankDraft((d) => ({ ...d, remember: e.target.checked }))}
-                  />
-                  <span>Lưu tài khoản này cho những lần chia tiền sau</span>
-                </label>
-                {hasSavedAccount && (
-                  <button
-                    type="button"
-                    className="groupcart-forget-account-v67"
-                    onClick={() => {
-                      clearSavedAccount();
-                      setHasSavedAccount(false);
-                      setSettleBankDraft((d) => ({ ...d, remember: false }));
-                    }}
-                  >
-                    Xoá tài khoản đã lưu trên máy này
-                  </button>
+                {user ? (
+                  <small className="groupcart-account-note-v67">
+                    Lưu ý: CartWise chỉ kiểm tra được <b>định dạng</b> số tài khoản, chưa thể xác minh tài khoản có thật sự tồn tại hay không vì việc đó cần kết nối API riêng (có phí) của từng ngân hàng. Bạn tự kiểm tra kỹ số tài khoản trước khi chia sẻ mã QR cho cả nhóm nhé. Sau khi chọn cách chia tiền, CartWise sẽ hỏi bạn có muốn lưu tài khoản này cho lần sau không.
+                  </small>
+                ) : (
+                  <small className="groupcart-account-note-v67">
+                    Lưu ý: CartWise chỉ kiểm tra được <b>định dạng</b> số tài khoản, chưa thể xác minh tài khoản có thật sự tồn tại hay không.{' '}
+                    <button type="button" className="groupcart-inline-login-v81" onClick={onOpenLogin}>Đăng nhập</button> để CartWise có thể lưu lại tài khoản này cho những lần chia tiền sau.
+                  </small>
                 )}
-                <small className="groupcart-account-note-v67">
-                  Lưu ý: CartWise chỉ kiểm tra được <b>định dạng</b> số tài khoản, chưa thể xác minh tài khoản có thật sự tồn tại hay không vì việc đó cần kết nối API riêng (có phí) của từng ngân hàng. Bạn tự kiểm tra kỹ số tài khoản trước khi chia sẻ mã QR cho cả nhóm nhé.
-                </small>
               </div>
               <div className="groupcart-settle-modes-v63">
                 <p>Chọn cách chia tiền cho nhóm này:</p>
                 <div className="groupcart-settle-mode-buttons-v63">
-                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'even'); setSettleOpenId(null); }}>Chia đều</button>
-                  <button type="button" disabled={!canStartSettlement()} onClick={() => { startSettlement(group, 'manual'); setSettleOpenId(null); }}>Ai góp nấy trả</button>
+                  <button type="button" disabled={!canStartSettlement()} onClick={() => handleChooseSplitMode(group, 'even')}>Chia đều</button>
+                  <button type="button" disabled={!canStartSettlement()} onClick={() => handleChooseSplitMode(group, 'manual')}>Ai góp nấy trả</button>
                 </div>
                 {!canStartSettlement() && <small className="groupcart-settle-hint-v64">Nhập đủ ngân hàng, số tài khoản đúng định dạng và tên chủ tài khoản để tạo QR.</small>}
               </div>

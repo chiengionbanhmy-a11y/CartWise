@@ -1,11 +1,14 @@
 import { TrendingDown, TrendingUp, Minus, Lock, Sparkles } from 'lucide-react';
-import { formatCurrency } from '../data/currency.js';
 import { getBuySignal } from '../data/products.js';
 
 // v63 — "Cawi Tín Hiệu Mua": khuyến nghị Mua ngay / Nên chờ dựa trên lịch sử giá tích
 // luỹ tối đa 180 ngày. Trả lời trực tiếp Nhận xét 1 của Ban Giám khảo (Google chỉ cho
 // biết giá tại 1 thời điểm; CartWise cần dữ liệu lịch sử tích luỹ theo sản phẩm — thứ
 // công cụ tìm kiếm không có). Chỉ mở khoá ở CartWise Plus (Mục 3, Mục 4.2 báo cáo).
+// v81 — Bỏ thanh ngang thấp nhất/cao nhất (đã có biểu đồ lên xuống ngay phía trên,
+// hiện thêm 1 thanh nữa là dư thừa/lặp thông tin). Thay vào đó, câu khuyến nghị
+// "Mua ngay / Nên chờ / Có thể mua" chuyển thành 1 khối to, rõ, nằm giữa — ngay dưới
+// biểu đồ — theo đúng yêu cầu để giám khảo nhìn phát hiểu ngay không cần đọc kỹ.
 
 const recoMeta = {
   buy: { icon: TrendingDown, label: 'Mua ngay', tone: 'good' },
@@ -33,7 +36,6 @@ function BuySignalCard({ product, storeName, enabled, onOpenUpgrade }) {
   const signal = getBuySignal(product, storeName, 180);
   const meta = recoMeta[signal.recommendation] || recoMeta.neutral;
   const Icon = meta.icon;
-  const markerPct = Number.isFinite(signal.percentile) ? Math.min(100, Math.max(0, signal.percentile)) : 50;
 
   return (
     <div className={`buy-signal-card-v63 ${meta.tone}`}>
@@ -42,22 +44,10 @@ function BuySignalCard({ product, storeName, enabled, onOpenUpgrade }) {
         <span className="buy-signal-confidence-v63">Độ tin cậy {signal.confidence}%</span>
       </div>
 
-      <div className="buy-signal-reco-row-v63">
-        <b className={`buy-signal-reco-badge-v63 ${meta.tone}`}><Icon size={16} /> {meta.label}</b>
-        <span>{signal.headline}</span>
+      <div className={`buy-signal-verdict-v81 ${meta.tone}`}>
+        <b className={`buy-signal-verdict-badge-v81 ${meta.tone}`}><Icon size={22} /> {meta.label}</b>
+        <span className="buy-signal-verdict-headline-v81">{signal.headline}</span>
       </div>
-
-      {Number.isFinite(signal.min) && (
-        <div className="buy-signal-range-v63">
-          <div className="buy-signal-range-track-v63">
-            <span className="buy-signal-range-marker-v63" style={{ left: `${markerPct}%` }} title={`Giá hiện tại: ${formatCurrency(signal.current, 'VND')}`} />
-          </div>
-          <div className="buy-signal-range-labels-v63">
-            <span>Thấp nhất {formatCurrency(signal.min, 'VND')}</span>
-            <span>Cao nhất {formatCurrency(signal.max, 'VND')}</span>
-          </div>
-        </div>
-      )}
 
       <p className="buy-signal-detail-v63">{signal.detail}</p>
       <small className="buy-signal-note-v63">Công thức minh bạch dựa trên dữ liệu giá demo đã ghi nhận — không phải dự đoán bằng AI, không đảm bảo diễn biến giá thực tế trong tương lai.</small>
