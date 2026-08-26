@@ -663,6 +663,145 @@ const productStoreOverrides = {
   }
 };
 
+
+// v82 — Giá cập nhật theo các URL sản phẩm do đội cung cấp / kiểm tra ngày 26/08/2026.
+// Lưu ý: một số URL là biến thể khác quy cách/màu (được giữ theo đúng link được cung cấp),
+// nên cần kiểm tra lại SKU nếu dùng số liệu này cho bản production có dữ liệu thật.
+const exactStoreSets = {
+  'mouse-logitech': [
+    {
+      storeName: 'Shopee', channel: 'online', storePrice: 198000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://shopee.vn/Chu%E1%BB%99t-kh%C3%B4ng-d%C3%A2y-Logitech-M331-Silent-k%E1%BA%BFt-n%E1%BB%91i-USB-M%C3%82%CC%83U-M%C6%A0%CC%81I-KH%C3%94NG-CO%CC%81-VI%C3%8AN-CAO-SU-1000-DPI-K%E1%BA%BFt-n%E1%BB%91i-10m-BH-2-N%C4%82M-i.1784062845.53708401444?extraParams=%7B%22display_model_id%22%3A436139682901%2C%22model_selection_logic%22%3A3%7D',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Lazada', channel: 'online', storePrice: 348600, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://www.lazada.vn/products/pdp-i13429475701-s117196813668.html',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Tiki', channel: 'online', storePrice: 369000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://tiki.vn/chuot-khong-day-logitech-m331-silent-p148813604.html?spid=263907797',
+      accountStatus: 'Theo link bạn cung cấp'
+    }
+  ],
+  'powerbank-anker': [
+    {
+      storeName: 'Shopee', channel: 'online', storePrice: 620000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://shopee.vn/Pin-D%E1%BB%B1-Ph%C3%B2ng-Anker-Zolo-Powerbank-10000mAh-20000mAh-22.5W-S%E1%BA%A1c-Nhanh-K%C3%A8m-C%C3%A1p-USB-C-t%C3%ADch-h%E1%BB%A3p-A110D-i.2849999.27591825394',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Lazada', channel: 'online', storePrice: 525000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://www.lazada.vn/products/pdp-i2306975637-s11213159289.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253Apin%252Bs%2525E1%2525BA%2525A1c%252Bd%2525E1%252BB%2525C4%2525B1%252Bph%2525C3%2525B2ng%252Banker%252B10000mah%253Bnid%253A2306975637%253Bsrc%253ALazadaMainSrp%253Brn%253A4d0ccc73be6b1738440c4545f2c8b2a5%253Bregion%253Avn%253Bsku%253A2306975637_VNAMZ%253Bprice%253A525000%253Bclient%253Adesktop%253Bsupplier_id%253A200233248179%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A4%253Butlog_bucket_id%253A470687%253Basc_category_id%253A9031%253Bitem_id%253A2306975637%253Bsku_id%253A11213159289%253Bshop_id%253A3347595%253BtemplateInfo%253A107883_E%2523-1_A3_C%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=en&location=Vietnam&price=5.25E%205&priceCompare=skuId%3A11213159289%3Bsource%3Alazada-search-voucher%3Bsn%3A4d0ccc73be6b1738440c4545f2c8b2a5%3BoriginPrice%3A525000%3BdisplayPrice%3A525000%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3AmockedSalePrice%3BvoucherPricePlugin%3A0%3Btimestamp%3A1787718921434&ratingscore=&request_id=4d0ccc73be6b1738440c4545f2c8b2a5&review=&sale=5&search=1&source=search&spm=a2o4n.searchlist.list.4&stock=1',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Tiki', channel: 'online', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#',
+      accountStatus: 'Không cùng model: link Tiki là A9514, không phải A110D'
+    },
+    {
+      storeName: 'CellphoneS', channel: 'offline', storePrice: 550000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://cellphones.com.vn/pin-sac-du-phong-anker-10000mah-22-5w-a110d.html',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Thế Giới Di Động', channel: 'offline', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#',
+      accountStatus: 'Không cùng model: link là A110J, sản phẩm demo là A110D'
+    },
+    {
+      storeName: 'Điện Máy Xanh', channel: 'offline', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#',
+      accountStatus: 'Không cùng model: link là A110J, sản phẩm demo là A110D'
+    }
+  ],
+  'sunscreen': [
+    {
+      storeName: 'Shopee', channel: 'online', storePrice: 375000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://shopee.vn/Gel-Ch%E1%BB%91ng-N%E1%BA%AFng-Anessa-D%C6%B0%E1%BB%A1ng-S%C3%A1ng-N%C3%A2ng-T%C3%B4ng-90g-(athen)-i.1698276414.52858921259?extraParams=%7B%22display_model_id%22%3A277541323613%2C%22model_selection_logic%22%3A3%7D',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Lazada', channel: 'online', storePrice: 549900, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://www.lazada.vn/products/pdp-i2651372018-s12930609572.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AKEM%252BCH%2525E1%252BBI%E1%BB%9A%2525E2%25258NG%252BN%2525E1%252%25BA%2525ENG%252BANESSA%253Bnid%253A2651372018%253Bsrc%253ALazadaMainSrp%253Brn%253A05ab9eb0036205edca270c46d54e039b%253Bregion%253Avn%253Bsku%253A2651372018_VNAMZ%253Bprice%253A549900%253Bclient%253Adesktop%253Bsupplier_id%253A200500656278%253Bsession_id%253A%253Bbiz_source%253Ah5_hp%253Bslot%253A27%253Butlog_bucket_id%253A470687%253Basc_category_id%253A2285%253Bitem_id%253A2651372018%253Bsku_id%253A12930609572%253Bshop_id%253A3715519%253BtemplateInfo%253A107883_E%2523-1_A3_C%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=en&location=Vietnam&price=5.499E%205&priceCompare=skuId%3A12930609572%3Bsource%3Alazada-search-voucher%3Bsn%3A05ab9eb0036205edca270c46d54e039b%3BoriginPrice%3A549900%3BdisplayPrice%3A549900%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3A-1%3BvoucherPricePlugin%3A0%3Btimestamp%3A1787719298486&qSellingPoint=b--anessa___p--kem%20ch%E1%BB%91ng%20n%E1%BA%AFng&ratingscore=&request_id=05ab9eb0036205edca270c46d54e039b&review=&sale=1&search=1&source=search&spm=a2o4n.searchlist.list.27&stock=1',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Tiki', channel: 'online', storePrice: 575000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://tiki.vn/kem-chong-nang-dang-gel-duong-am-bao-ve-hoan-hao-anessa-perfect-uv-sunscreen-skincare-gel-spf50-pa-90g-p51542411.html?spid=59495559',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Hasaki', channel: 'offline', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#', accountStatus: 'Không cùng biến thể với sản phẩm demo: link là Anessa cho da nhạy cảm/trẻ em 90g'
+    },
+    {
+      storeName: 'Watsons', channel: 'offline', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#', accountStatus: 'Không cùng biến thể: link là Anessa Mild SPF35 90g'
+    },
+    {
+      storeName: 'Pharmacity', channel: 'offline', storePrice: 423750, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://www.pharmacity.vn/anessa-gel-cn-duong-am-bao-ve-hoan-hao-spf50-pa-90gtuyp.html?source=%2Fsearch%3Fkeyword%3Dkem%2Bch%25E1%25BB%25991ng%2Bn%25E1%BA%AFng%2Banessa%26order%3Ddesc%26order_by%3Dde-xuat',
+      accountStatus: 'Theo link bạn cung cấp'
+    }
+  ],
+  'lipstick': [
+    {
+      storeName: 'Shopee', channel: 'online', storePrice: 451000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://shopee.vn/-KOLS-Son-d%C6%B0%E1%BB%A1ng-m%C3%B4i-D-a.ddi.ct-Lip-Glow-c%E1%BA%A5p-%E1%BA%A9m-m%E1%BB%81m-m%E1%BB%8Bn-m%C3%A0u-t%E1%BB%B1-nhi%C3%AAn-gi%C3%BAp-m%C3%B4i-t%C6%B0%C6%A1i-t%E1%BA%AFn-r%E1%BA%A1ng-r%E1%BB%A1-i.1553074816.48764112175?extraParams=%7B%22display_model_id%22%3A311216333277%2C%22model_selection_logic%22%3A3%7D',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Lazada', channel: 'online', storePrice: 1350000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://www.lazada.vn/products/pdp-i3073608528-s14770608723.html',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Amazon', channel: 'online', storePrice: null, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: false,
+      storeUrl: '#',
+      accountStatus: 'Chưa lấy được giá trực tiếp từ Amazon; không dùng giá bên thứ ba để tránh sai dữ liệu'
+    },
+    {
+      storeName: 'Lipstick.vn', channel: 'online', storePrice: 890000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://lipstick.vn/shop/son-duong-dior-addict-lip-glow-mau-004-coral/',
+      accountStatus: 'Theo link bạn cung cấp'
+    },
+    {
+      storeName: 'Beautyon', channel: 'online', storePrice: 1020000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://beautyon.vn/products/hxt-son-duong-moi-dior-addict-lip-glow-3-2g-077-candy',
+      accountStatus: 'Theo link bạn cung cấp — màu #077 Candy'
+    },
+    {
+      storeName: 'Joli Cosmetic', channel: 'online', storePrice: 1050000, shippingFee: 0,
+      publicDiscount: 0, cashback: 0, available: true,
+      storeUrl: 'https://jolicosmetic.vn/products/son-duong-co-mau-dior-addict-lip-glow-3-2g',
+      accountStatus: 'Theo link bạn cung cấp'
+    }
+  ]
+};
+
 const applyProductStoreOverride = (productItem, store) => {
   const override = productStoreOverrides[productItem.id]?.[store.storeName];
   if (!override) return store;
@@ -689,14 +828,18 @@ const applyProductStoreOverride = (productItem, store) => {
 };
 
 products.forEach((p) => {
-  p.stores = p.stores.map((store) => {
-    const withUrl = {
+  if (exactStoreSets[p.id]) {
+    p.stores = exactStoreSets[p.id].map((store) => ({ ...store }));
+  } else {
+    p.stores = p.stores.map((store) => {
+      const withUrl = {
       ...store,
       storeUrl: storeSearchUrl(store.storeName, p.name),
       available: store.available !== false
     };
-    return applyProductStoreOverride(p, withUrl);
-  });
+      return applyProductStoreOverride(p, withUrl);
+    });
+  }
   const availableOnline = p.stores.filter((store) => store.channel === 'online' && store.available !== false && Number.isFinite(Number(store.storePrice)));
   if (availableOnline.length) {
     const bestPrice = Math.min(...availableOnline.map((store) => Number(store.storePrice)));
