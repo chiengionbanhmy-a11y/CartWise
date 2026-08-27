@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Banknote, KeyRound, Mail, Pencil, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { ArrowLeft, Banknote, KeyRound, LogOut, Mail, Pencil, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import SavingsCounter from '../components/SavingsCounter.jsx';
 import { getPlan } from '../data/plans.js';
 import { loadSavedAccount, clearSavedAccount } from '../data/savedAccount.js';
 import { getMonthlyBudgetEditCount, getMonthlyBudgetSnapshot, updateMonthlyBudgetOnce } from '../data/purchases.js';
 import BudgetSetupModal from '../components/BudgetSetupModal.jsx';
 
-function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onOpenLogin, onOpenRegister }) {
+// v84 — Thêm nút "Đăng xuất" ở cuối trang Hồ sơ theo yêu cầu (trước đây chỉ đăng xuất
+// được qua menu 3 gạch trên navbar — Navbar.jsx, dòng "mobile-auth-block-v77"). Cần
+// thêm prop `onLogout` mới (App.jsx truyền `handleLogout` xuống, giống hệt cách đã
+// truyền cho Navbar).
+function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onOpenLogin, onOpenRegister, onLogout }) {
   const [passwordDraft, setPasswordDraft] = useState({ old: '', next: '', confirm: '' });
   // v81 — Hiện tài khoản ngân hàng đã lưu (nếu có) ngay trong hồ sơ, kèm nút xoá —
   // xem giải thích đầy đủ ở popup hỏi lưu tài khoản trong GroupCart.jsx.
@@ -135,6 +139,15 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
                 <p className="saved-account-empty-v81">Bạn chưa lưu tài khoản ngân hàng nào. Khi chốt nhóm ghép đơn trong "Ghép Đơn Cùng Bạn Bè", CartWise sẽ hỏi bạn có muốn lưu lại không.</p>
               )}
             </div>
+
+            {/* v84 — Nút đăng xuất ở cuối trang Hồ sơ, theo yêu cầu. */}
+            <button
+              type="button"
+              className="profile-logout-btn-v84"
+              onClick={() => { onLogout?.(); onBack?.(); }}
+            >
+              <LogOut size={17} /> Đăng xuất
+            </button>
           </article>
         </div>
       )}
