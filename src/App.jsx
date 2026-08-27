@@ -290,6 +290,7 @@ function App() {
             onBack={() => navigate('home')}
             onOpenLogin={() => setAuthMode('login')}
             onOpenRegister={() => setAuthMode('register')}
+            onLogout={handleLogout}
           />
         )}
         {page === 'check-history' && (
