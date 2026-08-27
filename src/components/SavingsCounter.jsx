@@ -36,14 +36,24 @@ function useCountUp(target, durationMs = 1200) {
 
 function SavingsCounter({ variant = 'simple', maxBadges = Infinity, currency = 'VND', onOpenUpgrade, onOpenAchievements }) {
   const [shared, setShared] = useState(false);
-  const [revision, setRevision] = useState(0);
+
+  // v82 — `getSavingsSummary()` đọc localStorage mới nhất mỗi lần render, nhưng
+  // trước đây không có gì khiến component này render lại khi lịch sử mua hàng đổi
+  // ở nơi khác (ví dụ nút "Đã mua" trong ProductModal.jsx) — số tiền tiết kiệm chỉ
+  // cập nhật sau khi điều hướng/tải lại trang. Lắng nghe sự kiện `cartwise-purchase-
+  // updated` (phát ra từ purchases.js) để buộc render lại ngay khi có thay đổi.
+  const [, forceUpdate] = useState(0);
   useEffect(() => {
-    const refresh = () => setRevision((value) => value + 1);
-    window.addEventListener('cartwise-purchase-updated', refresh);
-    return () => window.removeEventListener('cartwise-purchase-updated', refresh);
+    const onPurchaseUpdate = () => forceUpdate((n) => n + 1);
+    window.addEventListener('cartwise-purchase-updated', onPurchaseUpdate);
+    window.addEventListener('storage', onPurchaseUpdate);
+    return () => {
+      window.removeEventListener('cartwise-purchase-updated', onPurchaseUpdate);
+      window.removeEventListener('storage', onPurchaseUpdate);
+    };
   }, []);
+
   const summary = getSavingsSummary();
-  void revision;
   const milestone = getSavingsMilestoneProgress(summary.totalSaved);
   const animatedValue = useCountUp(variant === 'prominent' ? summary.totalSaved : summary.totalSaved, variant === 'prominent' ? 1200 : 0);
   const displayValue = variant === 'prominent' ? animatedValue : summary.totalSaved;

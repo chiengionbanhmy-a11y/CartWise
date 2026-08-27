@@ -1,14 +1,19 @@
 import { useState } from 'react';
-import { MessageCircleQuestion, Lock, Sparkles, Loader2 } from 'lucide-react';
+import { MessageCircleQuestion, Lock, Sparkles, Loader2, ListChecks } from 'lucide-react';
 import { computeSpendingAdvice, getPurchaseHistoryCoverageDays } from '../data/purchases.js';
+import SpendingAdvisorQuiz from './SpendingAdvisorQuiz.jsx';
 
 // v63 — "Cawi Cố Vấn Chi Tiêu": kích hoạt on-demand qua nút "Hỏi Cawi trước khi mua",
 // KHÔNG tự động cảnh báo (đúng nguyên tắc UX đã cam kết — tránh phiền người dùng).
 // Chỉ mở khoá ở CartWise Plus, và cần ≥30 ngày dữ liệu Lịch sử mua hàng (Mục 4.2 báo cáo).
+// v82 — Sau khi hiện lời khuyên theo ngân sách (giữ nguyên hành vi cũ), thêm CTA phụ
+// tuỳ chọn mở "Bộ 5 câu hỏi đánh giá mức độ cần thiết" (widget SpendingAdvisorQuiz)
+// để kết hợp thêm trục "mức độ cần thiết" — xem spendingAdvisorQuestions.js.
 
-function SpendingAdvisorCard({ product, enabled, onOpenUpgrade }) {
+function SpendingAdvisorCard({ product, enabled, onOpenUpgrade, purchasePrice, hasBuySignalData, onViewBuySignal }) {
   const [asked, setAsked] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
   const coverageDays = getPurchaseHistoryCoverageDays();
   const hasEnoughHistory = coverageDays >= 30;
 
@@ -75,6 +80,21 @@ function SpendingAdvisorCard({ product, enabled, onOpenUpgrade }) {
           <p>{advice.headline}</p>
           <small>{advice.detail}</small>
         </div>
+      )}
+
+      {asked && advice && !quizOpen && (
+        <button type="button" className="spending-advisor-quiz-cta-v82" onClick={() => setQuizOpen(true)}>
+          <ListChecks size={14} /> Trả lời nhanh 5 câu hỏi để Cawi tư vấn chính xác hơn (~20 giây)
+        </button>
+      )}
+
+      {quizOpen && (
+        <SpendingAdvisorQuiz
+          purchasePrice={purchasePrice}
+          hasBuySignalData={hasBuySignalData}
+          onViewBuySignal={onViewBuySignal}
+          onClose={() => setQuizOpen(false)}
+        />
       )}
     </div>
   );

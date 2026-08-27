@@ -12360,10 +12360,9 @@ option {
      trong CawiRobot.css. KHÔNG đặt !important cho top/right vì khi người dùng kéo thả,
      CawiRobot.jsx sẽ set left/top qua inline style — inline style (không !important) sẽ
      tự động thắng rule thường bên dưới, nhưng sẽ bị !important đè mất nếu ta lỡ đặt ở đây. */
-  position: fixed !important;
-  top: 118px;
-  right: 20px;
-  left: auto;
+  position: absolute !important;
+  top: 2px;
+  right: 2px;
   width: auto !important;
   min-height: 0 !important;
   align-items: flex-end !important;
@@ -13449,8 +13448,188 @@ option {
 .saved-account-empty-v81 { margin: 0; font-size: 13.5px; color: #64748b; line-height: 1.5; }
 .saved-account-delete-v81 { align-self: flex-start; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; color: #b91c1c; border-color: rgba(185,28,28,.3); }
 
+/* ============================================================
+   v82 — Cawi Cố Vấn Chi Tiêu: Bộ 5 câu hỏi đánh giá mức độ cần thiết
+   ============================================================ */
 
-/* v82 — Purchase confirmation + monthly budget setup */
+.spending-advisor-quiz-cta-v82 {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px dashed rgba(234,88,12,.45);
+  color: var(--primary-dark);
+  font-weight: 750;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.spending-advisor-quiz-cta-v82:hover { background: rgba(251,146,60,.08); border-color: rgba(234,88,12,.7); }
+
+.spending-quiz-v82 {
+  margin-top: 4px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(226,232,240,.9);
+  box-shadow: 0 10px 26px rgba(15,23,42,.07);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: quizFadeIn82 .2s ease both;
+}
+@keyframes quizFadeIn82 { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.spending-quiz-head-v82 { display: flex; align-items: center; justify-content: space-between; }
+.spending-quiz-dots-v82 { display: flex; align-items: center; gap: 6px; }
+.spending-quiz-dots-v82 .dot { width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; transition: background .2s ease, transform .2s ease; }
+.spending-quiz-dots-v82 .dot.filled { background: var(--primary); }
+.spending-quiz-dots-v82 .dot.current { background: var(--primary-dark); transform: scale(1.25); }
+.spending-quiz-close-v82 { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; }
+.spending-quiz-close-v82:hover { background: #e2e8f0; }
+
+.spending-quiz-step-v82 { display: flex; flex-direction: column; gap: 10px; }
+.spending-quiz-question-v82 { margin: 0; font-weight: 800; font-size: 14px; color: #0f172a; line-height: 1.5; }
+.spending-quiz-options-v82 { display: flex; flex-direction: column; gap: 8px; }
+.spending-quiz-option-v82 {
+  text-align: left;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(226,232,240,.95);
+  background: #f8fafc;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .1s ease;
+}
+.spending-quiz-option-v82:hover { border-color: var(--primary); background: rgba(251,146,60,.08); transform: translateY(-1px); }
+.spending-quiz-unsure-v82 {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 2px 0;
+}
+.spending-quiz-unsure-v82:hover { color: #334155; }
+
+.spending-quiz-back-v82 {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 0;
+}
+.spending-quiz-back-v82:hover { color: #334155; }
+
+.spending-quiz-result-v82 { display: flex; flex-direction: column; gap: 8px; }
+.spending-quiz-axis-row-v82 { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 700; }
+.spending-quiz-verdict-v82 {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 14.5px;
+  line-height: 1.5;
+  background: #f8fafc;
+  color: #334155;
+}
+.spending-quiz-verdict-v82.good { background: rgba(240,253,244,.9); color: #15803d; }
+.spending-quiz-verdict-v82.warning { background: rgba(254,242,242,.9); color: #b91c1c; }
+.spending-quiz-verdict-v82.stable { background: rgba(239,246,255,.9); color: #1d4ed8; }
+.spending-quiz-reasoning-v82 { margin: 0; font-size: 12.5px; color: #475569; font-weight: 650; line-height: 1.5; }
+.spending-quiz-lowconf-v82 {
+  margin: 0;
+  font-size: 12px;
+  color: #92400e;
+  background: rgba(254,243,199,.7);
+  border-radius: 12px;
+  padding: 8px 10px;
+  line-height: 1.5;
+  font-weight: 650;
+}
+.spending-quiz-actions-v82 { display: flex; gap: 8px; flex-wrap: wrap; }
+.spending-quiz-actions-v82 button { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ============================================================
+   v82 — Đánh giá & chất lượng sản phẩm: ảnh/video minh hoạ đi kèm review
+   ============================================================ */
+.ai-review-media-v82 {
+  margin-top: 9px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ai-review-media-thumb-v82 {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f1f5f9;
+}
+.ai-review-media-thumb-v82 img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ai-review-media-play-v82 {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15,23,42,.28);
+  color: #fff;
+}
+.ai-review-media-play-v82 svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,.35)); }
+.ai-review-media-imgtag-v82 {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: rgba(15,23,42,.55);
+  color: #fff;
+}
+.ai-review-media-duration-v82 {
+  position: absolute;
+  bottom: 4px;
+  right: 5px;
+  background: rgba(15,23,42,.7);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 6px;
+}
+.ai-review-media-caption-v82 {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+/* ============================================================
+   v83 — Ghép lại từ bản "sửa lỗi so sánh": popup xác nhận đã mua chưa (sau khi bấm
+   "Mua tại đây" rồi quay lại tab) + popup thiết lập/chỉnh sửa ngân sách tháng.
+   (Bỏ đúng 1 chỗ khác bản gốc: rule font-family Times New Roman trên 2 khối card —
+   rõ ràng không khớp font Inter/sans-serif toàn bộ phần còn lại của app, giữ nguyên
+   font mặc định cho đồng bộ giao diện.)
+   ============================================================ */
 .purchase-confirm-backdrop-v82, .budget-setup-backdrop-v82 { z-index: 5200 !important; }
 .purchase-confirm-card-v82, .budget-setup-card-v82 {
   width: min(540px, calc(100vw - 28px));
@@ -13459,7 +13638,6 @@ option {
   border: 1px solid rgba(210,222,240,.9);
   box-shadow: 0 30px 80px rgba(15,23,42,.2);
   padding: 28px;
-  font-family: "Times New Roman", Times, serif;
 }
 .purchase-confirm-card-v82 h2, .budget-setup-card-v82 h2 { margin: 8px 0 10px; color: #172033; line-height: 1.2; }
 .purchase-confirm-card-v82 p, .budget-setup-card-v82 p { color: #475569; line-height: 1.6; margin: 0 0 18px; }
@@ -13471,7 +13649,7 @@ option {
 .purchase-confirm-actions-v82 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .purchase-confirm-actions-v82 button { display:flex; justify-content:center; align-items:center; gap:7px; }
 .purchase-confirm-card-v82 > small, .budget-setup-card-v82 small { display:flex; align-items:center; gap:6px; margin-top:12px; color:#64748b; line-height:1.5; }
-.budget-setup-card-v82 { width:min(520px, calc(100vw - 28px)); text-align:left; }
+.budget-setup-card-v82 { width:min(520px, calc(100vw - 28px)); text-align:left; position:relative; }
 .budget-setup-icon-v82 { width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ecfdf5; color:#047857; margin-bottom:12px; }
 .budget-input-label-v82 { display:block; font-weight:800; color:#334155; margin-bottom:7px; }
 .budget-input-shell-v82 { display:flex; align-items:center; border:1px solid #cbd5e1; border-radius:14px; background:#fff; overflow:hidden; }
@@ -13479,6 +13657,7 @@ option {
 .budget-input-shell-v82 input { flex:1; border:0; outline:0; padding:14px 14px; font-size:18px; min-width:0; }
 .budget-input-shell-v82 span { padding:0 14px; color:#64748b; font-weight:800; }
 .budget-setup-card-v82 .primary.full { margin-top:16px; display:flex; justify-content:center; align-items:center; gap:7px; }
+.budget-setup-close-v82 { position:absolute; right:14px; top:14px; }
 .profile-budget-box-v82 { margin-top:18px; padding:18px; border:1px solid #d1fae5; border-radius:18px; background:linear-gradient(135deg,#f0fdf4,#fff); }
 .profile-budget-box-v82 h3 { display:flex; align-items:center; gap:8px; margin:0 0 10px; color:#14532d; }
 .profile-budget-value-v82 { color:#475569; font-weight:700; }
@@ -13486,10 +13665,9 @@ option {
 .profile-budget-bar-v82 { height:10px; border-radius:999px; background:#dcfce7; overflow:hidden; margin:12px 0 8px; }
 .profile-budget-bar-v82 span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#10b981,#059669); }
 .profile-budget-box-v82 small { color:#64748b; line-height:1.5; }
-@media (max-width: 560px) { .purchase-confirm-actions-v82 { grid-template-columns:1fr; } }
-
 .profile-budget-actions-v82 { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .profile-budget-actions-v82 .ghost { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
-.budget-setup-close-v82 { position:absolute; right:14px; top:14px; }
-.budget-setup-card-v82 { position:relative; }
-@media (max-width: 560px) { .profile-budget-actions-v82 { flex-direction:column; align-items:flex-start; } }
+@media (max-width: 560px) {
+  .purchase-confirm-actions-v82 { grid-template-columns:1fr; }
+  .profile-budget-actions-v82 { flex-direction:column; align-items:flex-start; }
+}

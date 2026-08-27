@@ -28,6 +28,10 @@ import { products, getBestFinalStore, getFinalCost } from './data/products.js';
 import { translations } from './data/i18n.js';
 import { applyLanguageToDom } from './utils/uiTranslator.js';
 import { loadCart, saveCart, isInCart } from './data/cart.js';
+// v83 — Ghép lại từ bản "sửa lỗi so sánh": tự động hỏi "Bạn đã mua chưa?" khi người
+// dùng bấm "Mua tại đây" (mở sàn ở tab mới) rồi quay lại CartWise, + popup thiết lập
+// ngân sách tháng 1 lần sau khi đăng nhập — bổ sung cho nút "Đã mua/Chưa mua" thủ công
+// đã có sẵn trong ProductModal.jsx (v81), không thay thế.
 import { addSelfReportedPurchase, getMonthlyBudget, hasMonthlyBudget, setMonthlyBudget } from './data/purchases.js';
 
 const savedSettings = JSON.parse(localStorage.getItem('cartwise-settings') || '{}');
@@ -65,7 +69,9 @@ function App() {
   const [language, setLanguage] = useState(savedSettings.language || 'vi');
   const [currency, setCurrency] = useState(savedSettings.currency || 'VND');
   const [planId, setPlanId] = useState(savedPlan);
-  const [budgetPromptOpen, setBudgetPromptOpen] = useState(() => Boolean(user && !hasMonthlyBudget()));
+  // v83 — Popup thiết lập ngân sách tháng (hiện sau khi đăng nhập nếu chưa khai) +
+  // "đơn mua đang chờ xác nhận" (mở khi bấm "Mua tại đây", hỏi lại khi quay về tab).
+  const [budgetPromptOpen, setBudgetPromptOpen] = useState(() => Boolean(savedUser && !hasMonthlyBudget()));
   const [pendingPurchase, setPendingPurchase] = useState(null);
   // v67 — Giỏ hàng so sánh: sản phẩm người dùng bấm "Thêm vào giỏ hàng" trong khung
   // so sánh sản phẩm, xem lại được từ icon giỏ hàng cạnh nút Đăng nhập ở navbar.
@@ -89,10 +95,14 @@ function App() {
     if (setupDone && visitCount <= 2) setWelcomeOpen(true);
   }, [setupDone, visitCount]);
 
+  // v83 — Khi người dùng bấm "Mua tại đây" (mở sàn ở tab mới) rồi quay lại tab
+  // CartWise (focus/pageshow/visibilitychange), đánh dấu "đã quay lại" để hiện popup
+  // hỏi xác nhận đã mua chưa (PurchaseConfirmationModal) — bổ sung cách tự động này
+  // bên cạnh nút "Đã mua/Chưa mua" thủ công đã có sẵn trong ProductModal.jsx.
   useEffect(() => {
     const onReturnToTab = () => {
       if (!pendingPurchase) return;
-      setPendingPurchase((current) => ({ ...current, returnedAt: Date.now() }));
+      setPendingPurchase((current) => (current ? { ...current, returnedAt: Date.now() } : current));
     };
     const onVisibility = () => {
       if (document.visibilityState === 'visible') onReturnToTab();
@@ -204,6 +214,10 @@ function App() {
     saveCart([]);
   }
 
+  // v83 — Bấm "Mua tại đây" trong khung so sánh (ProductModal.jsx) mở sàn ở tab mới
+  // và ghi lại "đơn đang chờ xác nhận"; khi quay về tab CartWise (useEffect ở trên),
+  // hiện PurchaseConfirmationModal hỏi đã mua chưa. Chọn "Đã mua" mới thật sự ghi
+  // vào lịch sử mua hàng — không tự suy đoán chỉ vì đã bấm link.
   function handleStoreLinkClick(product, row) {
     if (!product || !row || row.available === false || !row.storeUrl || row.storeUrl === '#') return;
     setPendingPurchase({ product, row, startedAt: Date.now() });
@@ -212,8 +226,7 @@ function App() {
   function handlePurchaseConfirmed() {
     if (!pendingPurchase?.product) return;
     const paidAmount = Number(pendingPurchase.row?.basicTotal ?? pendingPurchase.row?.storePrice ?? 0);
-    const entry = addSelfReportedPurchase(pendingPurchase.product, paidAmount);
-    void entry;
+    addSelfReportedPurchase(pendingPurchase.product, paidAmount);
     setPendingPurchase(null);
   }
 
@@ -267,7 +280,7 @@ function App() {
         {page === 'flash' && <FlashSale appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'stores' && <Stores appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'about' && <About appState={appState} />}
-        {page === 'upgrade' && <Upgrade onBack={() => navigate('home')} onChoosePlan={(nextPlan) => { setPlanId(nextPlan); localStorage.setItem('cartwise-plan', nextPlan); navigate('home'); if (nextPlan === 'plus' && user && !hasMonthlyBudget()) setBudgetPromptOpen(true); }} />}
+        {page === 'upgrade' && <Upgrade onBack={() => navigate('home')} onChoosePlan={(nextPlan) => { setPlanId(nextPlan); localStorage.setItem('cartwise-plan', nextPlan); navigate('home'); }} />}
         {page === 'profile' && (
           <Profile
             user={user}

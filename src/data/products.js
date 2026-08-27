@@ -663,8 +663,8 @@ const productStoreOverrides = {
   }
 };
 
-
-// v82 — Giá cập nhật theo các URL sản phẩm do đội cung cấp / kiểm tra ngày 26/08/2026.
+// v83 — Giá cập nhật theo các URL sản phẩm do đội cung cấp / kiểm tra ngày 26/08/2026
+// (ghép lại từ bản "sửa lỗi so sánh" người dùng gửi kèm, hợp nhất với toàn bộ v82).
 // Lưu ý: một số URL là biến thể khác quy cách/màu (được giữ theo đúng link được cung cấp),
 // nên cần kiểm tra lại SKU nếu dùng số liệu này cho bản production có dữ liệu thật.
 const exactStoreSets = {
@@ -833,10 +833,10 @@ products.forEach((p) => {
   } else {
     p.stores = p.stores.map((store) => {
       const withUrl = {
-      ...store,
-      storeUrl: storeSearchUrl(store.storeName, p.name),
-      available: store.available !== false
-    };
+        ...store,
+        storeUrl: storeSearchUrl(store.storeName, p.name),
+        available: store.available !== false
+      };
       return applyProductStoreOverride(p, withUrl);
     });
   }

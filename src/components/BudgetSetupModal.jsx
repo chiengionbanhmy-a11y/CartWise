@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { LockKeyhole, Wallet } from 'lucide-react';
 
+// v83 — Ghép lại từ bản "sửa lỗi so sánh": popup thiết lập ngân sách tháng, hiện sau
+// khi đăng nhập nếu chưa khai (App.jsx). Chỉ được chỉnh sửa đúng 1 lần sau khi đã lưu
+// lần đầu (xem updateMonthlyBudgetOnce trong data/purchases.js), mở lại ở Hồ sơ qua
+// mode="edit". Ngân sách này nuôi Cawi Cố Vấn Chi Tiêu (cả lời khuyên theo ngân sách
+// gốc lẫn trục ngân sách trong Bộ 5 câu hỏi) bằng số liệu thật thay vì mức demo cố định.
 function BudgetSetupModal({ onSave, initialValue = '', mode = 'setup', onClose }) {
   const [value, setValue] = useState(String(initialValue || ''));
   const numeric = Number(String(value).replace(/[^0-9]/g, ''));

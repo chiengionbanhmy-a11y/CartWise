@@ -1,6 +1,11 @@
 import { CheckCircle2, ExternalLink, PackageCheck, PackageX } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 
+// v83 — Ghép lại từ bản "sửa lỗi so sánh": hiện ra khi người dùng bấm "Mua tại đây"
+// (ProductModal.jsx) rồi quay lại tab CartWise (App.jsx theo dõi focus/pageshow/
+// visibilitychange). Chỉ ghi nhận vào lịch sử mua hàng sau khi người dùng tự bấm
+// "Đã mua" ở đây — không suy đoán chỉ vì đã bấm link, đúng nguyên tắc minh bạch dữ
+// liệu tự khai đã áp dụng cho nút "Đã mua/Chưa mua" thủ công trong ProductModal.jsx.
 function PurchaseConfirmationModal({ pendingPurchase, onPurchased, onNotPurchased }) {
   if (!pendingPurchase) return null;
   const { product, row } = pendingPurchase;
@@ -18,7 +23,7 @@ function PurchaseConfirmationModal({ pendingPurchase, onPurchased, onNotPurchase
             <span>{row?.storeName || 'Sàn mua hàng'} · Tổng đã ghi nhận {formatCurrency(paid, 'VND')}</span>
           </div>
         </div>
-        <p>Nếu chọn “Đã mua”, CartWise sẽ ghi nhận đúng khoản chi của sàn này, cập nhật “Số tiền đã tiết kiệm” và cộng khoản mua vào ngân sách tháng trong hồ sơ.</p>
+        <p>Nếu chọn "Đã mua", CartWise sẽ ghi nhận đúng khoản chi của sàn này, cập nhật "Số tiền đã tiết kiệm" và cộng khoản mua vào ngân sách tháng trong hồ sơ.</p>
         <div className="purchase-confirm-actions-v82">
           <button type="button" className="primary" onClick={onPurchased}><PackageCheck size={17} /> Đã mua</button>
           <button type="button" className="secondary" onClick={onNotPurchased}><PackageX size={17} /> Chưa mua</button>

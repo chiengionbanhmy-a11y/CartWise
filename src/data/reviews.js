@@ -6,6 +6,15 @@
 // Trong bản demo MVP, "cache" này là dữ liệu tĩnh viết sẵn — không gọi API AI thật,
 // không phát sinh chi phí, không cần OPENAI/ANTHROPIC_API_KEY (giữ đúng triết lý
 // "không phát sinh chi phí AI" mà bản v37 đã đặt ra cho Cawi Robo).
+//
+// v82 — Theo yêu cầu: mỗi sản phẩm giờ tổng hợp 4-5 đánh giá mẫu (rawReviews, trước
+// đây 3-4), và TỐI THIỂU 2 đánh giá mỗi sản phẩm có kèm ảnh/video minh hoạ (field
+// `media`). Vì CartWise chưa có backend lưu ảnh/video thật do người mua tự đăng,
+// ảnh minh hoạ dùng lại đúng ảnh sản phẩm đã có sẵn — luôn gắn rõ nhãn "Ảnh minh
+// hoạ (demo)" / "Video minh hoạ (demo)" ở giao diện (AIReviewSummary.jsx), KHÔNG
+// trình bày như ảnh/video thật do khách hàng tự chụp, đúng nguyên tắc minh bạch dữ
+// liệu demo đã áp dụng xuyên suốt dự án (QR nhóm, lịch sử mua hàng, biểu đồ giá...).
+const img = (name) => new URL(`../assets/products/${name}`, import.meta.url).href;
 
 export const reviewsData = {
   'mouse-logitech': {
@@ -13,10 +22,10 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-14',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'ngoc_tran**', text: 'Chuột êm tay, bấm không nghe tiếng, dùng cả ngày không mỏi cổ tay.' },
+      { store: 'Shopee', rating: 5, author: 'ngoc_tran**', text: 'Chuột êm tay, bấm không nghe tiếng, dùng cả ngày không mỏi cổ tay.', media: { type: 'image', src: img('logitech-m331.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
       { store: 'Lazada', rating: 4, author: 'minh.dev**', text: 'Kết nối ổn định qua USB receiver, pin dùng gần 2 năm chưa phải thay.' },
       { store: 'Shopee', rating: 3, author: 'hoa_bui**', text: 'Form hơi to với tay mình (tay nhỏ), cầm hơi cấn lúc đầu.' },
-      { store: 'Tiki', rating: 5, author: 'quan_le**', text: 'Mua cho em học sinh dùng học online, nhẹ, dễ mang theo balo.' }
+      { store: 'Tiki', rating: 5, author: 'quan_le**', text: 'Mua cho em học sinh dùng học online, nhẹ, dễ mang theo balo.', media: { type: 'video', src: img('logitech-m331.jpg'), duration: '0:28', caption: 'Video minh hoạ (demo)' } }
     ],
     aiSummary: {
       pros: [
@@ -36,10 +45,10 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-12',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'phong_it**', text: 'Sạc nhanh, dùng thương hiệu Anker nên yên tâm về an toàn pin.' },
+      { store: 'Shopee', rating: 5, author: 'phong_it**', text: 'Sạc nhanh, dùng thương hiệu Anker nên yên tâm về an toàn pin.', media: { type: 'image', src: img('anker-powercore.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
       { store: 'Lazada', rating: 4, author: 'trang2005**', text: 'Nhỏ gọn bỏ vừa túi áo khoác, sạc được điện thoại gần 2 lần đầy.' },
       { store: 'Tiki', rating: 3, author: 'duc_pham**', text: 'Không kèm cáp sạc dài, phải mua thêm cáp mới tiện dùng.' },
-      { store: 'Shopee', rating: 5, author: 'lan.a**', text: 'Mang đi học cả ngày không lo hết pin điện thoại nữa.' }
+      { store: 'Shopee', rating: 5, author: 'lan.a**', text: 'Mang đi học cả ngày không lo hết pin điện thoại nữa.', media: { type: 'video', src: img('anker-powercore.jpg'), duration: '0:41', caption: 'Video minh hoạ (demo)' } }
     ],
     aiSummary: {
       pros: [
@@ -59,8 +68,8 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-16',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'skincare_diary**', text: 'Chống nắng tốt, không gây bí da dầu mụn, dùng lâu năm rồi.' },
-      { store: 'Hasaki', rating: 5, author: 'thu.nt**', text: 'Kết cấu mỏng nhẹ, lên da nhanh, không để lại vệt trắng.' },
+      { store: 'Shopee', rating: 5, author: 'skincare_diary**', text: 'Chống nắng tốt, không gây bí da dầu mụn, dùng lâu năm rồi.', media: { type: 'image', src: img('anessa-sunscreen.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'Hasaki', rating: 5, author: 'thu.nt**', text: 'Kết cấu mỏng nhẹ, lên da nhanh, không để lại vệt trắng.', media: { type: 'video', src: img('anessa-sunscreen.jpg'), duration: '0:35', caption: 'Video minh hoạ (demo)' } },
       { store: 'Lazada', rating: 3, author: 'anh_nguyen**', text: 'Giá hơi cao so với các dòng nội địa nhưng đổi lại chất lượng ổn.' },
       { store: 'Tiki', rating: 4, author: 'my_pham**', text: 'Cần tẩy trang kỹ mới sạch hết lớp chống nắng, hơi mất công.' }
     ],
@@ -82,10 +91,10 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-10',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'beauty_gene**', text: 'Dưỡng ẩm rất tốt, môi không bị khô như son lì thường dùng.' },
+      { store: 'Shopee', rating: 5, author: 'beauty_gene**', text: 'Dưỡng ẩm rất tốt, môi không bị khô như son lì thường dùng.', media: { type: 'image', src: img('dior-lip-glow.webp'), caption: 'Ảnh minh hoạ (demo)' } },
       { store: 'Lazada', rating: 4, author: 'kim.chi**', text: 'Màu lên tự nhiên theo môi từng người, hợp đi học đi làm.' },
       { store: 'Beauty Box', rating: 3, author: 'ngan_pham**', text: 'Giá khá cao so với son bóng bình thường, độ bền màu không cao.' },
-      { store: 'Shopee', rating: 5, author: 'vy.makeup**', text: 'Mùi thơm nhẹ dễ chịu, không gắt như một số son khác.' }
+      { store: 'Shopee', rating: 5, author: 'vy.makeup**', text: 'Mùi thơm nhẹ dễ chịu, không gắt như một số son khác.', media: { type: 'video', src: img('dior-lip-glow.webp'), duration: '0:22', caption: 'Video minh hoạ (demo)' } }
     ],
     aiSummary: {
       pros: [
@@ -105,8 +114,8 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-11',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'sv_kytucxa**', text: 'Nồi nhỏ gọn đúng chuẩn phòng trọ, nấu 1-2 người ăn vừa đủ.' },
-      { store: 'Điện Máy Xanh', rating: 4, author: 'phuong.hn**', text: 'Cơm chín đều, dễ vệ sinh, không dính đáy nồi.' },
+      { store: 'Shopee', rating: 5, author: 'sv_kytucxa**', text: 'Nồi nhỏ gọn đúng chuẩn phòng trọ, nấu 1-2 người ăn vừa đủ.', media: { type: 'image', src: img('philips-rice-cooker.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'Điện Máy Xanh', rating: 4, author: 'phuong.hn**', text: 'Cơm chín đều, dễ vệ sinh, không dính đáy nồi.', media: { type: 'video', src: img('philips-rice-cooker.jpg'), duration: '0:47', caption: 'Video minh hoạ (demo)' } },
       { store: 'Lazada', rating: 3, author: 'tuan_sv**', text: 'Dung tích hơi nhỏ nếu nấu cho từ 3 người trở lên.' },
       { store: 'Tiki', rating: 4, author: 'mai_anh**', text: 'Tiết kiệm điện, dùng ổn sau vài tháng chưa thấy lỗi gì.' }
     ],
@@ -128,9 +137,9 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-09',
     rawReviews: [
-      { store: 'Shopee', rating: 4, author: 'hs_lop11**', text: 'Gọn nhẹ, để bàn học không chiếm chỗ, gấp lại dễ mang đi.' },
+      { store: 'Shopee', rating: 4, author: 'hs_lop11**', text: 'Gọn nhẹ, để bàn học không chiếm chỗ, gấp lại dễ mang đi.', media: { type: 'image', src: img('mini-fan-s18.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
       { store: 'WinMart', rating: 3, author: 'linh_ct**', text: 'Gió hơi nhẹ, hợp không gian nhỏ chứ phòng rộng thì không đủ mát.' },
-      { store: 'Lazada', rating: 4, author: 'khoa.tran**', text: 'Giá rẻ, dùng tạm trên bàn làm việc khá ổn.' },
+      { store: 'Lazada', rating: 4, author: 'khoa.tran**', text: 'Giá rẻ, dùng tạm trên bàn làm việc khá ổn.', media: { type: 'video', src: img('mini-fan-s18.jpg'), duration: '0:19', caption: 'Video minh hoạ (demo)' } },
       { store: 'Tiki', rating: 3, author: 'yen_nguyen**', text: 'Một số đợt hàng có tiếng ồn nhẹ khi chạy tốc độ cao.' }
     ],
     aiSummary: {
@@ -151,9 +160,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-08',
     rawReviews: [
-      { store: 'WinMart', rating: 5, author: 'anh_dat**', text: 'Mua thùng dùng hằng ngày, chất lượng ổn định, quen thuộc.' },
+      { store: 'WinMart', rating: 5, author: 'anh_dat**', text: 'Mua thùng dùng hằng ngày, chất lượng ổn định, quen thuộc.', media: { type: 'image', src: img('lavie-water.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
       { store: 'Bách Hóa Xanh', rating: 4, author: 'thao.vy**', text: 'Giá ổn định giữa các đợt mua, không thấy chênh nhiều.' },
-      { store: 'Co.op Mart', rating: 4, author: 'huy_nguyen**', text: 'Dễ mua ở hầu hết siêu thị/cửa hàng tiện lợi gần nhà.' }
+      { store: 'Co.op Mart', rating: 4, author: 'huy_nguyen**', text: 'Dễ mua ở hầu hết siêu thị/cửa hàng tiện lợi gần nhà.', media: { type: 'video', src: img('lavie-water.jpg'), duration: '0:15', caption: 'Video minh hoạ (demo)' } },
+      { store: 'Shopee', rating: 5, author: 'gia_dinh_tre**', text: 'Đặt online giao tận phòng trọ, không phải khuân vác nặng.' },
+      { store: 'WinMart', rating: 3, author: 'phuc.sv**', text: 'Vỏ chai hơi mỏng, cầm mạnh tay dễ móp so với vài hãng khác.' }
     ],
     aiSummary: {
       pros: [
@@ -173,9 +184,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-13',
     rawReviews: [
-      { store: 'WinMart', rating: 5, author: 'sv_nam**', text: 'Vị quen thuộc từ nhỏ, ăn nhanh gọn lúc bận học bài.' },
-      { store: 'Bách Hóa Xanh', rating: 4, author: 'huong_tran**', text: 'Giá rẻ, mua thùng để sẵn trong phòng trọ rất tiện.' },
-      { store: 'Co.op Mart', rating: 3, author: 'tan.le**', text: 'Nêm hơi mặn nếu cho hết gói gia vị, mình hay giảm bớt.' }
+      { store: 'WinMart', rating: 5, author: 'sv_nam**', text: 'Vị quen thuộc từ nhỏ, ăn nhanh gọn lúc bận học bài.', media: { type: 'image', src: img('haohao-noodle.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'Bách Hóa Xanh', rating: 4, author: 'huong_tran**', text: 'Giá rẻ, mua thùng để sẵn trong phòng trọ rất tiện.', media: { type: 'video', src: img('haohao-noodle.jpg'), duration: '0:24', caption: 'Video minh hoạ (demo)' } },
+      { store: 'Co.op Mart', rating: 3, author: 'tan.le**', text: 'Nêm hơi mặn nếu cho hết gói gia vị, mình hay giảm bớt.' },
+      { store: 'Shopee', rating: 5, author: 'ktx_2sao**', text: 'Mua thùng để dành, để được lâu, hợp dự trữ trong phòng ký túc xá.' },
+      { store: 'Bách Hóa Xanh', rating: 4, author: 'linh.food**', text: 'Thêm trứng với ít rau là thành bữa ăn khá ổn, tiện lúc gấp.' }
     ],
     aiSummary: {
       pros: [
@@ -195,9 +208,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-07',
     rawReviews: [
-      { store: 'Nhà sách Fahasa', rating: 5, author: 'hs_c3**', text: 'Giấy trắng mịn, viết không lem mực, đúng chuẩn vở ôn thi.' },
-      { store: 'Shopee', rating: 4, author: 'mebimsua**', text: 'Mua nguyên combo cho con đi học, chất lượng ổn định các cuốn.' },
-      { store: 'WinMart', rating: 4, author: 'duy_pham**', text: 'Giá hợp lý so với các loại vở khác cùng số trang.' }
+      { store: 'Nhà sách Fahasa', rating: 5, author: 'hs_c3**', text: 'Giấy trắng mịn, viết không lem mực, đúng chuẩn vở ôn thi.', media: { type: 'image', src: img('hongha-a4-notebook.webp'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'Shopee', rating: 4, author: 'mebimsua**', text: 'Mua nguyên combo cho con đi học, chất lượng ổn định các cuốn.', media: { type: 'video', src: img('hongha-a4-notebook.webp'), duration: '0:18', caption: 'Video minh hoạ (demo)' } },
+      { store: 'WinMart', rating: 4, author: 'duy_pham**', text: 'Giá hợp lý so với các loại vở khác cùng số trang.' },
+      { store: 'Tiki', rating: 5, author: 'hs_chuyenvan**', text: 'Bìa cứng cáp, dùng cả năm học không bị quăn mép.' },
+      { store: 'Nhà sách Fahasa', rating: 3, author: 'phu_huynh_88**', text: 'Số trang hơi ít so với giá nếu so với vài loại vở nội địa khác.' }
     ],
     aiSummary: {
       pros: [
@@ -217,9 +232,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-15',
     rawReviews: [
-      { store: 'Nhà sách Fahasa', rating: 5, author: 'hs_lop12**', text: 'Bấm phím nhạy, đúng chuẩn máy tính thi THPT Quốc Gia.' },
-      { store: 'Shopee', rating: 4, author: 'phu.tran**', text: 'Màn hình rõ, pin dùng bền, học 3 năm cấp 3 chưa hỏng.' },
-      { store: 'WinMart', rating: 3, author: 'kim_anh**', text: 'Vỏ máy hơi dễ trầy xước nếu không có bao đựng.' }
+      { store: 'Nhà sách Fahasa', rating: 5, author: 'hs_lop12**', text: 'Bấm phím nhạy, đúng chuẩn máy tính thi THPT Quốc Gia.', media: { type: 'image', src: img('casio-calculator.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'Shopee', rating: 4, author: 'phu.tran**', text: 'Màn hình rõ, pin dùng bền, học 3 năm cấp 3 chưa hỏng.', media: { type: 'video', src: img('casio-calculator.jpg'), duration: '0:31', caption: 'Video minh hoạ (demo)' } },
+      { store: 'WinMart', rating: 3, author: 'kim_anh**', text: 'Vỏ máy hơi dễ trầy xước nếu không có bao đựng.' },
+      { store: 'Tiki', rating: 5, author: 'on_thi_2026**', text: 'Đúng model được phép mang vào phòng thi, thầy cô kiểm tra tem không sao cả.' },
+      { store: 'Nhà sách Fahasa', rating: 4, author: 'hs_a1**', text: 'Sách hướng dẫn đi kèm khá chi tiết cho người mới dùng máy tính khoa học.' }
     ],
     aiSummary: {
       pros: [
@@ -239,9 +256,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-06',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'toy_collector**', text: 'Chi tiết đa dạng, sáng tạo được nhiều mô hình khác nhau.' },
-      { store: 'MyKingdom', rating: 5, author: 'me_2con**', text: 'Mua cho con chơi, mảnh ghép chắc chắn, không lo gãy vỡ.' },
-      { store: 'ToyZone', rating: 3, author: 'anh_trai**', text: 'Hộp khá nhiều mảnh nhỏ, cần để xa bé dưới 3 tuổi.' }
+      { store: 'Shopee', rating: 5, author: 'toy_collector**', text: 'Chi tiết đa dạng, sáng tạo được nhiều mô hình khác nhau.', media: { type: 'image', src: img('lego-classic.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'MyKingdom', rating: 5, author: 'me_2con**', text: 'Mua cho con chơi, mảnh ghép chắc chắn, không lo gãy vỡ.', media: { type: 'video', src: img('lego-classic.jpg'), duration: '0:52', caption: 'Video minh hoạ (demo)' } },
+      { store: 'ToyZone', rating: 3, author: 'anh_trai**', text: 'Hộp khá nhiều mảnh nhỏ, cần để xa bé dưới 3 tuổi.' },
+      { store: 'Shopee', rating: 4, author: 'hoi_sang_tao**', text: 'Ráp cùng các bộ LEGO khác nhà vẫn khớp, mở rộng bộ sưu tập dễ dàng.' },
+      { store: 'Lazada', rating: 5, author: 'qua_sinh_nhat**', text: 'Mua tặng sinh nhật bạn, hộp đóng gói đẹp, bạn thích lắm.' }
     ],
     aiSummary: {
       pros: [
@@ -261,9 +280,11 @@ export const reviewsData = {
     sourceCount: 3,
     lastUpdated: '2026-08-05',
     rawReviews: [
-      { store: 'Shopee', rating: 5, author: 'qua_tang_xinh**', text: 'Gấu mềm mịn, may chắc chắn, mua tặng bạn gái rất ưng.' },
-      { store: 'FunnyLand', rating: 4, author: 'trang_bui**', text: 'Kích thước mini vừa để bàn học hoặc treo balo.' },
-      { store: 'Lazada', rating: 3, author: 'huy.pham**', text: 'Màu lông hơi khác ảnh một chút nhưng vẫn dễ thương.' }
+      { store: 'Shopee', rating: 5, author: 'qua_tang_xinh**', text: 'Gấu mềm mịn, may chắc chắn, mua tặng bạn gái rất ưng.', media: { type: 'image', src: img('teddy-bear.jpg'), caption: 'Ảnh minh hoạ (demo)' } },
+      { store: 'FunnyLand', rating: 4, author: 'trang_bui**', text: 'Kích thước mini vừa để bàn học hoặc treo balo.', media: { type: 'video', src: img('teddy-bear.jpg'), duration: '0:20', caption: 'Video minh hoạ (demo)' } },
+      { store: 'Lazada', rating: 3, author: 'huy.pham**', text: 'Màu lông hơi khác ảnh một chút nhưng vẫn dễ thương.' },
+      { store: 'Shopee', rating: 5, author: 'valentine_2026**', text: 'Ôm rất êm, không có mùi lạ, giặt nhẹ vẫn giữ form đẹp.' },
+      { store: 'FunnyLand', rating: 4, author: 'em_gai_ut**', text: 'Mua tặng em gái, bé thích ôm ngủ mỗi tối, size vừa tay bé.' }
     ],
     aiSummary: {
       pros: [

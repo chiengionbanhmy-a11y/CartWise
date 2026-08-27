@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, PackageCheck, PackageX, Navigation } from 'lucide-react';
-import CawiRobot from './CawiRobot.jsx';
+// v82 — không còn render CawiRobot trong khung so sánh (xem modal-advisor-slot bên dưới), import giữ comment lại để không xoá hẳn:
+// import CawiRobot from './CawiRobot.jsx';
 import AIReviewSummary from './AIReviewSummary.jsx';
 import BuySignalCard from './BuySignalCard.jsx';
 import SpendingAdvisorCard from './SpendingAdvisorCard.jsx';
@@ -8,6 +9,7 @@ import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from 
 import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore, getStoreDistanceLabel } from '../data/products.js';
 import { getReviewData } from '../data/reviews.js';
 import { getPlan } from '../data/plans.js';
+import { isPurchaseReported, addSelfReportedPurchase, removeSelfReportedPurchase } from '../data/purchases.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
@@ -120,6 +122,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
   const [deliveryBasis, setDeliveryBasis] = useState(() => JSON.parse(localStorage.getItem('cartwise-delivery-basis') || 'null'));
   const [manualAddress, setManualAddress] = useState(deliveryBasis?.address || '');
   const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
+  // v81 — Nút tự khai "Đã mua / Chưa mua" — xem giải thích đầy đủ trong data/purchases.js.
+  const [purchaseReported, setPurchaseReported] = useState(() => isPurchaseReported(product.id));
 
   useEffect(() => {
     setVoucherByStore({});
@@ -130,6 +134,7 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
     setSelectedHistoryStore('Shopee');
     setHistoryMenuOpen(false);
     setReviewPanelOpen(false);
+    setPurchaseReported(isPurchaseReported(product.id));
   }, [product]);
 
   const reviewData = useMemo(() => getReviewData(product.id), [product.id]);
@@ -307,6 +312,17 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
       ? `${bestOnline?.storeName || 'Nền tảng online'} đang có tổng chi phí dự kiến thấp nhất theo dữ liệu online hiện có.`
       : `${bestOffline?.storeName || 'Cửa hàng trực tiếp'} đang có mức giá tham khảo tốt nhất trong nhóm cửa hàng trực tiếp.`;
 
+  function markPurchased() {
+    const referenceRow = bestSelected || bestOnline || bestOffline;
+    addSelfReportedPurchase(product, referenceRow?.basicTotal);
+    setPurchaseReported(true);
+  }
+
+  function markNotPurchased() {
+    removeSelfReportedPurchase(product.id);
+    setPurchaseReported(false);
+  }
+
   function renderRow(row, bestRow, compact = false) {
     const isUnavailable = row.available === false || row.basicTotal == null;
     const isBest = !isUnavailable && row.storeName === bestRow?.storeName;
@@ -377,6 +393,30 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               {inCart ? <><Check size={16} /> Đã có trong giỏ hàng</> : <><ShoppingCart size={16} /> Thêm vào giỏ hàng</>}
             </button>
 
+            {/* v81 — Tự khai đã mua sản phẩm này chưa, để "Thành tựu tiết kiệm" phản
+                ứng lại thay vì luôn đứng yên ở dữ liệu demo cố định. */}
+            <div className="self-report-purchase-v81">
+              <div className="self-report-toggle-v81">
+                <button
+                  type="button"
+                  className={purchaseReported ? 'active' : ''}
+                  onClick={markPurchased}
+                  aria-pressed={purchaseReported}
+                >
+                  <PackageCheck size={15} /> Đã mua
+                </button>
+                <button
+                  type="button"
+                  className={!purchaseReported ? 'active' : ''}
+                  onClick={markNotPurchased}
+                  aria-pressed={!purchaseReported}
+                >
+                  <PackageX size={15} /> Chưa mua
+                </button>
+              </div>
+              <small>Bạn tự khai để mở khoá "Thành tựu tiết kiệm" — dữ liệu minh hoạ, chưa liên kết tài khoản mua sắm thật.</small>
+            </div>
+
             <div className="quick-convert premium-convert">
               <h4>Đơn vị hiển thị</h4>
               <div className="currency-grid compact">
@@ -428,7 +468,11 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
 
           <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel v30-cost-panel v31-cost-panel">
             <div className="modal-advisor-slot">
-              <CawiRobot mode="modal" message="Mình sẽ giúp bạn so sánh online và cửa hàng trực tiếp gọn hơn!" />
+              {/* v82 — Theo yêu cầu, Cawi Robo không hiển thị nữa bên trong khung so sánh
+                  tổng chi phí (khi bấm "So sánh tổng chi phí"). Giữ lại slot + import
+                  CawiRobot (không xoá) để không phá layout/CSS liên quan và có thể bật
+                  lại dễ dàng nếu cần — chỉ bỏ dòng render bên dưới.
+              <CawiRobot mode="modal" message="Mình sẽ giúp bạn so sánh online và cửa hàng trực tiếp gọn hơn!" /> */}
             </div>
 
             <span className="category-chip">Tính năng chính của CartWise</span>
@@ -475,6 +519,11 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               product={product}
               enabled={plan.spendingAdvisor.enabled}
               onOpenUpgrade={onOpenUpgrade}
+              purchasePrice={(bestSelected || bestOnline || bestOffline)?.basicTotal}
+              hasBuySignalData={plan.buySignal.enabled}
+              onViewBuySignal={() => {
+                document.querySelector('.buy-signal-card-v63')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
             />
 
             <div className="expected-workspace v31-workspace">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Banknote, KeyRound, Mail, ShieldCheck, Trash2, UserRound, Pencil } from 'lucide-react';
+import { ArrowLeft, Banknote, KeyRound, Mail, Pencil, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import SavingsCounter from '../components/SavingsCounter.jsx';
 import { getPlan } from '../data/plans.js';
 import { loadSavedAccount, clearSavedAccount } from '../data/savedAccount.js';
@@ -12,6 +12,8 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
   // xem giải thích đầy đủ ở popup hỏi lưu tài khoản trong GroupCart.jsx.
   const [savedAccount, setSavedAccount] = useState(() => (user ? loadSavedAccount() : null));
   const plan = getPlan(planId);
+  // v83 — Khối ngân sách tháng đã tự khai (ghép lại từ bản "sửa lỗi so sánh") — chỉ
+  // sửa được đúng 1 lần sau khi đã lưu lần đầu ở BudgetSetupModal (App.jsx).
   const [budgetRevision, setBudgetRevision] = useState(0);
   const [budgetEditOpen, setBudgetEditOpen] = useState(false);
   const budget = getMonthlyBudgetSnapshot();
@@ -100,7 +102,6 @@ function Profile({ user, profile, currency = 'VND', planId = 'free', onBack, onO
               <input type="password" placeholder="Nhập lại mật khẩu mới" value={passwordDraft.confirm} onChange={(e) => setPasswordDraft({ ...passwordDraft, confirm: e.target.value })} />
               <button className="primary full" onClick={savePasswordDemo}>Lưu mật khẩu</button>
             </div>
-
 
             <div className="profile-budget-box-v82">
               <h3><Banknote size={18} /> Ngân sách chi tiêu tháng này</h3>

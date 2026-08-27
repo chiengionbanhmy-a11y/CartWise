@@ -13,9 +13,16 @@ export const demoPurchases = [
   { id: 'p7', name: 'Pin dự phòng Anker', category: 'Đồ điện tử', date: '2026-01-20', paid: 690000, reference: 780000, saved: 90000 }
 ];
 
-// Ngân sách tháng minh hoạ dùng cho Cawi Cố Vấn Chi Tiêu (bản demo — chưa có form
-// người dùng tự khai ngân sách, ở bản chính thức sẽ lấy từ hồ sơ/cài đặt).
+// Ngân sách tháng minh hoạ dùng cho Cawi Cố Vấn Chi Tiêu khi người dùng CHƯA tự khai
+// ngân sách thật (xem BudgetSetupModal.jsx / v83 bên dưới) — luôn dùng làm mức dự
+// phòng để phần Cố Vấn Chi Tiêu vẫn có số liệu để demo ngay cả khi chưa đăng nhập.
 export const DEMO_MONTHLY_BUDGET = 1500000;
+
+// v83 — Ghép lại từ bản "sửa lỗi so sánh": cho phép người dùng tự khai ngân sách
+// tháng thật (qua BudgetSetupModal.jsx, mở sau khi đăng nhập) thay vì luôn dùng mức
+// demo cố định ở trên. Chỉ lưu được 1 lần, sau đó chỉ còn đúng 1 lần chỉnh sửa duy
+// nhất (updateMonthlyBudgetOnce) — tránh người dùng đổi qua đổi lại để "né" lời
+// khuyên của Cawi Cố Vấn Chi Tiêu.
 export const MONTHLY_BUDGET_KEY = 'cartwise-monthly-budget';
 
 export function getMonthlyBudget() {
@@ -52,6 +59,10 @@ export function getCurrentMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// Tổng chi thật trong tháng hiện tại — CHỈ tính các khoản người dùng tự xác nhận
+// "Đã mua" (selfReported), không tính dữ liệu demo dựng sẵn — dùng cho khối ngân
+// sách ở trang Hồ sơ (profile-budget-box), nơi cần con số thật khớp với ngân sách
+// thật người dùng vừa khai, thay vì trộn với dữ liệu minh hoạ.
 export function getMonthlySpent() {
   const monthKey = getCurrentMonthKey();
   return getPurchaseRecords()
@@ -81,8 +92,13 @@ export function getPurchaseRecords() {
 // trong bản demo để bộ đếm/thành tựu thực sự phản ứng lại — vẫn ghi rõ đây là tự
 // khai (không xác minh được đơn hàng thật, cần liên kết tài khoản mua sắm/API đối
 // tác để làm được điều đó ở bản chính thức).
+// v82 — Phát 1 sự kiện window tuỳ biến mỗi khi lịch sử mua hàng đổi, để các thành
+// phần hiển thị số tiền đã tiết kiệm (SavingsCounter ở trang chủ, trang Hồ sơ,
+// trang Thành tựu tiết kiệm) tự cập nhật ngay lập tức mà không cần tải lại trang
+// — cùng kiểu sự kiện `cawi-theme-sync` đã dùng cho việc đổi màu robot Cawi.
 function persistPurchaseRecords(records) {
   localStorage.setItem('cartwise-purchase-history', JSON.stringify(records));
+  window.dispatchEvent(new CustomEvent('cartwise-purchase-updated'));
 }
 
 export function isPurchaseReported(productId) {
@@ -109,7 +125,6 @@ export function addSelfReportedPurchase(product, paidAmount) {
     monthKey: getCurrentMonthKey()
   };
   persistPurchaseRecords([entry, ...existing]);
-  window.dispatchEvent(new CustomEvent('cartwise-purchase-updated', { detail: entry }));
   return entry;
 }
 
@@ -142,9 +157,14 @@ export function getPurchaseHistoryCoverageDays() {
   return getSavingsSummary().coverageDays;
 }
 
-// % ngân sách tháng đã dùng (tín hiệu 1 trong công thức Cố Vấn Chi Tiêu).
+// % ngân sách tháng đã dùng (tín hiệu 1 trong công thức Cố Vấn Chi Tiêu). v83 — ưu
+// tiên dùng ngân sách THẬT người dùng đã tự khai (getMonthlyBudget()) nếu có, chỉ
+// dùng mức demo cố định khi chưa khai — nhưng vẫn tính "đã chi" theo cửa sổ 30 ngày
+// gần nhất trên TOÀN BỘ lịch sử (kể cả dữ liệu demo dựng sẵn), khác với getMonthly
+// Spent() (chỉ tính khoản tự khai trong đúng tháng dương lịch) — vì Cố Vấn Chi Tiêu
+// cần luôn có số liệu để demo ngay, kể cả khi người dùng chưa tự báo cáo đơn nào.
 export function getMonthlyBudgetUsage(monthlyBudget = getMonthlyBudget() || DEMO_MONTHLY_BUDGET) {
-  const spentThisMonth = getMonthlySpent();
+  const spentThisMonth = getPurchasesSince(30).reduce((sum, item) => sum + Number(item.paid || 0), 0);
   return {
     spent: spentThisMonth,
     budget: monthlyBudget,
@@ -155,6 +175,23 @@ export function getMonthlyBudgetUsage(monthlyBudget = getMonthlyBudget() || DEMO
 // Tần suất mua cùng danh mục trong 14-30 ngày qua (tín hiệu 2).
 export function getCategoryPurchaseFrequency(category, days = 30) {
   return getPurchasesSince(days).filter((item) => item.category === category).length;
+}
+
+// v82 — Trục "ngân sách" thuần (tách riêng khỏi trục "mức độ cần thiết" của Bộ 5
+// câu hỏi — xem spendingAdvisorQuestions.js). Tính bằng % ngân sách tháng sẽ dùng
+// NẾU mua thêm sản phẩm này (chi đã dùng trong 30 ngày + giá sản phẩm), để phản
+// ánh đúng câu hỏi "mua món này có làm vượt ngân sách không" thay vì chỉ nhìn chi
+// tiêu quá khứ. 3 mức: fit (< 80%) / near (80-100%) / over (> 100%).
+export function getBudgetLevel(purchasePrice, monthlyBudget = getMonthlyBudget() || DEMO_MONTHLY_BUDGET) {
+  const usage = getMonthlyBudgetUsage(monthlyBudget);
+  const price = Number(purchasePrice || 0);
+  const projectedSpent = usage.spent + price;
+  const projectedPercent = monthlyBudget > 0 ? Math.round((projectedSpent / monthlyBudget) * 100) : 0;
+  let level;
+  if (projectedPercent > 100) level = 'over';
+  else if (projectedPercent >= 80) level = 'near';
+  else level = 'fit';
+  return { level, projectedPercent, spentBefore: usage.spent, price, budget: monthlyBudget };
 }
 
 // Huy hiệu/mốc thành tích cho Bộ đếm tiết kiệm — mỗi mốc mở khoá theo tổng tiền tiết kiệm.
@@ -170,7 +207,7 @@ export const SAVINGS_MILESTONES = [
 // cộng trọng số 3 tín hiệu — % ngân sách tháng đã dùng, tần suất mua cùng danh mục
 // trong 14-30 ngày, sản phẩm có đang nằm trong Flash Sale vừa xem không. Lớp AI chỉ
 // diễn giải điểm số thành câu tư vấn tự nhiên, không tự quyết định (Mục 4.2 báo cáo).
-export function computeSpendingAdvice(product, monthlyBudget = DEMO_MONTHLY_BUDGET) {
+export function computeSpendingAdvice(product, monthlyBudget = getMonthlyBudget() || DEMO_MONTHLY_BUDGET) {
   const budget = getMonthlyBudgetUsage(monthlyBudget);
   const categoryFreq = getCategoryPurchaseFrequency(product.category, 30);
   const inFlashSale = Boolean(product.flashSaleToday);

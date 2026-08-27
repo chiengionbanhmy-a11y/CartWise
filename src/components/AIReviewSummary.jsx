@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Sparkles, CheckCircle2, XCircle, ChevronDown, Star, Info } from 'lucide-react';
+import { Sparkles, CheckCircle2, XCircle, ChevronDown, Star, Info, Play, ImageIcon } from 'lucide-react';
 import { getReviewData } from '../data/reviews.js';
 
 function AIReviewSummary({ productId }) {
@@ -83,6 +83,20 @@ function AIReviewSummary({ productId }) {
                 <span className="ai-review-author-v58">{review.author}</span>
               </div>
               <p>{review.text}</p>
+              {review.media && (
+                <div className="ai-review-media-v82">
+                  <div className="ai-review-media-thumb-v82">
+                    <img src={review.media.src} alt={review.media.type === 'video' ? 'Video minh hoạ đánh giá' : 'Ảnh minh hoạ đánh giá'} loading="lazy" />
+                    {review.media.type === 'video' ? (
+                      <span className="ai-review-media-play-v82"><Play size={16} fill="currentColor" /></span>
+                    ) : (
+                      <span className="ai-review-media-imgtag-v82"><ImageIcon size={12} /></span>
+                    )}
+                    {review.media.duration && <span className="ai-review-media-duration-v82">{review.media.duration}</span>}
+                  </div>
+                  <span className="ai-review-media-caption-v82">{review.media.caption || (review.media.type === 'video' ? 'Video minh hoạ (demo)' : 'Ảnh minh hoạ (demo)')}</span>
+                </div>
+              )}
             </article>
           ))}
         </div>
@@ -93,7 +107,8 @@ function AIReviewSummary({ productId }) {
         <span>
           Tóm tắt được AI tạo <b>1 lần</b> khi hệ thống thu thập đủ đánh giá cho sản phẩm (cập nhật gần nhất: {lastUpdated})
           và được lưu lại để dùng chung cho mọi lượt xem — không gọi lại AI mỗi lượt truy cập, giữ chi phí vận hành
-          gần như không đổi khi có thêm người dùng.
+          gần như không đổi khi có thêm người dùng. Ảnh/video kèm theo một số đánh giá là ảnh minh hoạ (demo) —
+          bản chính thức cần tính năng cho phép người mua tự đăng ảnh/video thật kèm đánh giá.
         </span>
       </div>
     </div>
