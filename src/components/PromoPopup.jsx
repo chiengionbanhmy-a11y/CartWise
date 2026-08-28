@@ -3,13 +3,11 @@ import { ChevronRight } from 'lucide-react';
 
 function pickDailyFlashProducts(products = []) {
   if (!products.length) return [];
+  // v85: đã bỏ 3 cặp dùng sản phẩm không còn tồn tại (notebook/casio/lego-classic/teddy-bear).
   const plannedPairs = [
-    ['lego-classic', 'teddy-bear'],
-    ['rice-cooker', 'notebook'],
     ['mouse-logitech', 'powerbank-anker'],
     ['sunscreen', 'lipstick'],
-    ['mini-fan', 'water-lavie-500'],
-    ['haohao', 'casio']
+    ['mini-fan', 'water-lavie-500']
   ];
   const dayIndex = Math.floor(Date.now() / 86400000) % plannedPairs.length;
   const pair = plannedPairs[dayIndex]

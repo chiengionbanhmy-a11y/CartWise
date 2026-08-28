@@ -22,12 +22,12 @@ import { formatCurrency } from '../data/currency.js';
 const STATS_KEY = 'cartwise-dealhunt-stats-v78';
 const ONLINE_STORES = ['Shopee', 'Lazada', 'Tiki'];
 
+// v85: đã bỏ nhiệm vụ 'hoc-tap' (notebook, casio) và 'qua-tang' (lego-classic,
+// teddy-bear) — 4 sản phẩm này không còn trong danh sách sản phẩm.
 const MISSIONS = [
-  { id: 'hoc-tap', title: 'Trang bị góc học tập đầu năm', desc: 'Chuẩn bị vở và máy tính cầm tay cho năm học mới.', items: ['notebook', 'casio'] },
   { id: 'phong-tro', title: 'Sắm đồ cho phòng trọ mới', desc: 'Chuyển phòng trọ mới, cần nồi cơm điện mini và quạt để bàn.', items: ['rice-cooker', 'mini-fan'] },
   { id: 'lam-dep', title: 'Set chăm sóc da đi học, đi làm', desc: 'Kem chống nắng và son dưỡng dùng hằng ngày.', items: ['sunscreen', 'lipstick'] },
   { id: 'cong-nghe', title: 'Set phụ kiện công nghệ mini', desc: 'Chuột không dây và pin sạc dự phòng cho việc học, làm từ xa.', items: ['mouse-logitech', 'powerbank-anker'] },
-  { id: 'qua-tang', title: 'Chọn quà tặng nhỏ dễ thương', desc: 'Bộ xếp hình LEGO và gấu bông mini để làm quà tặng.', items: ['lego-classic', 'teddy-bear'] },
   { id: 'hop-nhom', title: 'Chuẩn bị đồ ăn nhẹ cho buổi học nhóm', desc: 'Mì ăn liền và nước khoáng cho cả nhóm học chung.', items: ['haohao', 'water-lavie-500'] }
 ];
 

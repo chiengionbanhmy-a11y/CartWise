@@ -5919,6 +5919,22 @@ main {
   font-size: 12px;
 }
 
+/* v85 — Ghi chú minh bạch cho sản phẩm tự thêm qua link (data/customProducts.js). */
+.custom-product-notice-v85 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #eef2ff;
+  border: 1px solid rgba(99,102,241,.28);
+  color: #3730a3;
+  font-size: 12.5px;
+  line-height: 1.55;
+  font-weight: 650;
+}
+.custom-product-notice-v85 svg { flex: 0 0 auto; margin-top: 2px; }
+
 .expected-cost-panel > h2 {
   max-width: 720px;
   margin-bottom: 8px;
@@ -8099,6 +8115,20 @@ option {
   color: #64748b;
   font-size: 13px;
   font-weight: 700;
+}
+
+/* v85 — Gợi ý "dán link sản phẩm" trong ô tìm kiếm (data/customProducts.js). */
+.search-suggestion-panel-url-v85 { border-color: rgba(99,102,241,.35); }
+.search-suggestion-url-item-v85:hover { background: #eef2ff; }
+.search-suggestion-url-icon-v85 {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: #eef2ff;
+  color: #4338ca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .location-notice-v40 {
@@ -12575,6 +12605,11 @@ option {
 .spending-advisor-intro-v63 { margin: 0; color: #475569; font-weight: 650; line-height: 1.55; font-size: 13.5px; }
 .spending-advisor-empty-v63 { margin: 0; color: var(--muted); font-weight: 650; line-height: 1.55; font-size: 13.5px; }
 .spending-advisor-ask-btn-v63 { width: fit-content; display: inline-flex; align-items: center; gap: 7px; }
+/* v85 — giới thiệu mặc định rút gọn thành 1 dòng ngắn + nút "Hỏi Cawi" cùng hàng
+   (thay cho đoạn văn dài + nút xuống dòng riêng ở v63/v82). */
+.spending-advisor-intro-row-v85 { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.spending-advisor-intro-v85 { flex: 1 1 auto; white-space: nowrap; }
+.spending-advisor-intro-row-v85 .spending-advisor-ask-btn-v63 { flex: 0 0 auto; }
 .spending-advisor-thinking-v63 { display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 700; font-size: 13.5px; }
 .spending-advisor-thinking-v63 .spin { animation: cw63Spin 1s linear infinite; }
 @keyframes cw63Spin { to { transform: rotate(360deg); } }
@@ -13671,3 +13706,264 @@ option {
   .purchase-confirm-actions-v82 { grid-template-columns:1fr; }
   .profile-budget-actions-v82 { flex-direction:column; align-items:flex-start; }
 }
+
+/* ===== v84 — Góp ý UX vòng chung kết: gọn khung so sánh sản phẩm, thêm huy hiệu gói
+   nâng cấp cạnh giỏ hàng, nút đăng xuất trong Hồ sơ, tái cấu trúc trang Thành tựu
+   tiết kiệm. Xem README-v84.md để biết đầy đủ lý do từng thay đổi. ===== */
+
+/* --- Huy hiệu gói tài khoản (Plus / Plus Student) cạnh icon giỏ hàng trên navbar,
+   dùng đúng màu gradient than-vàng của nút "Nâng cấp ứng dụng" (.upgrade-row-v44) để
+   người dùng liên tưởng ngay đây là dấu hiệu đã nâng cấp. --- */
+.plan-badge-v84 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #172033 0%, #9b6a20 100%);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 900;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px rgba(23,32,51,.22);
+}
+.plan-badge-v84 svg { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .plan-badge-v84 { display: none; }
+}
+
+/* --- Nút đăng xuất ở cuối trang Hồ sơ. --- */
+.profile-logout-btn-v84 {
+  margin-top: 22px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #b91c1c;
+  font-weight: 850;
+  font-size: 15px;
+}
+.profile-logout-btn-v84:hover { background: #fee2e2; }
+
+/* --- ProductModal: đơn vị hiển thị (tiền tệ) ẩn sau icon cài đặt thay vì hiện luôn. --- */
+.currency-settings-v84 { position: relative; margin-top: 14px; }
+.currency-settings-trigger-v84 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 750;
+  color: #334155;
+}
+.currency-settings-trigger-v84 b { color: #111827; }
+.currency-settings-trigger-v84 svg:last-child { margin-left: auto; transition: transform .15s ease; }
+.currency-settings-trigger-v84 svg.rotated { transform: rotate(180deg); }
+.currency-settings-panel-v84 {
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(15,23,42,.10);
+}
+.currency-settings-panel-v84 small { display: block; margin-top: 10px; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+
+/* v85 — icon đơn vị tiền tệ thu gọn thành 1 nút tròn nhỏ ở góc trên-phải cột trái
+   (trước đây .currency-settings-v84 vẫn còn là 1 nút full-width có chữ). */
+.currency-settings-v85 { position: absolute; top: 14px; right: 14px; z-index: 5; }
+.currency-settings-trigger-v85 {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.92);
+  color: #334155;
+  box-shadow: 0 6px 16px rgba(15,23,42,.12);
+}
+.currency-settings-trigger-v85:hover { background: #fff; }
+.currency-settings-panel-v85 { position: absolute; top: 40px; right: 0; width: 220px; }
+.currency-settings-panel-label-v85 { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+
+/* v85 — huy hiệu "Cawi Tín Hiệu Mua" gộp vào góc khung biểu đồ lịch sử giá, thay cho
+   thanh riêng .buy-signal-badge-v84 bên dưới biểu đồ ở v84. */
+.price-insight-panel-v85 { position: relative; padding-top: 46px; }
+.buy-signal-chart-badge-v85 {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-weight: 900;
+  font-size: 12px;
+  z-index: 3;
+  box-shadow: 0 6px 14px rgba(15,23,42,.08);
+}
+.buy-signal-chart-badge-v85.good { border-color: #bbf7d0; background: #ecfdf5; color: #166534; }
+.buy-signal-chart-badge-v85.warning { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+.buy-signal-chart-badge-v85.stable { border-color: #e2e8f0; background: #f8fafc; color: #334155; }
+.buy-signal-chart-badge-v85.locked { border-color: #e2e8f0; background: #f8fafc; color: #64748b; }
+
+/* --- ProductModal: huy hiệu gọn "Cawi Tín Hiệu Mua" ở cột trái, thay cho toàn bộ
+   BuySignalCard (đã dời phần chi tiết vào khung "Trợ lý Cawi"). --- */
+.buy-signal-badge-v84 {
+  width: 100%;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 750;
+  font-size: 13.5px;
+  color: #334155;
+  text-align: left;
+}
+.buy-signal-badge-v84 b { font-weight: 900; }
+.buy-signal-badge-v84 span { margin-left: auto; color: var(--muted); font-weight: 700; font-size: 12px; white-space: nowrap; }
+.buy-signal-badge-v84.good { border-color: #bbf7d0; background: #ecfdf5; color: #166534; }
+.buy-signal-badge-v84.warning { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+.buy-signal-badge-v84.stable { border-color: #e2e8f0; background: #f8fafc; color: #334155; }
+.buy-signal-badge-v84.locked { border-color: #e2e8f0; background: #f8fafc; color: #64748b; }
+
+/* --- ProductModal: banner hero gộp "giá tốt nhất" + "khoản tiết kiệm tối ưu" thành 1
+   khối duy nhất (trước đây 2 khối tách rời, lặp thông tin). --- */
+.hero-merged-v84 { display: flex; flex-wrap: wrap; align-items: stretch; gap: 18px; }
+.hero-merged-divider-v84 { width: 1px; align-self: stretch; background: rgba(255,255,255,.18); }
+.hero-merged-saving-v84 { flex: 1 1 220px; min-width: 200px; display: flex; flex-direction: column; gap: 5px; }
+.hero-merged-saving-label-v84 { font-weight: 850; font-size: 13px; color: rgba(255,255,255,.72) !important; }
+.hero-merged-saving-title-v84 { font-size: 18px; color: #fff !important; }
+/* v85: tên sàn + số tiền tiết kiệm tách thành 2 khối lớn, nổi bật hơn (thay cho
+   .hero-merged-saving-title-v84 cũ vốn chỉ là chữ nhỏ lồng trong 1 câu văn). */
+.hero-merged-saving-store-v85 {
+  display: block;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  color: #fff !important;
+  line-height: 1.15;
+}
+.hero-merged-saving-amount-v85 {
+  display: block;
+  font-size: clamp(20px, 3.4vw, 26px) !important;
+  font-weight: 900;
+  color: #fde68a !important;
+  margin: 2px 0 0;
+  line-height: 1.2;
+}
+.hero-merged-saving-desc-v84 { margin: 2px 0 4px; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.86) !important; }
+.hero-merged-saving-metrics-v84 { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 12.5px; color: rgba(255,255,255,.8) !important; }
+.hero-merged-saving-metrics-v84 b { color: #fff !important; }
+@media (max-width: 640px) {
+  .hero-merged-divider-v84 { display: none; }
+}
+
+/* --- ProductModal: khung "Trợ lý Cawi" gộp chung cả 3 tính năng AI (đánh giá, cố vấn
+   chi tiêu, tín hiệu mua) — mặc định thu gọn (Progressive Disclosure), chỉ 1 nút bấm
+   để mở toàn bộ phân tích thay vì rải rác 3 nơi như trước. --- */
+.cawi-widget-v84 {
+  margin-top: 22px;
+  border: 1px solid #ddd6fe;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f5f3ff, #fdf4ff);
+  overflow: hidden;
+}
+.cawi-widget-toggle-v84 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 18px;
+  background: transparent;
+  border: 0;
+}
+.cawi-widget-toggle-label-v84 { display: inline-flex; align-items: center; gap: 8px; font-weight: 950; font-size: 15.5px; color: #5b21b6; }
+.cawi-widget-toggle-cta-v84 { display: inline-flex; align-items: center; gap: 6px; font-weight: 850; font-size: 13px; color: #7c3aed; }
+.cawi-widget-toggle-cta-v84 svg.rotated { transform: rotate(180deg); }
+.cawi-widget-body-v84 { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.cawi-widget-review-row-v84 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid #e9d5ff;
+  background: #fff;
+  font-family: inherit;
+}
+.cawi-widget-review-rating-v84 { display: inline-flex; align-items: center; gap: 4px; font-weight: 900; font-size: 13px; color: #b45309; }
+.cawi-widget-review-meta-v84 { width: 100%; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.cawi-widget-review-cta-v84 { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 850; color: #7c3aed; }
+
+/* --- Trang Thành tựu tiết kiệm: huy hiệu nhỏ + tooltip thay cho đoạn ghi chú dữ liệu
+   demo hiện luôn cả đoạn văn dài (chiếm quá nhiều chỗ ngay đầu trang). --- */
+.savings-achv-demo-badge-v84 {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.12);
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 800;
+}
+.savings-achv-demo-badge-v84:hover .savings-achv-demo-tooltip-v84,
+.savings-achv-demo-badge-v84:focus .savings-achv-demo-tooltip-v84,
+.savings-achv-demo-badge-v84.open .savings-achv-demo-tooltip-v84 { display: block; }
+.savings-achv-demo-tooltip-v84 {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(320px, 80vw);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #111827;
+  color: #e2e8f0 !important;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.55;
+  text-align: left;
+  box-shadow: 0 18px 36px rgba(0,0,0,.28);
+}
+
+/* --- Trang Thành tựu tiết kiệm: danh sách mốc giờ là khối chính (thay cho bản đồ đã
+   bỏ) — nới rộng, thêm khung nhẹ cho mốc "đang hướng tới" để nổi bật hơn hẳn 2 trạng
+   thái còn lại, đúng góp ý "trạng thái khoá/đang hướng tới/đã đạt phải thật rõ". --- */
+.savings-achv-path-primary-v84 { max-width: 720px; margin-top: 22px; }
+.savings-achv-path-primary-v84 .savings-achv-node-v69 { padding: 14px 16px 34px; border-radius: 18px; }
+.savings-achv-path-primary-v84 .savings-achv-node-v69.current {
+  background: linear-gradient(135deg, #fff7ed, #fffbeb);
+  border: 1px solid #fed7aa;
+  padding-top: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 14px;
+}
+.savings-achv-path-primary-v84 .savings-achv-node-v69.locked { opacity: .72; }

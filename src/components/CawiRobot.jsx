@@ -41,11 +41,9 @@ const productHints = [
   { id: 'rice-cooker', terms: ['philips', 'nồi cơm', 'hd3170'] },
   { id: 'mini-fan', terms: ['quạt', 's-18', 'quạt mini'] },
   { id: 'water-lavie-500', terms: ['lavie', 'nước khoáng', 'nước lavie'] },
-  { id: 'haohao', terms: ['hảo hảo', 'hao hao', 'mì', 'mì gói'] },
-  { id: 'notebook', terms: ['vở', 'hồng hà', '4586', 'subject a4'] },
-  { id: 'casio', terms: ['casio', 'máy tính', 'fx-580', '580vnx'] },
-  { id: 'lego-classic', terms: ['lego', 'classic', 'xếp hình'] },
-  { id: 'teddy-bear', terms: ['gấu bông', 'thú bông', 'teddy'] }
+  { id: 'haohao', terms: ['hảo hảo', 'hao hao', 'mì', 'mì gói'] }
+  // v85: đã bỏ hint cho 'notebook', 'casio', 'lego-classic', 'teddy-bear' —
+  // 4 sản phẩm này không còn tồn tại, để lại sẽ khiến buildBestStoreReply lỗi.
 ];
 
 function normalizeText(text = '') {

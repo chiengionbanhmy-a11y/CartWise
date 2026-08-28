@@ -25,6 +25,10 @@ import PriceGuessGame from './pages/PriceGuessGame.jsx';
 import DealHuntGame from './pages/DealHuntGame.jsx';
 import CartPanel from './components/CartPanel.jsx';
 import { products, getBestFinalStore, getFinalCost } from './data/products.js';
+// v85 — "Dán link sản phẩm để so sánh": sản phẩm người dùng tự thêm qua link, lưu trên
+// trình duyệt này (localStorage), gộp chung với 8 sản phẩm mẫu để tìm kiếm/mở lại được
+// như sản phẩm thường (xem data/customProducts.js để biết chi tiết + lưu ý minh bạch).
+import { getAllCustomProducts, CUSTOM_PRODUCT_EVENT } from './data/customProducts.js';
 import { translations } from './data/i18n.js';
 import { applyLanguageToDom } from './utils/uiTranslator.js';
 import { loadCart, saveCart, isInCart } from './data/cart.js';
@@ -80,12 +84,26 @@ function App() {
   // v81 — Popup chào mừng tự động, chỉ hiện ở lần mở web thứ 1 và thứ 2 trên máy này.
   const [visitCount] = useState(bumpVisitCount);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  // v85 — Sản phẩm người dùng tự thêm bằng cách dán link vào ô tìm kiếm (lưu ở
+  // trình duyệt này). Đọc lại từ localStorage khi mở app, và mỗi khi có link mới được
+  // thêm (sự kiện CUSTOM_PRODUCT_EVENT, phát ra từ data/customProducts.js).
+  const [customProducts, setCustomProducts] = useState(getAllCustomProducts);
+
+  useEffect(() => {
+    function refreshCustomProducts() {
+      setCustomProducts(getAllCustomProducts());
+    }
+    window.addEventListener(CUSTOM_PRODUCT_EVENT, refreshCustomProducts);
+    return () => window.removeEventListener(CUSTOM_PRODUCT_EVENT, refreshCustomProducts);
+  }, []);
 
   const t = translations[language] || translations.vi;
 
+  const allProducts = useMemo(() => [...products, ...customProducts], [customProducts]);
+
   const appState = useMemo(() => ({
-    page, t, products, user, profile, language, currency, planId, monthlyBudget: getMonthlyBudget()
-  }), [page, t, user, profile, language, currency, planId]);
+    page, t, products: allProducts, user, profile, language, currency, planId, monthlyBudget: getMonthlyBudget()
+  }), [page, t, allProducts, user, profile, language, currency, planId]);
 
   useEffect(() => applyLanguageToDom(language), [language]);
 
@@ -280,7 +298,22 @@ function App() {
         {page === 'flash' && <FlashSale appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'stores' && <Stores appState={appState} onOpenProduct={handleOpenProduct} />}
         {page === 'about' && <About appState={appState} />}
-        {page === 'upgrade' && <Upgrade onBack={() => navigate('home')} onChoosePlan={(nextPlan) => { setPlanId(nextPlan); localStorage.setItem('cartwise-plan', nextPlan); navigate('home'); }} />}
+        {page === 'upgrade' && (
+          <Upgrade
+            onBack={() => navigate('home')}
+            onChoosePlan={(nextPlan) => {
+              // v85: bắt buộc đăng nhập/đăng ký trước khi mua gói nâng cấp.
+              if (!user) {
+                alert('Bạn cần đăng ký/đăng nhập trước khi mua gói nâng cấp.');
+                setAuthMode('login');
+                return;
+              }
+              setPlanId(nextPlan);
+              localStorage.setItem('cartwise-plan', nextPlan);
+              navigate('home');
+            }}
+          />
+        )}
         {page === 'profile' && (
           <Profile
             user={user}
@@ -290,6 +323,7 @@ function App() {
             onBack={() => navigate('home')}
             onOpenLogin={() => setAuthMode('login')}
             onOpenRegister={() => setAuthMode('register')}
+            onLogout={handleLogout}
           />
         )}
         {page === 'check-history' && (
@@ -379,7 +413,7 @@ function App() {
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         items={cartItems}
-        products={products}
+        products={allProducts}
         currency={currency}
         onRemove={removeFromCart}
         onRemoveMany={removeManyFromCart}

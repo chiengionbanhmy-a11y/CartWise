@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Mic, MapPin, ChevronRight, ChevronDown, X } from 'lucide-react';
+import { Search, Mic, MapPin, ChevronRight, ChevronDown, X, Link2 } from 'lucide-react';
 import ProductCard from '../components/ProductCard.jsx';
 import SavingsCounter from '../components/SavingsCounter.jsx';
 import { categories, getBestFinalStore, getFinalCost, getStorePopularityScore } from '../data/products.js';
 import { getPlan } from '../data/plans.js';
+// v85 — "Dán link sản phẩm để so sánh": xem data/customProducts.js để biết chi tiết.
+import { looksLikeUrl, getOrCreateCustomProduct } from '../data/customProducts.js';
 
 function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
   const { products, currency, planId } = appState;
@@ -35,7 +37,12 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
     });
   }, [products, category, sortBy]);
 
+  // v85 — Dán link sản phẩm: khi ô tìm kiếm chứa 1 link (thay vì tên sản phẩm), không
+  // tìm theo tên nữa — hiện gợi ý riêng "Xem sản phẩm từ link này" (xem JSX bên dưới).
+  const isUrlQuery = useMemo(() => looksLikeUrl(query), [query]);
+
   const searchSuggestions = useMemo(() => {
+    if (isUrlQuery) return [];
     const q = query.trim().toLowerCase();
     if (q) {
       return products.filter((product) => product.name.toLowerCase().includes(q)).slice(0, 8);
@@ -46,20 +53,18 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
       .map((id) => products.find((product) => product.id === id))
       .filter(Boolean)
       .slice(0, 6);
-  }, [products, query, searchFocused, searchHistory]);
+  }, [products, query, searchFocused, searchHistory, isUrlQuery]);
 
   useEffect(() => {
     setVisibleCount(8);
   }, [category, sortBy]);
 
   const dailyFlashIds = useMemo(() => {
+    // v85: đã bỏ 3 cặp dùng sản phẩm không còn tồn tại (notebook/casio/lego-classic/teddy-bear).
     const plannedPairs = [
-      ['lego-classic', 'teddy-bear'],
-      ['rice-cooker', 'notebook'],
       ['mouse-logitech', 'powerbank-anker'],
       ['sunscreen', 'lipstick'],
-      ['mini-fan', 'water-lavie-500'],
-      ['haohao', 'casio']
+      ['mini-fan', 'water-lavie-500']
     ];
     return new Set(plannedPairs[Math.floor(Date.now() / 86400000) % plannedPairs.length]);
   }, []);
@@ -129,9 +134,25 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
     saveDeliveryBasis({ type: 'manual', label: clean, address: clean });
   }
 
+  // v85 — Mở màn hình so sánh cho 1 link sản phẩm bên ngoài: tạo (hoặc lấy lại nếu đã
+  // từng dán link này trước đó — xem cache trong customProducts.js) rồi mở như 1 sản
+  // phẩm bình thường, đủ 6 sàn (3 online + 3 offline).
+  function openFromLink(rawUrl) {
+    const product = getOrCreateCustomProduct(rawUrl);
+    rememberSearch(product);
+    setQuery('');
+    setSearchFocused(false);
+    onOpenProduct(product);
+  }
+
   function handleSearchAction() {
-    const q = query.trim().toLowerCase();
-    if (!q) return;
+    const raw = query.trim();
+    if (!raw) return;
+    if (looksLikeUrl(raw)) {
+      openFromLink(raw);
+      return;
+    }
+    const q = raw.toLowerCase();
     const firstMatch = products.find((product) => product.name.toLowerCase().includes(q));
     if (firstMatch) {
       rememberSearch(firstMatch);
@@ -182,7 +203,7 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSearchAction();
               }}
-              placeholder="Nhập tên sản phẩm, ví dụ: chuột Logitech, kem chống nắng, mì Hảo Hảo..."
+              placeholder="Nhập tên sản phẩm hoặc dán link sản phẩm từ Shopee, Lazada, Tiki..."
             />
             <div className="shell-right-icons">
               <button className="shell-icon-btn" aria-label="Tìm bằng giọng nói" onClick={() => stubFeature('Tìm kiếm bằng giọng nói')}>
@@ -194,7 +215,23 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
             </div>
           </div>
 
-          {searchSuggestions.length > 0 && (
+          {/* v85 — Dán link sản phẩm: khi ô tìm kiếm nhận ra 1 link (thay vì tên), hiện
+              gợi ý riêng để mở màn hình so sánh cho đúng sản phẩm từ link đó — dữ liệu sẽ
+              được lưu lại trên trình duyệt này để lần sau dán lại link cũ không phải chờ. */}
+          {isUrlQuery && (
+            <div className="search-suggestion-panel-v40 search-suggestion-panel-url-v85">
+              <button type="button" className="search-suggestion-item-v40 search-suggestion-url-item-v85" onMouseDown={(event) => { event.preventDefault(); openFromLink(query); }}>
+                <span className="search-suggestion-url-icon-v85"><Link2 size={20} /></span>
+                <span>
+                  <b>So sánh sản phẩm từ link này</b>
+                  <small>CartWise sẽ tạo màn hình so sánh đủ 6 sàn (3 online + 3 offline) — dữ liệu ước tính, lưu lại cho lần xem sau</small>
+                </span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+
+          {!isUrlQuery && searchSuggestions.length > 0 && (
             <div className="search-suggestion-panel-v40">
               {searchSuggestions.map((product) => (
                 <button key={product.id} type="button" className="search-suggestion-item-v40" onMouseDown={(event) => { event.preventDefault(); selectSuggestion(product); }}>
@@ -217,7 +254,7 @@ function Home({ appState, onOpenProduct, onNavigate, onOpenUpgrade }) {
         </div>
 
         <div className="hero-stats-strip">
-          <div><strong>12</strong><span>Sản phẩm mẫu</span></div>
+          <div><strong>8</strong><span>Sản phẩm mẫu</span></div>
           <div><strong>6+</strong><span>Nơi bán online và trực tiếp</span></div>
           <div><strong>Tổng phí</strong><span>Giá sản phẩm + phí vận chuyển</span></div>
         </div>

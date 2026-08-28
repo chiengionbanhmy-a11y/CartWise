@@ -7,8 +7,11 @@ import { LockKeyhole, Wallet } from 'lucide-react';
 // mode="edit". Ngân sách này nuôi Cawi Cố Vấn Chi Tiêu (cả lời khuyên theo ngân sách
 // gốc lẫn trục ngân sách trong Bộ 5 câu hỏi) bằng số liệu thật thay vì mức demo cố định.
 function BudgetSetupModal({ onSave, initialValue = '', mode = 'setup', onClose }) {
-  const [value, setValue] = useState(String(initialValue || ''));
-  const numeric = Number(String(value).replace(/[^0-9]/g, ''));
+  const [value, setValue] = useState(String(initialValue || '').replace(/[^0-9]/g, ''));
+  const numeric = Number(value);
+  // v85: hiển thị số tiền có dấu chấm phân cách hàng nghìn cho dễ đọc (2.000.000₫),
+  // trong khi `value` vẫn chỉ lưu chuỗi số thuần để tính toán/lưu như trước.
+  const displayValue = value ? Number(value).toLocaleString('vi-VN') : '';
 
   function submit(event) {
     event.preventDefault();
@@ -30,9 +33,9 @@ function BudgetSetupModal({ onSave, initialValue = '', mode = 'setup', onClose }
             <input
               autoFocus
               inputMode="numeric"
-              value={value}
+              value={displayValue}
               onChange={(event) => setValue(event.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="Ví dụ: 2000000"
+              placeholder="Ví dụ: 2.000.000"
               aria-label="Ngân sách tháng này"
             />
             <span>đ</span>

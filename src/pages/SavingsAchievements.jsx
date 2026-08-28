@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Check, Lock } from 'lucide-react';
+import { ArrowLeft, Check, Info, Lock } from 'lucide-react';
 import { formatCurrency } from '../data/currency.js';
 import { getSavingsSummary, SAVINGS_MILESTONES } from '../data/purchases.js';
 
@@ -25,6 +25,9 @@ const NODE_POS = [
 const MAP_PATH_D = 'M60,480 C180,460 200,420 280,380 C340,350 40,320 100,280 C160,240 360,210 300,170 C240,130 90,110 150,70 C160,55 260,35 340,20';
 
 function SavingsAchievements({ currency = 'VND', onBack }) {
+  // v84 — Huy hiệu nhỏ + tooltip cho ghi chú "dữ liệu minh hoạ" (xem bên dưới), bấm để
+  // mở/đóng trên di động vì hover không hoạt động ở đó.
+  const [demoTipOpen, setDemoTipOpen] = useState(false);
   const summary = getSavingsSummary();
   const totalSaved = summary.totalSaved;
   const finalGoal = SAVINGS_MILESTONES[SAVINGS_MILESTONES.length - 1].amount;
@@ -49,12 +52,23 @@ function SavingsAchievements({ currency = 'VND', onBack }) {
         <h1>Bản đồ hành trình tiết kiệm của bạn</h1>
         <p>Mỗi mốc được mở khoá theo tổng số tiền bạn đã tiết kiệm khi mua sắm qua CartWise — so sánh giá càng kỹ, bạn càng lên bậc nhanh hơn.</p>
         {/* v81 — Minh bạch nguồn dữ liệu: số liệu bắt đầu từ dữ liệu demo, cộng thêm
-            các sản phẩm bạn tự khai "Đã mua" ở khung so sánh sản phẩm. Bản chính thức
-            cần liên kết tài khoản mua sắm/API đối tác để ghi nhận đơn hàng thật, tự
-            động, không cần tự khai. */}
-        <p className="savings-achv-demo-note-v81">
-          <b>Dữ liệu minh hoạ:</b> số tiền bắt đầu từ 7 đơn hàng demo, cộng thêm các sản phẩm bạn bấm "Đã mua" khi xem so sánh giá. Ở bản chính thức, CartWise sẽ ghi nhận đơn hàng thật qua liên kết tài khoản mua sắm/API đối tác thay vì tự khai thủ công.
-        </p>
+            các sản phẩm bạn tự khai "Đã mua"/xác nhận đã mua. Bản chính thức cần liên
+            kết tài khoản mua sắm/API đối tác để ghi nhận đơn hàng thật, tự động, không
+            cần tự khai.
+            v84 — Theo góp ý UX, đoạn ghi chú này trước đây là 1 đoạn văn dài luôn hiện
+            ngay đầu trang, chiếm nhiều chỗ. Giờ thu gọn thành 1 huy hiệu nhỏ có icon
+            (i), bấm/di chuột vào mới hiện chú thích đầy đủ — nội dung giữ nguyên. */}
+        <button
+          type="button"
+          className={`savings-achv-demo-badge-v84 ${demoTipOpen ? 'open' : ''}`}
+          onClick={() => setDemoTipOpen((open) => !open)}
+          aria-expanded={demoTipOpen}
+        >
+          <Info size={13} /> Dữ liệu minh hoạ
+          <span className="savings-achv-demo-tooltip-v84">
+            Số tiền bắt đầu từ 7 đơn hàng demo, cộng thêm các sản phẩm bạn xác nhận "Đã mua". Ở bản chính thức, CartWise sẽ ghi nhận đơn hàng thật qua liên kết tài khoản mua sắm/API đối tác thay vì tự khai thủ công.
+          </span>
+        </button>
 
         <div className="savings-achv-overview-v69">
           <div className="savings-achv-overview-top-v69">
@@ -69,7 +83,13 @@ function SavingsAchievements({ currency = 'VND', onBack }) {
       </div>
 
       {/* v72 — Khung bản đồ trò chơi, thuần trang trí (không có chữ đè lên ảnh để luôn
-          gọn gàng ở mọi màn hình) — chi tiết từng mốc đọc ở danh sách bên dưới. */}
+          gọn gàng ở mọi màn hình) — chi tiết từng mốc đọc ở danh sách bên dưới.
+          v84 — Theo góp ý UX, bỏ hẳn bản đồ game nền tối này khỏi giao diện: quá "nặng"
+          so với phần còn lại của app (chủ đạo sáng, tối giản), và thông tin đã có đủ ở
+          khối tổng quan phía trên + danh sách mốc chi tiết phía dưới (giờ là khối
+          chính, xem `savings-achv-path-v69`) — không cần lặp lại dưới dạng bản đồ nữa.
+          Giữ nguyên code trong `{false && (...)}` để không xoá hẳn, dễ bật lại nếu cần. */}
+      {false && (
       <div className="savings-achv-map-v72" role="img" aria-label={`Bản đồ hành trình, đã đạt ${achievedCount}/${SAVINGS_MILESTONES.length} mốc`}>
         <div className="savings-achv-map-stars-v72" />
         <div className="savings-achv-map-moon-v72" />
@@ -125,8 +145,13 @@ function SavingsAchievements({ currency = 'VND', onBack }) {
           );
         })}
       </div>
+      )}
 
-      <div className="savings-achv-path-v69">
+      {/* v84 — Danh sách mốc giờ là khối hiển thị CHÍNH của trang (trước đây chỉ là
+          phần "chi tiết" phụ bên dưới bản đồ) — đã có sẵn đủ 3 trạng thái rõ ràng
+          (đã đạt/đang hướng tới/khoá) nên giữ nguyên cấu trúc, chỉ đổi vai trò hiển
+          thị lên vị trí nổi bật nhất theo góp ý UX. */}
+      <div className="savings-achv-path-v69 savings-achv-path-primary-v84">
         {SAVINGS_MILESTONES.map((m, index) => {
           const done = totalSaved >= m.amount;
           const status = done ? 'done' : index === firstUnachievedIndex ? 'current' : 'locked';

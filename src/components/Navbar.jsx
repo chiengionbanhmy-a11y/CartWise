@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, HelpCircle } from 'lucide-react';
+import { Bell, Menu, X, Star, Lock, ChevronDown, Sparkles, User, UserPlus, LogOut, History, MessageSquare, Settings, ShoppingBag, ShoppingCart, HelpCircle, Crown } from 'lucide-react';
 
 function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegister, onLogout, onOpenUpgrade, onOpenProfile, onOpenHistory, onOpenPurchaseHistory, onOpenGroupCart, planId = 'free', cartCount = 0, onOpenCart, onOpenGuide }) {
   const { page, t, user, profile, products } = appState;
+  // v84 — Huy hiệu gói tài khoản hiện tại (Plus / Plus Student), hiện ngay cạnh icon
+  // giỏ hàng trên thanh nav, theo yêu cầu — chỉ hiện khi đã nâng cấp (bỏ qua gói Free).
+  const planBadgeLabel = planId === 'plus' ? 'Plus' : planId === 'student' ? 'Plus Student' : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -42,13 +45,11 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
   }
 
   const dailySaleProducts = useMemo(() => {
+    // v85: đã bỏ 3 cặp dùng sản phẩm không còn tồn tại (notebook/casio/lego-classic/teddy-bear).
     const plannedPairs = [
-      ['lego-classic', 'teddy-bear'],
-      ['rice-cooker', 'notebook'],
       ['mouse-logitech', 'powerbank-anker'],
       ['sunscreen', 'lipstick'],
-      ['mini-fan', 'water-lavie-500'],
-      ['haohao', 'casio']
+      ['mini-fan', 'water-lavie-500']
     ];
     const dayIndex = Math.floor(Date.now() / 86400000) % plannedPairs.length;
     const selected = plannedPairs[dayIndex]
@@ -123,6 +124,14 @@ function Navbar({ appState, onNavigate, onOpenSettings, onOpenLogin, onOpenRegis
             vẫn được GIỮ NGUYÊN làm lối vào cho mobile — chỉ ẩn 2 mục đó đi trên
             desktop (xem CSS `menu-row-cart-v80`, `auth-login-row-v77`, `auth-register-row-v80`
             trong khối `@media (min-width: 761px)`) để tránh trùng lặp không cần thiết. */}
+
+        {/* v84 — Huy hiệu gói tài khoản (Plus/Plus Student), đặt ngay cạnh icon giỏ
+            hàng theo yêu cầu — cùng màu gradient than-vàng với nút "Nâng cấp ứng dụng". */}
+        {planBadgeLabel && (
+          <span className="plan-badge-v84" title={`Bạn đang dùng gói ${planBadgeLabel}`}>
+            <Crown size={13} /> {planBadgeLabel}
+          </span>
+        )}
 
         <button className="notification-button-v43 cart-nav-btn-v80" onClick={() => { onOpenCart?.(); closePanels(); }} aria-label="Giỏ hàng so sánh">
           <ShoppingCart size={21} />

@@ -4,7 +4,7 @@ const future = (hours) => Date.now() + hours * 60 * 60 * 1000;
 
 const encode = (text) => encodeURIComponent(text);
 
-const storeDomains = {
+export const storeDomains = {
   'Shopee': 'shopee.vn',
   'Tiki': 'tiki.vn',
   'Lazada': 'lazada.vn',
@@ -48,7 +48,7 @@ const storeSearchUrl = (storeName, productName) => {
   return map[storeName] || '#';
 };
 
-const offer = (storeName, channel, storePrice, shippingFee, publicDiscount, cashback, accountStatus = 'Đã có tài khoản') => ({
+export const offer = (storeName, channel, storePrice, shippingFee, publicDiscount, cashback, accountStatus = 'Đã có tài khoản') => ({
   storeName,
   channel,
   storePrice,
@@ -60,13 +60,13 @@ const offer = (storeName, channel, storePrice, shippingFee, publicDiscount, cash
   storeUrl: '#'
 });
 
-const onlineStores = (base) => [
+export const onlineStores = (base) => [
   offer('Shopee', 'online', Math.round(base * 0.98), 25000, 0, 0, 'Dữ liệu cơ bản'),
   offer('Lazada', 'online', Math.round(base * 0.96), 30000, 0, 0, 'Dữ liệu cơ bản'),
   offer('Tiki', 'online', Math.round(base * 1.04), 20000, 0, 0, 'Dữ liệu cơ bản')
 ];
 
-const offlineByCategory = (category, base) => {
+export const offlineByCategory = (category, base) => {
   if (category === 'Đồ điện tử') {
     return [
       offer('FPT Shop', 'offline', Math.round(base * 1.04), 0, 20000, 0, 'Đã có tài khoản'),
@@ -257,59 +257,10 @@ export const products = [
     offerHours: 10,
     tags: ['mì', 'hảo hảo', 'đồ ăn']
   }),
-  product({
-    id: 'notebook',
-    name: 'Vở Hồng Hà 200 trang A4 4586',
-    category: 'Học tập',
-    subCategory: 'Vở',
-    image: 'hongha-a4-notebook.webp',
-    description: 'Vở Hồng Hà 200 trang A4 4586, phù hợp ghi chép, học tập và ôn thi.',
-    basePrice: 22000,
-    originalPrice: 30000,
-    discountPercent: 27,
-    offerHours: 30,
-    tags: ['vở', 'hồng hà', 'học tập', 'notebook']
-  }),
-  product({
-    id: 'casio',
-    name: 'Máy tính Casio học sinh',
-    category: 'Học tập',
-    subCategory: 'Máy tính',
-    image: 'casio-calculator.jpg',
-    description: 'Máy tính học sinh phục vụ học tập và thi cử.',
-    basePrice: 459000,
-    originalPrice: 550000,
-    discountPercent: 17,
-    offerHours: 26,
-    tags: ['casio', 'máy tính', 'học tập']
-  }),
-  product({
-    id: 'lego-classic',
-    name: 'Bộ xếp hình LEGO Classic',
-    category: 'Đồ chơi',
-    subCategory: 'Xếp hình',
-    image: 'lego-classic.jpg',
-    description: 'Bộ xếp hình sáng tạo, phù hợp trẻ em và người sưu tầm.',
-    basePrice: 329000,
-    originalPrice: 450000,
-    discountPercent: 27,
-    offerHours: 14,
-    tags: ['lego', 'đồ chơi', 'xếp hình']
-  }),
-  product({
-    id: 'teddy-bear',
-    name: 'Gấu bông mini',
-    category: 'Đồ chơi',
-    subCategory: 'Gấu bông',
-    image: 'teddy-bear.jpg',
-    description: 'Gấu bông mềm, dễ thương, phù hợp làm quà tặng.',
-    basePrice: 99000,
-    originalPrice: 150000,
-    discountPercent: 34,
-    offerHours: 9,
-    tags: ['gấu bông', 'đồ chơi', 'quà tặng']
-  })
 ];
+// v85: đã bỏ 4 sản phẩm 'notebook' (Vở Hồng Hà), 'casio' (Máy tính Casio),
+// 'lego-classic' (LEGO Classic) và 'teddy-bear' (Gấu bông mini) theo góp ý —
+// xem CHANGELOG.md mục v85 để biết chi tiết và các file liên quan đã dọn theo.
 
 
 const productStoreOverrides = {
@@ -545,123 +496,9 @@ const productStoreOverrides = {
       "accountStatus": "Theo link bạn cung cấp"
     }
   },
-  "notebook": {
-    "Shopee": {
-      "storeUrl": "https://shopee.vn/S%E1%BB%95-_V%E1%BB%9F-b%C3%ACa-b%E1%BB%93i-Subject-A4-200-trang-d%C3%B2ng-k%E1%BA%BB-ngang-H%E1%BB%93ng-H%C3%A0-_MS-4586-i.24528665.22034043938?extraParams=%7B%22display_model_id%22%3A146750159410%2C%22model_selection_logic%22%3A3%7D&sp_atk=53c67557-b701-4ab5-9061-461b0c8be957&xptdk=53c67557-b701-4ab5-9061-461b0c8be957",
-      "storePrice": 34800,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Lazada": {
-      "storeUrl": "https://www.lazada.vn/products/pdp-i2742856181-s13436508918.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AV%2525E1%2525BB%25259F%252BH%2525E1%2525BB%252593ng%252BH%2525C3%2525A0%252B200%252Btrang%252BA4%252B4586%253Bnid%253A2742856181%253Bsrc%253ALazadaMainSrp%253Brn%253A41cf4681e47c3b009725342217f9e272%253Bregion%253Avn%253Bsku%253A2742856181_VNAMZ%253Bprice%253A33200%253Bclient%253Adesktop%253Bsupplier_id%253A200723488342%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A1%253Butlog_bucket_id%253A470687%253Basc_category_id%253A12976%253Bitem_id%253A2742856181%253Bsku_id%253A13436508918%253Bshop_id%253A4773000%253BtemplateInfo%253A107883_A3_C_E%2523164594_J%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=vi&location=Ph%C3%BA%20Th%E1%BB%8D&price=3.32E%204&priceCompare=skuId%3A13436508918%3Bsource%3Alazada-search-voucher%3Bsn%3A41cf4681e47c3b009725342217f9e272%3BoriginPrice%3A33200%3BdisplayPrice%3A33200%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3A-1%3BvoucherPricePlugin%3A0%3Btimestamp%3A1782972270662&ratingscore=&request_id=41cf4681e47c3b009725342217f9e272&review=&sale=0&search=1&source=search&spm=a2o4n.searchlist.list.1&stock=1",
-      "storePrice": 33200,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Tiki": {
-      "storeUrl": "#",
-      "storePrice": null,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": false,
-      "accountStatus": "Không có sản phẩm"
-    }
-  },
-  "casio": {
-    "Shopee": {
-      "storeUrl": "https://shopee.vn/M%C3%A1y-T%C3%ADnh-Casio-FX-580VN-X-D%C3%A0nh-Cho-H%E1%BB%8Dc-Sinh-C%E1%BA%A5p-3-C%E1%BA%A5p-2-Chuy%C3%AAn-D%E1%BB%A5ng-Cho-Ph%C3%B2ng-Thi-Chuy%E1%BB%83n-C%E1%BA%A5p-%C4%90%E1%BA%A1i-H%E1%BB%8Dc-i.688878745.45359922171?extraParams=%7B%22display_model_id%22%3A420873765652%2C%22model_selection_logic%22%3A3%7D&sp_atk=7b7f31fb-3569-4230-96d8-d828667a5ef6&xptdk=7b7f31fb-3569-4230-96d8-d828667a5ef6",
-      "storePrice": 499000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Lazada": {
-      "storeUrl": "https://www.lazada.vn/products/pdp-i3177278566-s15212308703.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AM%2525C3%2525A1y%252Bt%2525C3%2525ADnh%252BCasio%252Bh%2525E1%2525BB%25258Dc%252Bsinh%253Bnid%253A3177278566%253Bsrc%253ALazadaMainSrp%253Brn%253A742e68420c36f41bdebdcb5b39a5ad39%253Bregion%253Avn%253Bsku%253A3177278566_VNAMZ%253Bprice%253A420000%253Bclient%253Adesktop%253Bsupplier_id%253A200587328236%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A3%253Butlog_bucket_id%253A470687%253Basc_category_id%253A13010%253Bitem_id%253A3177278566%253Bsku_id%253A15212308703%253Bshop_id%253A4388667%253BtemplateInfo%253A107883_A3_C_E%2523164594_J%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=vi&location=H%E1%BB%93%20Ch%C3%AD%20Minh&price=4.2E%205&priceCompare=skuId%3A15212308703%3Bsource%3Alazada-search-voucher%3Bsn%3A742e68420c36f41bdebdcb5b39a5ad39%3BoriginPrice%3A420000%3BdisplayPrice%3A420000%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3AmockedSalePrice%3BvoucherPricePlugin%3A0%3Btimestamp%3A1782972347361&ratingscore=4.808219178082192&request_id=742e68420c36f41bdebdcb5b39a5ad39&review=73&sale=382&search=1&source=search&spm=a2o4n.searchlist.list.3&stock=1",
-      "storePrice": 420000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Tiki": {
-      "storeUrl": "https://tiki.vn/may-tinh-casio-fx580vn-x-p104769768.html?itm_campaign=SRC_YPD_TKA_PLA_UNK_ALL_UNK_UNK_UNK_UNK_X.232216_Y.1814536_Z.3676410_CN.may-tinh-casio-fx&itm_medium=CPC&itm_source=tiki-ads&spid=107005518",
-      "storePrice": 822600,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    }
-  },
-  "lego-classic": {
-    "Shopee": {
-      "storeUrl": "https://shopee.vn/Th%C3%B9ng-G%E1%BA%A1ch-Trung-Classic-S%C3%A1ng-T%E1%BA%A1o-LEGO-Classic-10696-(484-Chi-Ti%E1%BA%BFt)-i.14983509.6258976362?extraParams=%7B%22display_model_id%22%3A71515535780%2C%22model_selection_logic%22%3A3%7D&sp_atk=dc93deb4-e644-48ef-b69c-0375aef931d2&xptdk=dc93deb4-e644-48ef-b69c-0375aef931d2",
-      "storePrice": 1015000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Lazada": {
-      "storeUrl": "https://www.lazada.vn/products/pdp-i3010217722-s14500623910.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AB%2525E1%2525BB%252599%252Bx%2525E1%2525BA%2525BFp%252Bh%2525C3%2525ACnh%252BLEGO%252BClassic%253Bnid%253A3010217722%253Bsrc%253ALazadaMainSrp%253Brn%253Ac7a677dbff404ba9d33f748f59ba2e80%253Bregion%253Avn%253Bsku%253A3010217722_VNAMZ%253Bprice%253A1360000%253Bclient%253Adesktop%253Bsupplier_id%253A200441664930%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A8%253Butlog_bucket_id%253A470687%253Basc_category_id%253A10347%253Bitem_id%253A3010217722%253Bsku_id%253A14500623910%253Bshop_id%253A3615465%253BtemplateInfo%253A107883_E%2523-1_A3_C%2523164594_J%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=vi&location=B%E1%BA%AFc%20Ninh&price=1.36E%206&priceCompare=skuId%3A14500623910%3Bsource%3Alazada-search-voucher%3Bsn%3Ac7a677dbff404ba9d33f748f59ba2e80%3BoriginPrice%3A1360000%3BdisplayPrice%3A1360000%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3AmockedSalePrice%3BvoucherPricePlugin%3A0%3Btimestamp%3A1782972464770&ratingscore=&request_id=c7a677dbff404ba9d33f748f59ba2e80&review=&sale=0&search=1&source=search&spm=a2o4n.searchlist.list.8&stock=1",
-      "storePrice": 1360000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Tiki": {
-      "storeUrl": "https://tiki.vn/bo-lap-rap-thung-gach-lon-classic-sang-tao-lego-classic-10698-790-chi-tiet-p2758763.html?spid=146281285",
-      "storePrice": 2399000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    }
-  },
-  "teddy-bear": {
-    "Shopee": {
-      "storeUrl": "https://shopee.vn/Th%C3%BA-B%C3%B4ng-Mini-D%E1%BB%85-Th%C6%B0%C6%A1ng-Nhi%E1%BB%81u-H%C3%ACnh-Th%C3%BA-nh%E1%BB%93i-b%C3%B4ng%E2%80%93-GTh%E1%BB%8F-Heo-Voi-C%C3%A1o-Chim-%E2%80%93-G%E1%BA%A5u-B%C3%B4ng-Nh%E1%BB%93i-B%C3%B4ng-Size-Nh%E1%BB%8F-M%E1%BB%81m-M%E1%BB%8Bn-i.1107906013.44006732423?extraParams=%7B%22display_model_id%22%3A258579189531%2C%22model_selection_logic%22%3A3%7D&sp_atk=807428cb-0871-4c65-b43d-438cdfb8935b&xptdk=807428cb-0871-4c65-b43d-438cdfb8935b",
-      "storePrice": 20000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Lazada": {
-      "storeUrl": "https://www.lazada.vn/products/pdp-i3250455209-s15669381478.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253AG%2525E1%2525BA%2525A5u%252Bb%2525C3%2525B4ng%252Bmini%253Bnid%253A3250455209%253Bsrc%253ALazadaMainSrp%253Brn%253Adb1a5869ec8d03f8312c5d3c9d6b15d8%253Bregion%253Avn%253Bsku%253A3250455209_VNAMZ%253Bprice%253A37490%253Bclient%253Adesktop%253Bsupplier_id%253A200722880090%253Bsession_id%253A%253Bbiz_source%253Ah5_internal%253Bslot%253A0%253Butlog_bucket_id%253A470687%253Basc_category_id%253A10492%253Bitem_id%253A3250455209%253Bsku_id%253A15669381478%253Bshop_id%253A4772014%253BtemplateInfo%253A107883_E%2523-1_A3_C%2523164594_J%2523&freeshipping=1&fs_ab=2&fuse_fs=&lang=vi&location=China&price=3.749E%204&priceCompare=skuId%3A15669381478%3Bsource%3Alazada-search-voucher%3Bsn%3Adb1a5869ec8d03f8312c5d3c9d6b15d8%3BoriginPrice%3A37490%3BdisplayPrice%3A37490%3BisGray%3Afalse%3BsinglePromotionId%3A-1%3BsingleToolCode%3AmockedSalePrice%3BvoucherPricePlugin%3A0%3Btimestamp%3A1782972570027&qSellingPoint=p--mini&ratingscore=4.636363636363637&request_id=db1a5869ec8d03f8312c5d3c9d6b15d8&review=33&sale=134&search=1&source=search&spm=a2o4n.searchlist.list.0&stock=1",
-      "storePrice": 37490,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    },
-    "Tiki": {
-      "storeUrl": "https://tiki.vn/gau-bong-chim-canh-cut-sieu-mem-min-de-thuong-cho-be-20cm-45cm-vai-miniso-4-chieu-co-gian-em-ai-hang-cao-cap-an-toan-cho-tre-nho-p275603398.html?spid=275603400",
-      "storePrice": 139000,
-      "shippingFee": 0,
-      "publicDiscount": 0,
-      "cashback": 0,
-      "available": true,
-      "accountStatus": "Theo link bạn cung cấp"
-    }
-  }
 };
+// v85: đã bỏ các mục ghi đè giá "notebook", "casio", "lego-classic", "teddy-bear"
+// khỏi productStoreOverrides — 4 sản phẩm này không còn trong danh sách sản phẩm.
 
 // v83 — Giá cập nhật theo các URL sản phẩm do đội cung cấp / kiểm tra ngày 26/08/2026
 // (ghép lại từ bản "sửa lỗi so sánh" người dùng gửi kèm, hợp nhất với toàn bộ v82).

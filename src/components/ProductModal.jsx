@@ -1,18 +1,76 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, PackageCheck, PackageX, Navigation } from 'lucide-react';
+import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, Navigation, Settings, Lock, Wand2, Link2 } from 'lucide-react';
 // v82 — không còn render CawiRobot trong khung so sánh (xem modal-advisor-slot bên dưới), import giữ comment lại để không xoá hẳn:
 // import CawiRobot from './CawiRobot.jsx';
 import AIReviewSummary from './AIReviewSummary.jsx';
 import BuySignalCard from './BuySignalCard.jsx';
 import SpendingAdvisorCard from './SpendingAdvisorCard.jsx';
 import { convertCurrency, formatCurrency, formatInputNumber, toVndAmount } from '../data/currency.js';
-import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore, getStoreDistanceLabel } from '../data/products.js';
+import { getStoreLogo, getOptimalSavingStats, getPriceHistory, getPriceInsight, getStorePopularityScore, getStoreDistanceLabel, getBuySignal } from '../data/products.js';
 import { getReviewData } from '../data/reviews.js';
 import { getPlan } from '../data/plans.js';
+// v81 — Nút tự khai "Đã mua/Chưa mua" trong khung so sánh đã BỊ ẨN ở v84 theo yêu cầu
+// (xem giải thích chi tiết ở khối markPurchased/markNotPurchased bên dưới) — cách tự
+// khai chính giờ là popup tự động "Bạn đã mua chưa?" sau khi bấm "Mua tại đây" (v83,
+// PurchaseConfirmationModal.jsx). isPurchaseReported/removeSelfReportedPurchase vẫn
+// import vì addSelfReportedPurchase (App.jsx) và logic bên dưới còn cần tới.
 import { isPurchaseReported, addSelfReportedPurchase, removeSelfReportedPurchase } from '../data/purchases.js';
 
 const currencies = ['VND', 'USD', 'CNY', 'EUR', 'JPY', 'KRW'];
 const onlineStores = ['Shopee', 'Lazada', 'Tiki'];
+// v84 — Bản đồ khuyến nghị rút gọn, dùng cho huy hiệu "Cawi Tín Hiệu Mua" gọn ở cột
+// trái (xem BuySignalBadgeCompact) — trùng với recoMeta trong BuySignalCard.jsx vì đó
+// là component riêng, không export sẵn bản đồ này ra ngoài để dùng chung.
+const compactSignalMeta = {
+  buy: { icon: TrendingDown, label: 'Mua ngay', tone: 'good' },
+  wait: { icon: TrendingUp, label: 'Nên chờ', tone: 'warning' },
+  neutral: { icon: Minus, label: 'Có thể mua', tone: 'stable' }
+};
+
+// v84 — Huy hiệu gọn cho "Cawi Tín Hiệu Mua" ở cột trái (ảnh sản phẩm), thay cho toàn
+// bộ BuySignalCard trước đây. v85 — theo góp ý UX ảnh 2/3, huy hiệu dạng thanh ngang này
+// không còn được render riêng nữa — đã gộp thẳng vào góc biểu đồ lịch sử giá (xem
+// BuySignalChartBadge bên dưới) để "biểu đồ + tín hiệu mua" thành 1 khối duy nhất. Giữ
+// lại function này (không xoá) để có thể bật lại nhanh nếu cần.
+function BuySignalBadgeCompact({ product, storeName, enabled, onOpenUpgrade, onExpand }) {
+  if (!enabled) {
+    return (
+      <button type="button" className="buy-signal-badge-v84 locked" onClick={onOpenUpgrade}>
+        <Lock size={14} /> Cawi Tín Hiệu Mua — CartWise Plus
+      </button>
+    );
+  }
+  const signal = getBuySignal(product, storeName, 180);
+  const meta = compactSignalMeta[signal.recommendation] || compactSignalMeta.neutral;
+  const Icon = meta.icon;
+  return (
+    <button type="button" className={`buy-signal-badge-v84 ${meta.tone}`} onClick={onExpand}>
+      <Icon size={15} /> Cawi Tín Hiệu Mua: <b>{meta.label}</b> <span>· xem phân tích</span>
+    </button>
+  );
+}
+
+// v85 — Huy hiệu "Tín Hiệu Mua" siêu gọn, đặt ở góc thẻ biểu đồ lịch sử giá (thay vì
+// 1 thanh riêng bên dưới biểu đồ như v84) — theo đúng góp ý "gộp biểu đồ + tín hiệu mua
+// vào 1 khung, có huy hiệu 'Có thể mua' ở góc". Bấm vào để mở khung "Trợ lý Cawi" xem
+// thêm lý do đằng sau tín hiệu (khung Cố Vấn Chi Tiêu vẫn còn trong đó).
+function BuySignalChartBadge({ product, storeName, enabled, onOpenUpgrade, onExpand }) {
+  if (!enabled) {
+    return (
+      <button type="button" className="buy-signal-chart-badge-v85 locked" onClick={onOpenUpgrade} title="Cawi Tín Hiệu Mua — CartWise Plus">
+        <Lock size={12} /> Plus
+      </button>
+    );
+  }
+  const signal = getBuySignal(product, storeName, 180);
+  const meta = compactSignalMeta[signal.recommendation] || compactSignalMeta.neutral;
+  const Icon = meta.icon;
+  return (
+    <button type="button" className={`buy-signal-chart-badge-v85 ${meta.tone}`} onClick={onExpand} title="Cawi Tín Hiệu Mua — bấm để xem thêm">
+      <Icon size={13} /> {meta.label}
+    </button>
+  );
+}
 
 function getBasicTotal(row) {
   if (row?.available === false || row?.storePrice == null) return null;
@@ -123,7 +181,15 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
   const [manualAddress, setManualAddress] = useState(deliveryBasis?.address || '');
   const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
   // v81 — Nút tự khai "Đã mua / Chưa mua" — xem giải thích đầy đủ trong data/purchases.js.
+  // v84 — JSX của nút này đã ẩn khỏi giao diện, nhưng vẫn giữ state để hàm markPurchased/
+  // markNotPurchased không vỡ nếu cần bật lại nhanh.
   const [purchaseReported, setPurchaseReported] = useState(() => isPurchaseReported(product.id));
+  // v84 — Tái cấu trúc khung so sánh theo góp ý UX (giảm rối mắt, "Progressive
+  // Disclosure"): đơn vị hiển thị (tiền tệ) giờ ẩn sau icon cài đặt thay vì hiện luôn;
+  // toàn bộ phân tích AI (đánh giá, cố vấn chi tiêu, tín hiệu mua) gộp vào 1 khung
+  // "Trợ lý Cawi" duy nhất, mặc định thu gọn — chỉ mở khi người dùng chủ động bấm xem.
+  const [currencyPanelOpen, setCurrencyPanelOpen] = useState(false);
+  const [cawiWidgetOpen, setCawiWidgetOpen] = useState(false);
 
   useEffect(() => {
     setVoucherByStore({});
@@ -135,6 +201,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
     setHistoryMenuOpen(false);
     setReviewPanelOpen(false);
     setPurchaseReported(isPurchaseReported(product.id));
+    setCurrencyPanelOpen(false);
+    setCawiWidgetOpen(false);
   }, [product]);
 
   const reviewData = useMemo(() => getReviewData(product.id), [product.id]);
@@ -384,6 +452,20 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               <span>{product.subCategory}</span>
             </div>
 
+            {/* v85 — Sản phẩm tự thêm qua link dán vào ô tìm kiếm (data/customProducts.js).
+                Theo đúng quy ước minh bạch dữ liệu demo của dự án: ghi rõ đây là dữ liệu
+                ước tính (trừ sàn nguồn có link thật), và chỉ lưu trên trình duyệt này —
+                KHÔNG phải dữ liệu dùng chung cho mọi người dùng (không có backend thật). */}
+            {product.isCustom && (
+              <div className="custom-product-notice-v85">
+                <Link2 size={15} />
+                <span>
+                  Sản phẩm tự thêm từ link bạn dán{product.sourceStore ? ` (nhận diện là ${product.sourceStore})` : ''}.
+                  Giá các sàn {product.sourceStore ? 'khác' : ''} là <b>ước tính minh hoạ</b>, chỉ lưu trên trình duyệt này — chưa dùng chung được với người dùng khác.
+                </span>
+              </div>
+            )}
+
             <button
               type="button"
               className={inCart ? 'product-add-cart-btn-v67 added' : 'product-add-cart-btn-v67'}
@@ -393,41 +475,63 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               {inCart ? <><Check size={16} /> Đã có trong giỏ hàng</> : <><ShoppingCart size={16} /> Thêm vào giỏ hàng</>}
             </button>
 
-            {/* v81 — Tự khai đã mua sản phẩm này chưa, để "Thành tựu tiết kiệm" phản
-                ứng lại thay vì luôn đứng yên ở dữ liệu demo cố định. */}
+            {/* v81 — Tự khai đã mua sản phẩm này chưa, đặt ngay dưới nút "Thêm vào giỏ
+                hàng". v84 — ẨN khỏi giao diện theo yêu cầu (không xoá code): cách quan
+                trọng hơn để tự khai giờ là popup tự động "Bạn đã mua chưa?" sau khi bấm
+                "Mua tại đây" và quay lại tab (v83, App.jsx + PurchaseConfirmationModal.jsx)
+                — 1 lối tự khai chủ động là đủ, tránh trùng lặp/rối UI theo góp ý.
+                markPurchased/markNotPurchased vẫn còn nguyên trong file, dễ bật lại.
             <div className="self-report-purchase-v81">
               <div className="self-report-toggle-v81">
-                <button
-                  type="button"
-                  className={purchaseReported ? 'active' : ''}
-                  onClick={markPurchased}
-                  aria-pressed={purchaseReported}
-                >
+                <button type="button" className={purchaseReported ? 'active' : ''} onClick={markPurchased} aria-pressed={purchaseReported}>
                   <PackageCheck size={15} /> Đã mua
                 </button>
-                <button
-                  type="button"
-                  className={!purchaseReported ? 'active' : ''}
-                  onClick={markNotPurchased}
-                  aria-pressed={!purchaseReported}
-                >
+                <button type="button" className={!purchaseReported ? 'active' : ''} onClick={markNotPurchased} aria-pressed={!purchaseReported}>
                   <PackageX size={15} /> Chưa mua
                 </button>
               </div>
               <small>Bạn tự khai để mở khoá "Thành tựu tiết kiệm" — dữ liệu minh hoạ, chưa liên kết tài khoản mua sắm thật.</small>
             </div>
+            */}
 
-            <div className="quick-convert premium-convert">
-              <h4>Đơn vị hiển thị</h4>
-              <div className="currency-grid compact">
-                {currencies.map((cur) => (
-                  <button key={cur} className={localCurrency === cur ? 'choice active' : 'choice'} onClick={() => selectCurrency(cur)}>{cur}</button>
-                ))}
-              </div>
-              <small>Voucher dạng giảm tiền sẽ được hiểu theo đúng đơn vị tiền tệ bạn đang chọn.</small>
+            {/* v84 — Đơn vị hiển thị (tiền tệ) trước đây hiện luôn thành 1 khối riêng ở
+                cột trái. v85 — theo góp ý ảnh 3, thu gọn tiếp thành icon tròn nhỏ ở góc
+                (trước đây v84 vẫn còn là 1 nút có chữ "Đơn vị hiển thị: VND"). */}
+            <div className="currency-settings-v85">
+              <button
+                type="button"
+                className="currency-settings-trigger-v85"
+                onClick={() => setCurrencyPanelOpen((open) => !open)}
+                aria-expanded={currencyPanelOpen}
+                aria-label={`Đơn vị hiển thị: ${localCurrency}`}
+                title={`Đơn vị hiển thị: ${localCurrency}`}
+              >
+                <Settings size={15} />
+              </button>
+              {currencyPanelOpen && (
+                <div className="currency-settings-panel-v84 currency-settings-panel-v85">
+                  <small className="currency-settings-panel-label-v85">Đơn vị hiển thị: <b>{localCurrency}</b></small>
+                  <div className="currency-grid compact">
+                    {currencies.map((cur) => (
+                      <button key={cur} className={localCurrency === cur ? 'choice active' : 'choice'} onClick={() => selectCurrency(cur)}>{cur}</button>
+                    ))}
+                  </div>
+                  <small>Voucher dạng giảm tiền sẽ được hiểu theo đúng đơn vị tiền tệ bạn đang chọn.</small>
+                </div>
+              )}
             </div>
 
-            <div className={`price-insight-panel-v39 ${priceInsight.tone}`}>
+            {/* v85 — Theo góp ý ảnh 2/3: gộp biểu đồ lịch sử giá + tín hiệu mua thành 1
+                khung duy nhất, huy hiệu "Cawi Tín Hiệu Mua" giờ nằm ở góc khung này
+                (BuySignalChartBadge) thay vì 1 thanh riêng bên dưới như v84. */}
+            <div className={`price-insight-panel-v39 price-insight-panel-v85 ${priceInsight.tone}`}>
+              <BuySignalChartBadge
+                product={product}
+                storeName={activeHistoryStore}
+                enabled={plan.buySignal.enabled}
+                onOpenUpgrade={onOpenUpgrade}
+                onExpand={() => setCawiWidgetOpen(true)}
+              />
               <div className="price-insight-head-v39">
                 <span><BarChart3 size={17} /> Lịch sử giá</span>
                 <div className="history-store-picker-v39">
@@ -457,13 +561,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               <PriceHistoryChart data={priceHistory} currency={localCurrency} />
               <small className="history-source-note-v39">Dữ liệu biểu đồ hiện là dữ liệu ghi nhận trong bản demo từ giá sản phẩm đã nhập; để có lịch sử thật theo thời gian cần backend/API lưu snapshot giá hằng ngày.</small>
             </div>
-
-            <BuySignalCard
-              product={product}
-              storeName={activeHistoryStore}
-              enabled={plan.buySignal.enabled}
-              onOpenUpgrade={onOpenUpgrade}
-            />
+            {/* v84's standalone BuySignalBadgeCompact bar đã bỏ khỏi đây ở v85 — xem
+                BuySignalChartBadge ở góc khung biểu đồ ngay phía trên. */}
           </section>
 
           <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel v30-cost-panel v31-cost-panel">
@@ -478,53 +577,38 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             <span className="category-chip">Tính năng chính của CartWise</span>
             <h2>So sánh tổng chi phí dự kiến</h2>
 
-            <div className="best-price-box expected-hero-box v30-best-box v31-best-box hero-with-review-v60">
+            {/* v84 — Gộp "banner giá tốt nhất" và "thẻ tính khoản tiết kiệm tối ưu"
+                (trước đây 2 khối tách rời, lặp thông tin) thành 1 banner hero duy nhất
+                theo góp ý UX. Ô "Đánh giá & Chất lượng sản phẩm" dời sang khung "Trợ lý
+                Cawi" gộp chung bên dưới (cùng nhóm với các tính năng AI khác). */}
+            <div className="best-price-box expected-hero-box v30-best-box v31-best-box hero-merged-v84">
               <div className="hero-price-col-v60">
                 <span>{selectedChannel === 'online' ? 'Tổng online dự kiến thấp nhất' : 'Giá trực tiếp tham khảo thấp nhất'}</span>
                 <strong>{bestSelected ? formatCurrency(bestSelected.basicTotal, localCurrency) : '—'}</strong>
                 <p>{conclusion}</p>
               </div>
 
-              <button type="button" className="hero-review-col-v60" onClick={() => setReviewPanelOpen(true)}>
-                <span className="hero-review-badge-v60"><Sparkles size={16} /> Đánh giá &amp; Chất lượng sản phẩm</span>
-                {reviewAvgRating != null && (
-                  <span className="hero-review-rating-v60"><Star size={13} fill="currentColor" /> {reviewAvgRating.toFixed(1)}</span>
-                )}
-                <span className="hero-review-meta-v60">
-                  {reviewData
-                    ? `Tổng hợp từ ${reviewData.reviewCount} đánh giá bằng AI · ${reviewData.sourceCount} nguồn`
-                    : 'Chưa có đủ đánh giá để tổng hợp bằng AI'}
-                </span>
-                <span className="hero-review-cta-v60">Xem đánh giá chi tiết <ChevronRight size={14} /></span>
-              </button>
-            </div>
+              <div className="hero-merged-divider-v84" />
 
-            <div className="optimal-saving-card-v38">
-              <div>
-                <span>Tính toán khoản tiết kiệm tối ưu</span>
-                <h3>{savingStats.best ? `Chọn ${savingStats.best.storeName}` : 'Đang cập nhật'}</h3>
-                <p>
+              {/* v85 — tách rõ tên sàn tiết kiệm nhất và số tiền tiết kiệm thành 2 khối lớn,
+                  nổi bật ngang hàng thị giác với mức giá bên trái, thay vì giấu trong 1 câu văn. */}
+              <div className="hero-merged-saving-v84">
+                <span className="hero-merged-saving-label-v84">Nơi mua tiết kiệm nhất</span>
+                <b className="hero-merged-saving-store-v85">{savingStats.best ? savingStats.best.storeName : 'Đang cập nhật'}</b>
+                <strong className="hero-merged-saving-amount-v85">
+                  {savingStats.saveMax > 0 ? `Tiết kiệm ${formatCurrency(savingStats.saveMax, localCurrency)}` : 'Chưa đủ chênh lệch'}
+                </strong>
+                <p className="hero-merged-saving-desc-v84">
                   {savingStats.saveMax > 0
-                    ? `Có thể tiết kiệm tối đa ${formatCurrency(savingStats.saveMax, localCurrency)} so với lựa chọn có tổng chi phí cao nhất trong danh sách hiện tại.`
-                    : 'Các lựa chọn hiện chưa có chênh lệch đủ lớn để tính khoản tiết kiệm.'}
+                    ? 'So với lựa chọn cao nhất trong danh sách.'
+                    : 'Chưa đủ chênh lệch để tính khoản tiết kiệm.'}
                 </p>
-              </div>
-              <div className="saving-metrics-v38">
-                <span>So với lựa chọn kế tiếp <b>{formatCurrency(savingStats.saveVsNext, localCurrency)}</b></span>
-                <span>So với mức trung bình <b>{formatCurrency(savingStats.saveVsAverage, localCurrency)}</b></span>
+                <div className="hero-merged-saving-metrics-v84">
+                  <span>So với kế tiếp <b>{formatCurrency(savingStats.saveVsNext, localCurrency)}</b></span>
+                  <span>So với trung bình <b>{formatCurrency(savingStats.saveVsAverage, localCurrency)}</b></span>
+                </div>
               </div>
             </div>
-
-            <SpendingAdvisorCard
-              product={product}
-              enabled={plan.spendingAdvisor.enabled}
-              onOpenUpgrade={onOpenUpgrade}
-              purchasePrice={(bestSelected || bestOnline || bestOffline)?.basicTotal}
-              hasBuySignalData={plan.buySignal.enabled}
-              onViewBuySignal={() => {
-                document.querySelector('.buy-signal-card-v63')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-            />
 
             <div className="expected-workspace v31-workspace">
               <section className="expected-pane fair-pane v31-fair-pane">
@@ -640,10 +724,71 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               )}
             </div>
 
+            {/* v84 — "Trợ lý Cawi": gộp cả 3 tính năng AI trước đây nằm rải rác 3 nơi
+                khác nhau (đánh giá & chất lượng, cố vấn chi tiêu, tín hiệu mua) vào 1
+                khung duy nhất, mặc định THU GỌN — đúng nguyên tắc "Progressive
+                Disclosure" từ góp ý UX: mặc định chỉ hiện ảnh+biểu đồ, kết quả giá tốt
+                nhất, và bảng so sánh online/trực tiếp; phân tích AI chi tiết chỉ hiện
+                khi người dùng chủ động bấm xem. */}
+            <div className="cawi-widget-v84">
+              <button type="button" className="cawi-widget-toggle-v84" onClick={() => setCawiWidgetOpen((open) => !open)} aria-expanded={cawiWidgetOpen}>
+                <span className="cawi-widget-toggle-label-v84"><Wand2 size={18} /> Trợ lý Cawi</span>
+                <span className="cawi-widget-toggle-cta-v84">
+                  {cawiWidgetOpen ? 'Thu gọn' : 'Xem phân tích AI Cawi'} <ChevronDown size={16} className={cawiWidgetOpen ? 'rotated' : ''} />
+                </span>
+              </button>
+
+              {cawiWidgetOpen && (
+                <div className="cawi-widget-body-v84">
+                  <button type="button" className="cawi-widget-review-row-v84" onClick={() => setReviewPanelOpen(true)}>
+                    <span className="hero-review-badge-v60"><Sparkles size={16} /> Đánh giá &amp; Chất lượng sản phẩm</span>
+                    {reviewAvgRating != null && (
+                      <span className="cawi-widget-review-rating-v84"><Star size={13} fill="currentColor" /> {reviewAvgRating.toFixed(1)}</span>
+                    )}
+                    <span className="cawi-widget-review-meta-v84">
+                      {reviewData
+                        ? `Tổng hợp từ ${reviewData.reviewCount} đánh giá bằng AI · ${reviewData.sourceCount} nguồn`
+                        : 'Chưa có đủ đánh giá để tổng hợp bằng AI'}
+                    </span>
+                    <span className="cawi-widget-review-cta-v84">Xem đánh giá chi tiết <ChevronRight size={14} /></span>
+                  </button>
+
+                  <SpendingAdvisorCard
+                    product={product}
+                    enabled={plan.spendingAdvisor.enabled}
+                    onOpenUpgrade={onOpenUpgrade}
+                    purchasePrice={(bestSelected || bestOnline || bestOffline)?.basicTotal}
+                    hasBuySignalData={plan.buySignal.enabled}
+                    onViewBuySignal={() => {
+                      // v85 — Tín Hiệu Mua giờ nằm ở góc khung biểu đồ lịch sử giá (cột
+                      // trái), không còn là 1 thẻ riêng trong khung Trợ lý Cawi nữa.
+                      document.querySelector('.price-insight-panel-v39')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                  />
+
+                  {/* v85 — Đã bỏ <BuySignalCard> khỏi khung "Trợ lý Cawi" theo góp ý ảnh 2/3:
+                      chức năng này giờ đã gộp vào huy hiệu góc biểu đồ (BuySignalChartBadge)
+                      ở cột trái, tránh lặp thông tin 2 nơi. Import BuySignalCard vẫn giữ lại
+                      (không xoá) — component gốc dùng chung recoMeta với compactSignalMeta.
+                  <BuySignalCard
+                    product={product}
+                    storeName={activeHistoryStore}
+                    enabled={plan.buySignal.enabled}
+                    onOpenUpgrade={onOpenUpgrade}
+                  /> */}
+                </div>
+              )}
+            </div>
+
+            {/* v84 — Bỏ khối "CHÚ Ý — Kết luận dự kiến" ở cuối trang theo góp ý UX: nội
+                dung lặp lại y hệt câu kết luận đã hiện ngay trong banner hero ở đầu
+                trang (biến `conclusion` dùng chung) — 2 lần cùng 1 câu là dư thừa. Giữ
+                lại code, chỉ không render, để dễ bật lại nếu cần:
             <div className="expected-conclusion-card attention-card v31-attention-card">
               <div className="attention-heading"><span>CHÚ Ý</span><b>Kết luận dự kiến</b></div>
               <p>{conclusion}</p>
             </div>
+            */}
 
             <p className="final-price-note expected-note compact-note">
               Phí vận chuyển và thời gian ưu đãi hiện là dữ liệu demo. Để đồng bộ 100% theo thời gian thực với Shopee, Lazada, Tiki hoặc cửa hàng, CartWise cần backend/API chính thức từ từng nền tảng.

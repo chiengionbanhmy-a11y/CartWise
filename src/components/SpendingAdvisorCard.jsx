@@ -62,12 +62,14 @@ function SpendingAdvisorCard({ product, enabled, onOpenUpgrade, purchasePrice, h
       </div>
 
       {!asked && !thinking && (
-        <>
-          <p className="spending-advisor-intro-v63">Cân nhắc lần mua này? Hỏi Cawi để xem có phù hợp với ngân sách và thói quen chi tiêu gần đây của bạn không.</p>
+        // v85 — Rút gọn phần giới thiệu mặc định thành 1 dòng ngắn + nút "Hỏi Cawi"
+        // nằm cùng hàng (trước đây là 1 đoạn văn dài + nút xuống dòng riêng).
+        <div className="spending-advisor-intro-row-v85">
+          <p className="spending-advisor-intro-v63 spending-advisor-intro-v85">Cân nhắc lần mua này?</p>
           <button type="button" className="secondary small spending-advisor-ask-btn-v63" onClick={askCawi}>
-            <Sparkles size={15} /> Hỏi Cawi trước khi mua
+            <Sparkles size={15} /> Hỏi Cawi
           </button>
-        </>
+        </div>
       )}
 
       {thinking && (
