@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-<<<<<<< HEAD
 import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, Navigation, Settings, Lock, Wand2, Link2 } from 'lucide-react';
-=======
-import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, Navigation, Settings, Lock, Wand2 } from 'lucide-react';
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
 // v82 — không còn render CawiRobot trong khung so sánh (xem modal-advisor-slot bên dưới), import giữ comment lại để không xoá hẳn:
 // import CawiRobot from './CawiRobot.jsx';
 import AIReviewSummary from './AIReviewSummary.jsx';
@@ -32,16 +28,10 @@ const compactSignalMeta = {
 };
 
 // v84 — Huy hiệu gọn cho "Cawi Tín Hiệu Mua" ở cột trái (ảnh sản phẩm), thay cho toàn
-<<<<<<< HEAD
 // bộ BuySignalCard trước đây. v85 — theo góp ý UX ảnh 2/3, huy hiệu dạng thanh ngang này
 // không còn được render riêng nữa — đã gộp thẳng vào góc biểu đồ lịch sử giá (xem
 // BuySignalChartBadge bên dưới) để "biểu đồ + tín hiệu mua" thành 1 khối duy nhất. Giữ
 // lại function này (không xoá) để có thể bật lại nhanh nếu cần.
-=======
-// bộ BuySignalCard trước đây — theo góp ý UX "cột trái chỉ nên còn ảnh + nút thêm giỏ
-// hàng + biểu đồ lịch sử giá + huy hiệu tín hiệu mua", phần phân tích đầy đủ dời vào
-// khung "Trợ lý Cawi" gộp chung ở cột phải (xem cawi-widget-v84 bên dưới).
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
 function BuySignalBadgeCompact({ product, storeName, enabled, onOpenUpgrade, onExpand }) {
   if (!enabled) {
     return (
@@ -59,7 +49,6 @@ function BuySignalBadgeCompact({ product, storeName, enabled, onOpenUpgrade, onE
     </button>
   );
 }
-<<<<<<< HEAD
 
 // v85 — Huy hiệu "Tín Hiệu Mua" siêu gọn, đặt ở góc thẻ biểu đồ lịch sử giá (thay vì
 // 1 thanh riêng bên dưới biểu đồ như v84) — theo đúng góp ý "gộp biểu đồ + tín hiệu mua
@@ -82,8 +71,6 @@ function BuySignalChartBadge({ product, storeName, enabled, onOpenUpgrade, onExp
     </button>
   );
 }
-=======
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
 
 function getBasicTotal(row) {
   if (row?.available === false || row?.storePrice == null) return null;
@@ -508,7 +495,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             */}
 
             {/* v84 — Đơn vị hiển thị (tiền tệ) trước đây hiện luôn thành 1 khối riêng ở
-<<<<<<< HEAD
                 cột trái. v85 — theo góp ý ảnh 3, thu gọn tiếp thành icon tròn nhỏ ở góc
                 (trước đây v84 vẫn còn là 1 nút có chữ "Đơn vị hiển thị: VND"). */}
             <div className="currency-settings-v85">
@@ -525,22 +511,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               {currencyPanelOpen && (
                 <div className="currency-settings-panel-v84 currency-settings-panel-v85">
                   <small className="currency-settings-panel-label-v85">Đơn vị hiển thị: <b>{localCurrency}</b></small>
-=======
-                cột trái, chiếm nhiều chỗ dù ít khi cần đổi. Theo góp ý UX, giờ ẩn sau 1
-                icon cài đặt gọn, chỉ mở ra khi người dùng chủ động bấm. */}
-            <div className="currency-settings-v84">
-              <button
-                type="button"
-                className="currency-settings-trigger-v84"
-                onClick={() => setCurrencyPanelOpen((open) => !open)}
-                aria-expanded={currencyPanelOpen}
-              >
-                <Settings size={15} /> Đơn vị hiển thị: <b>{localCurrency}</b>
-                <ChevronDown size={14} className={currencyPanelOpen ? 'rotated' : ''} />
-              </button>
-              {currencyPanelOpen && (
-                <div className="currency-settings-panel-v84">
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
                   <div className="currency-grid compact">
                     {currencies.map((cur) => (
                       <button key={cur} className={localCurrency === cur ? 'choice active' : 'choice'} onClick={() => selectCurrency(cur)}>{cur}</button>
@@ -591,22 +561,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
               <PriceHistoryChart data={priceHistory} currency={localCurrency} />
               <small className="history-source-note-v39">Dữ liệu biểu đồ hiện là dữ liệu ghi nhận trong bản demo từ giá sản phẩm đã nhập; để có lịch sử thật theo thời gian cần backend/API lưu snapshot giá hằng ngày.</small>
             </div>
-<<<<<<< HEAD
             {/* v84's standalone BuySignalBadgeCompact bar đã bỏ khỏi đây ở v85 — xem
                 BuySignalChartBadge ở góc khung biểu đồ ngay phía trên. */}
-=======
-
-            {/* v84 — Huy hiệu gọn thay cho BuySignalCard đầy đủ trước đây (đã dời phần
-                phân tích chi tiết vào khung "Trợ lý Cawi" ở cột phải) — bấm để mở khung
-                đó đúng ngay chỗ có phân tích tín hiệu mua chi tiết. */}
-            <BuySignalBadgeCompact
-              product={product}
-              storeName={activeHistoryStore}
-              enabled={plan.buySignal.enabled}
-              onOpenUpgrade={onOpenUpgrade}
-              onExpand={() => setCawiWidgetOpen(true)}
-            />
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
           </section>
 
           <section className="modal-info-panel has-advisor premium-info-panel expected-cost-panel v30-cost-panel v31-cost-panel">
@@ -634,7 +590,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
 
               <div className="hero-merged-divider-v84" />
 
-<<<<<<< HEAD
               {/* v85 — tách rõ tên sàn tiết kiệm nhất và số tiền tiết kiệm thành 2 khối lớn,
                   nổi bật ngang hàng thị giác với mức giá bên trái, thay vì giấu trong 1 câu văn. */}
               <div className="hero-merged-saving-v84">
@@ -646,14 +601,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
                 <p className="hero-merged-saving-desc-v84">
                   {savingStats.saveMax > 0
                     ? 'So với lựa chọn cao nhất trong danh sách.'
-=======
-              <div className="hero-merged-saving-v84">
-                <span className="hero-merged-saving-label-v84">Khoản tiết kiệm tối ưu</span>
-                <b className="hero-merged-saving-title-v84">{savingStats.best ? `Chọn ${savingStats.best.storeName}` : 'Đang cập nhật'}</b>
-                <p className="hero-merged-saving-desc-v84">
-                  {savingStats.saveMax > 0
-                    ? `Tiết kiệm tối đa ${formatCurrency(savingStats.saveMax, localCurrency)} so với lựa chọn cao nhất trong danh sách.`
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
                     : 'Chưa đủ chênh lệch để tính khoản tiết kiệm.'}
                 </p>
                 <div className="hero-merged-saving-metrics-v84">
@@ -813,7 +760,6 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
                     purchasePrice={(bestSelected || bestOnline || bestOffline)?.basicTotal}
                     hasBuySignalData={plan.buySignal.enabled}
                     onViewBuySignal={() => {
-<<<<<<< HEAD
                       // v85 — Tín Hiệu Mua giờ nằm ở góc khung biểu đồ lịch sử giá (cột
                       // trái), không còn là 1 thẻ riêng trong khung Trợ lý Cawi nữa.
                       document.querySelector('.price-insight-panel-v39')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -824,22 +770,12 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
                       chức năng này giờ đã gộp vào huy hiệu góc biểu đồ (BuySignalChartBadge)
                       ở cột trái, tránh lặp thông tin 2 nơi. Import BuySignalCard vẫn giữ lại
                       (không xoá) — component gốc dùng chung recoMeta với compactSignalMeta.
-=======
-                      document.querySelector('.buy-signal-card-v63')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }}
-                  />
-
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
                   <BuySignalCard
                     product={product}
                     storeName={activeHistoryStore}
                     enabled={plan.buySignal.enabled}
                     onOpenUpgrade={onOpenUpgrade}
-<<<<<<< HEAD
                   /> */}
-=======
-                  />
->>>>>>> f1940b00e9866cd3ebeea39773630392dca308d8
                 </div>
               )}
             </div>
