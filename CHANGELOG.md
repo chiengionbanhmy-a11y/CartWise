@@ -2,7 +2,24 @@
 
 Trước đây mỗi bản giao có 1 file `README-vNN.md` riêng — dồn hết vào 1 file `CHANGELOG.md` duy nhất này cho gọn (đỡ nhiều mục khi đưa lên GitHub). Bản mới nhất ở trên cùng.
 
-## v84 — Góp ý UX vòng chung kết (bản hiện tại)
+## v85 — Góp ý UX vòng 2 + tính năng dán link sản phẩm (bản hiện tại)
+
+Xử lý 6 góp ý gửi kèm ảnh chụp màn hình sau khi xem v84:
+
+1. Bắt buộc đăng ký/đăng nhập trước khi mua gói nâng cấp (`Upgrade.jsx` → `App.jsx`): bấm "Chọn CartWise Plus"/"Chọn Plus Student" khi chưa đăng nhập sẽ hiện thông báo + mở form đăng nhập, không đổi gói.
+2. Khung "Nơi mua tiết kiệm nhất": tên sàn và số tiền tiết kiệm tách thành 2 dòng chữ lớn, đậm, nổi bật ngang hàng với mức giá bên trái (trước đây gộp trong 1 câu văn nhỏ).
+3. Tái cấu trúc khung so sánh sản phẩm theo góp ý ảnh 2–3: gộp biểu đồ lịch sử giá + Cawi Tín Hiệu Mua thành 1 khung duy nhất (huy hiệu "Có thể mua"/"Mua ngay"/"Nên chờ" đặt ở góc biểu đồ, bỏ hẳn thẻ Tín Hiệu Mua riêng trong khung Trợ lý Cawi); icon đơn vị tiền tệ thu nhỏ thành nút tròn ở góc trên-phải cột trái; phần giới thiệu "Cawi Cố Vấn Chi Tiêu" rút gọn còn 1 dòng ngắn + nút "Hỏi Cawi" cùng hàng.
+4. Ô nhập ngân sách tháng tự động thêm dấu chấm phân cách hàng nghìn khi gõ số (ví dụ gõ `2000000` hiện thành `2.000.000`), vẫn lưu đúng giá trị số như cũ.
+5. Bỏ 4 sản phẩm theo ảnh gửi kèm: Vở Hồng Hà 200 trang A4 4586, Máy tính Casio học sinh, Bộ xếp hình LEGO Classic, Gấu bông mini — dọn theo toàn bộ nơi có tham chiếu tới 4 sản phẩm này (dữ liệu đánh giá, gợi ý của Cawi Robo, nhiệm vụ trong game Săn Deal, các cặp Flash Sale theo ngày, dữ liệu mẫu "Ghép Đơn Cùng Bạn Bè", 4 ảnh sản phẩm không còn dùng) để không còn chỗ nào lỗi/hiện sai do thiếu sản phẩm. Web hiện còn 8 sản phẩm mẫu.
+6. **Tính năng mới — Dán link sản phẩm để so sánh**: tại ô tìm kiếm ở trang chủ, dán 1 link sản phẩm bất kỳ từ Shopee/Lazada/Tiki/sàn khác vào sẽ hiện gợi ý "So sánh sản phẩm từ link này" → mở đúng màn hình so sánh với đủ 6 sàn (3 online + 3 offline) như 1 sản phẩm bình thường. Sàn nhận diện được đúng domain (vd Shopee) sẽ gắn đúng link thật bạn dán; các sàn còn lại là giá ước tính minh hoạ, ổn định theo đúng link đó (dán lại link cũ ra đúng 1 kết quả, không đổi mỗi lần xem). Dữ liệu lưu bằng `localStorage` trên trình duyệt — có ghi chú rõ ràng ngay trong khung sản phẩm là dữ liệu ước tính + chỉ lưu trên máy này, chưa dùng chung được giữa nhiều người dùng (chưa có backend thật).
+
+File chính: `src/App.jsx`, `src/pages/Upgrade.jsx`, `src/pages/Home.jsx`, `src/components/ProductModal.jsx`, `src/components/SpendingAdvisorCard.jsx`, `src/components/BudgetSetupModal.jsx`, `src/data/products.js`, `src/data/reviews.js`, `src/data/groupCarts.js`, `src/components/CawiRobot.jsx`, `src/pages/DealHuntGame.jsx`, `src/pages/FlashSale.jsx`, `src/components/Navbar.jsx`, `src/components/PromoPopup.jsx` (mục 5), file mới `src/data/customProducts.js` (mục 6), `src/styles.css` (khối `v85`).
+
+Đã kiểm tra: build sạch từ thư mục cô lập hoàn toàn mới; Playwright 21/21 pass (không tính 1 lỗi mạng do môi trường kiểm thử chặn tải favicon ngoài, không liên quan tới code) — đủ 6 mục trên + hồi quy các tính năng v81–v84.
+
+**Dọn dẹp thêm:** gỡ 4 ảnh sản phẩm không còn dùng (`hongha-a4-notebook.webp`, `casio-calculator.jpg`, `lego-classic.jpg`, `teddy-bear.jpg`) và 29 icon SVG cũ chưa từng được code nào tham chiếu tới (bộ icon dự phòng từ đầu dự án) — giảm thêm dung lượng repo.
+
+## v84 — Góp ý UX vòng chung kết
 
 Xử lý 6 góp ý gửi kèm ảnh chụp màn hình sau khi xem v83:
 
