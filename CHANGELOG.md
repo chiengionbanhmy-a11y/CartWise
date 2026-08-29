@@ -2,7 +2,23 @@
 
 Trước đây mỗi bản giao có 1 file `README-vNN.md` riêng — dồn hết vào 1 file `CHANGELOG.md` duy nhất này cho gọn (đỡ nhiều mục khi đưa lên GitHub). Bản mới nhất ở trên cùng.
 
-## v85 — Góp ý UX vòng 2 + tính năng dán link sản phẩm (bản hiện tại)
+## v86 — Góp ý UX vòng 3 (bản hiện tại)
+
+Xử lý 5 góp ý gửi kèm 3 ảnh chụp màn hình sau khi xem v85:
+
+1. Khung "Nơi mua tiết kiệm nhất" (banner hero): bỏ hẳn cột giá bên trái (đã lặp thông tin với bảng "So sánh công bằng" ngay bên dưới) — giờ chỉ còn đúng khối bên phải (tên sàn + số tiền tiết kiệm).
+2. Khung "Đánh giá & chất lượng sản phẩm": bấm "Xem đánh giá" giờ mở popup phủ gần kín màn hình (dùng `createPortal` render thẳng ra `document.body`) thay vì chỉ hiện 1 phần nhỏ phải cuộn lên mới thấy hết — sửa đúng gốc lỗi: `backdrop-filter` của khung so sánh sản phẩm khiến phần tử `position:fixed` con bị "nhốt" trong khung đó thay vì phủ đúng toàn màn hình (containing-block, lỗi CSS quen thuộc chứ không phải cố ý).
+3. "Cawi Cố Vấn Chi Tiêu": bấm "Hỏi Cawi" giờ mở THẲNG bộ 5 câu hỏi dạng popup toàn màn hình (cùng cơ chế portal như mục 2), bỏ bước "lời khuyên chỉ theo ngân sách" ở giữa (trước đây phải bấm thêm 1 CTA phụ mới tới được 5 câu hỏi). Lời khuyên cuối cùng vẫn tính từ CẢ ngân sách còn lại LẪN kết quả 5 câu hỏi (công thức giữ nguyên từ v82, chỉ đổi luồng bấm cho nhanh hơn).
+4. Biểu đồ lịch sử giá: chữ trạng thái ("Ổn định"/"Đang rẻ"/"Giá cao") và huy hiệu "Tín Hiệu Mua" ở góc giờ có màu nền đậm theo đúng tông (xanh lá = tốt, xanh dương = ổn định, đỏ = cảnh báo) để nổi bật kết quả, thay vì luôn nền trắng/nhạt trung tính như trước.
+5. **Phím tắt mới**: bấm Esc trên máy tính sẽ tự đóng khung so sánh sản phẩm đang mở. Nếu đang mở thêm 1 lớp popup bên trong (khung đánh giá, hoặc bộ 5 câu hỏi Cawi) thì Esc đóng lớp đó trước — đúng hành vi "đóng lớp trên cùng trước", bấm Esc lần nữa mới đóng khung so sánh sản phẩm.
+
+File chính: `src/components/ProductModal.jsx`, `src/components/SpendingAdvisorCard.jsx`, `src/components/SpendingAdvisorQuiz.jsx`, `src/styles.css` (khối `v86`).
+
+**Lỗi kỹ thuật phát hiện + đã sửa trong lúc kiểm thử:** 2 khung popup toàn màn hình mới (mục 2, 3) ban đầu bị 1 lớp nền mờ khác của khung so sánh sản phẩm (`z-index` cố định cho thanh điều hướng luôn nổi trên cùng) che mất, khiến bấm vào các nút/câu trả lời bên trong không có phản ứng — đã tăng đúng `z-index` của 2 khung popup này để luôn nổi trên cùng.
+
+Đã kiểm tra: build sạch từ thư mục cô lập hoàn toàn mới; Playwright 25/25 pass — đủ 5 mục trên (bao gồm cả việc bấm Esc đóng đúng lớp popup đang mở, không đóng nhầm cả khung so sánh sản phẩm cùng lúc) + hồi quy các tính năng v81–v85.
+
+## v85 — Góp ý UX vòng 2 + tính năng dán link sản phẩm
 
 Xử lý 6 góp ý gửi kèm ảnh chụp màn hình sau khi xem v84:
 
