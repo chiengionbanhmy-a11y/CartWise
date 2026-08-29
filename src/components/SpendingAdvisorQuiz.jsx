@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, X, TrendingUp } from 'lucide-react';
 import { SPENDING_ADVISOR_QUESTIONS, computeCombinedAdvice, getBudgetLevelLabel } from '../data/spendingAdvisorQuestions.js';
 import { getBudgetLevel } from '../data/purchases.js';
@@ -7,10 +8,29 @@ import { getBudgetLevel } from '../data/purchases.js';
 // Từng-câu-một, tự nhảy sang câu kế tiếp khi chọn (không cần bấm "Tiếp tục"), có
 // chấm tròn báo tiến trình + nút quay lại để đổi đáp án. Không có màn hình loading
 // giả "trông giống AI đang nghĩ" — công thức có sẵn, minh bạch, không cần giả vờ.
+// v86 — Theo góp ý: mở ngay dạng popup TOÀN MÀN HÌNH (trước đây chỉ là 1 khối trong
+// khung Trợ lý Cawi, phải cuộn mới thấy hết). Dùng createPortal render thẳng ra
+// document.body (giống review-overlay-fullscreen-v86 ở ProductModal.jsx) để tránh
+// bug containing-block do backdrop-filter của .product-modal cha. Bàn phím Esc dùng
+// listener pha capture + stopPropagation() để chỉ đóng popup 5 câu hỏi này (lớp trên
+// cùng) chứ không đóng luôn cả khung so sánh sản phẩm bên dưới cùng lúc — capture-phase
+// trên window luôn chạy trước bubble-phase, nên chặn được trước khi tới listener Esc
+// của ProductModal.jsx.
 
 function SpendingAdvisorQuiz({ purchasePrice, hasBuySignalData, onViewBuySignal, onClose }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        onClose?.();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [onClose]);
 
   const total = SPENDING_ADVISOR_QUESTIONS.length;
   const showResult = answers.length >= total;
@@ -73,8 +93,9 @@ function SpendingAdvisorQuiz({ purchasePrice, hasBuySignalData, onViewBuySignal,
     );
   }
 
-  return (
-    <div className="spending-quiz-v82">
+  return createPortal(
+    <div className="spending-quiz-overlay-v86" role="dialog" aria-modal="true" aria-label="Bộ 5 câu hỏi Cawi Cố Vấn Chi Tiêu">
+    <div className="spending-quiz-v82 spending-quiz-fullscreen-v86">
       <div className="spending-quiz-head-v82">
         <div className="spending-quiz-dots-v82">
           {SPENDING_ADVISOR_QUESTIONS.map((q, i) => (
@@ -125,6 +146,8 @@ function SpendingAdvisorQuiz({ purchasePrice, hasBuySignalData, onViewBuySignal,
         </button>
       )}
     </div>
+    </div>,
+    document.body
   );
 }
 

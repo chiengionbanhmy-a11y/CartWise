@@ -7880,6 +7880,17 @@ option {
   white-space: nowrap;
 }
 
+/* v86 — huy hiệu trạng thái giá tô màu đậm theo tông (nền màu, chữ trắng) để kết quả
+   gợi ý ("Đang rẻ"/"Ổn định"/"Giá cao") nổi bật rõ ràng, thay vì chỉ nền trắng nhạt. */
+.price-insight-status-pill-v86 {
+  background: #64748b !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.price-insight-status-pill-v86.good { background: #16a34a !important; }
+.price-insight-status-pill-v86.stable { background: #2563eb !important; }
+.price-insight-status-pill-v86.warning { background: #dc2626 !important; }
+
 .history-store-picker-v39 {
   position: relative;
 }
@@ -11812,7 +11823,12 @@ option {
 .review-overlay-v59 {
   position: fixed;
   inset: 0;
-  z-index: 3000;
+  /* v86 — z-index nâng từ 3000 lên 3500: khung này giờ luôn render qua createPortal
+     thẳng ra document.body (thoát khỏi .product-modal), nên phải cao hơn z-index
+     3400 !important của .modal-backdrop (đặt để modal luôn nổi trên thanh nav dính
+     top, xem rule .modal-backdrop gần cuối file) — nếu không sẽ bị backdrop của
+     chính khung so sánh sản phẩm đè lên, khiến các nút bên trong không bấm được. */
+  z-index: 3500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11830,6 +11846,13 @@ option {
   border-radius: 26px;
   box-shadow: 0 30px 70px rgba(15,23,42,.28);
   overflow: hidden;
+}
+
+/* v86 — khung đánh giá phóng to gần kín màn hình (thay vì hộp nhỏ giữa màn hình như
+   trước) — theo góp ý, tránh phải cuộn lên/xuống để xem hết nội dung. */
+.review-overlay-fullscreen-v86 .review-overlay-card-v59 {
+  width: min(1100px, 96vw);
+  max-height: min(92vh, 1000px);
 }
 
 .review-overlay-head-v59 {
@@ -13599,6 +13622,48 @@ option {
 .spending-quiz-actions-v82 { display: flex; gap: 8px; flex-wrap: wrap; }
 .spending-quiz-actions-v82 button { display: inline-flex; align-items: center; gap: 6px; }
 
+/* v86 — Bộ 5 câu hỏi Cawi giờ mở dạng popup toàn màn hình (createPortal ra
+   document.body, xem SpendingAdvisorQuiz.jsx) thay vì hiện trong khung Trợ lý Cawi
+   như trước — theo góp ý để không phải cuộn xem hết 5 câu hỏi. Cùng khuôn với
+   .review-overlay-fullscreen-v86 để đồng bộ trải nghiệm 2 lớp popup toàn màn hình. */
+.spending-quiz-overlay-v86 {
+  position: fixed;
+  inset: 0;
+  /* v86 — Cùng lý do với .review-overlay-v59 ở trên: portal thẳng ra document.body nên
+     cần z-index cao hơn 3400 !important của .modal-backdrop, đặt cao hơn cả khung đánh
+     giá (3500) 1 bậc — 2 khung này không mở cùng lúc trong luồng hiện tại, nhưng để dự
+     phòng vẫn ưu tiên khung câu hỏi (mở từ trong khung Trợ lý Cawi) nổi trên cùng. */
+  z-index: 3600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15,23,42,.42);
+  backdrop-filter: blur(2px);
+}
+.spending-quiz-fullscreen-v86 {
+  /* v86 — theo góp ý, phóng to hẳn (gần bằng khung đánh giá 1100px) thay vì 1 hộp nhỏ
+     giữa màn hình như bản nháp đầu — đúng cảm giác "toàn màn hình" hơn, đồng thời tăng
+     khoảng đệm + cỡ chữ bên trong (câu hỏi, đáp án) cho cân đối với khung to hơn. */
+  width: min(880px, 96vw);
+  max-height: min(92vh, 900px);
+  min-height: min(560px, 80vh);
+  padding: 30px 34px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 0;
+  animation: quizFadeIn82 .2s ease both;
+}
+.spending-quiz-fullscreen-v86 .spending-quiz-question-v82 { font-size: 19px; }
+.spending-quiz-fullscreen-v86 .spending-quiz-option-v82 { padding: 15px 18px; font-size: 15px; }
+.spending-quiz-fullscreen-v86 .spending-quiz-verdict-v82 { font-size: 17px; padding: 16px 18px; }
+@media (max-width: 640px) {
+  .spending-quiz-overlay-v86 { padding: 0; align-items: flex-end; }
+  .spending-quiz-fullscreen-v86 { width: 100%; max-height: 88vh; min-height: auto; border-radius: 22px 22px 0 0; padding: 22px 20px; }
+}
+
 /* ============================================================
    v82 — Đánh giá & chất lượng sản phẩm: ảnh/video minh hoạ đi kèm review
    ============================================================ */
@@ -13815,9 +13880,11 @@ option {
   z-index: 3;
   box-shadow: 0 6px 14px rgba(15,23,42,.08);
 }
-.buy-signal-chart-badge-v85.good { border-color: #bbf7d0; background: #ecfdf5; color: #166534; }
-.buy-signal-chart-badge-v85.warning { border-color: #fde68a; background: #fffbeb; color: #92400e; }
-.buy-signal-chart-badge-v85.stable { border-color: #e2e8f0; background: #f8fafc; color: #334155; }
+/* v86 — nền màu đậm hơn (thay vì tô nhạt trước đây) để kết quả khuyến nghị mua/chờ
+   nổi bật rõ, dễ nhận ra ngay từ góc biểu đồ thay vì phải nhìn kỹ mới thấy màu. */
+.buy-signal-chart-badge-v85.good { border-color: transparent; background: #16a34a; color: #fff; }
+.buy-signal-chart-badge-v85.warning { border-color: transparent; background: #dc2626; color: #fff; }
+.buy-signal-chart-badge-v85.stable { border-color: transparent; background: #2563eb; color: #fff; }
 .buy-signal-chart-badge-v85.locked { border-color: #e2e8f0; background: #f8fafc; color: #64748b; }
 
 /* --- ProductModal: huy hiệu gọn "Cawi Tín Hiệu Mua" ở cột trái, thay cho toàn bộ
@@ -13849,6 +13916,9 @@ option {
 .hero-merged-v84 { display: flex; flex-wrap: wrap; align-items: stretch; gap: 18px; }
 .hero-merged-divider-v84 { width: 1px; align-self: stretch; background: rgba(255,255,255,.18); }
 .hero-merged-saving-v84 { flex: 1 1 220px; min-width: 200px; display: flex; flex-direction: column; gap: 5px; }
+/* v86 — bỏ cột giá bên trái theo góp ý, banner chỉ còn khối "Nơi mua tiết kiệm nhất"
+   nên bỏ luôn giới hạn min-width/flex-basis hẹp của nó để chiếm trọn banner gọn gàng. */
+.hero-merged-solo-v86 .hero-merged-saving-v84 { flex: 1 1 auto; min-width: 0; }
 .hero-merged-saving-label-v84 { font-weight: 850; font-size: 13px; color: rgba(255,255,255,.72) !important; }
 .hero-merged-saving-title-v84 { font-size: 18px; color: #fff !important; }
 /* v85: tên sàn + số tiền tiết kiệm tách thành 2 khối lớn, nổi bật hơn (thay cho

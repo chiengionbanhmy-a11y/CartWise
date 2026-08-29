@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MapPin, Truck, Store, Smartphone, ChevronDown, Clock3, TrendingDown, TrendingUp, Minus, BarChart3, Star, Sparkles, X, ChevronRight, ShoppingCart, Check, Navigation, Settings, Lock, Wand2, Link2 } from 'lucide-react';
 // v82 — không còn render CawiRobot trong khung so sánh (xem modal-advisor-slot bên dưới), import giữ comment lại để không xoá hẳn:
 // import CawiRobot from './CawiRobot.jsx';
@@ -216,6 +217,22 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // v86 — Phím tắt Esc để đóng khung so sánh sản phẩm (góp ý người dùng). Nếu đang mở
+  // khung đánh giá chi tiết (review overlay) thì Esc đóng khung đó trước — đúng hành vi
+  // "đóng lớp trên cùng trước" quen thuộc, chưa đóng thẳng cả khung so sánh sản phẩm.
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') return;
+      if (reviewPanelOpen) {
+        setReviewPanelOpen(false);
+        return;
+      }
+      onClose?.();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [reviewPanelOpen, onClose]);
 
   function selectCurrency(cur) {
     setLocalCurrency(cur);
@@ -556,7 +573,10 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
                     </div>
                   )}
                 </div>
-                <b><PriceStatusIcon size={16} /> {priceInsight.status}</b>
+                {/* v86 — huy hiệu trạng thái giá ("Ổn định"/"Đang rẻ"/"Giá cao") giờ có màu
+                    nền theo đúng tông màu (xanh/vàng/đỏ) để làm nổi bật kết quả gợi ý,
+                    thay vì luôn nền trắng trung tính như trước. */}
+                <b className={`price-insight-status-pill-v86 ${priceInsight.tone}`}><PriceStatusIcon size={16} /> {priceInsight.status}</b>
               </div>
               <PriceHistoryChart data={priceHistory} currency={localCurrency} />
               <small className="history-source-note-v39">Dữ liệu biểu đồ hiện là dữ liệu ghi nhận trong bản demo từ giá sản phẩm đã nhập; để có lịch sử thật theo thời gian cần backend/API lưu snapshot giá hằng ngày.</small>
@@ -580,16 +600,21 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
             {/* v84 — Gộp "banner giá tốt nhất" và "thẻ tính khoản tiết kiệm tối ưu"
                 (trước đây 2 khối tách rời, lặp thông tin) thành 1 banner hero duy nhất
                 theo góp ý UX. Ô "Đánh giá & Chất lượng sản phẩm" dời sang khung "Trợ lý
-                Cawi" gộp chung bên dưới (cùng nhóm với các tính năng AI khác). */}
-            <div className="best-price-box expected-hero-box v30-best-box v31-best-box hero-merged-v84">
-              <div className="hero-price-col-v60">
-                <span>{selectedChannel === 'online' ? 'Tổng online dự kiến thấp nhất' : 'Giá trực tiếp tham khảo thấp nhất'}</span>
-                <strong>{bestSelected ? formatCurrency(bestSelected.basicTotal, localCurrency) : '—'}</strong>
-                <p>{conclusion}</p>
-              </div>
-
-              <div className="hero-merged-divider-v84" />
-
+                Cawi" gộp chung bên dưới (cùng nhóm với các tính năng AI khác).
+                v86 — theo góp ý ảnh 1, bỏ hẳn cột giá bên trái (.hero-price-col-v60,
+                đã lặp thông tin với bảng "So sánh công bằng" ngay bên dưới) — banner hero
+                giờ chỉ còn đúng khối "Nơi mua tiết kiệm nhất", giữ lại code cột trái +
+                divider trong comment để dễ bật lại nếu cần. Biến bestSelected/conclusion
+                vẫn được dùng ở nơi khác (dòng ~384, ~760, khối "expected-conclusion-card"
+                đã ẩn từ v84), không xoá.
+            <div className="hero-price-col-v60">
+              <span>{selectedChannel === 'online' ? 'Tổng online dự kiến thấp nhất' : 'Giá trực tiếp tham khảo thấp nhất'}</span>
+              <strong>{bestSelected ? formatCurrency(bestSelected.basicTotal, localCurrency) : '—'}</strong>
+              <p>{conclusion}</p>
+            </div>
+            <div className="hero-merged-divider-v84" />
+            */}
+            <div className="best-price-box expected-hero-box v30-best-box v31-best-box hero-merged-v84 hero-merged-solo-v86">
               {/* v85 — tách rõ tên sàn tiết kiệm nhất và số tiền tiết kiệm thành 2 khối lớn,
                   nổi bật ngang hàng thị giác với mức giá bên trái, thay vì giấu trong 1 câu văn. */}
               <div className="hero-merged-saving-v84">
@@ -796,8 +821,14 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
           </section>
         </div>
 
-        {reviewPanelOpen && (
-          <div className="review-overlay-v59" role="dialog" aria-modal="true" aria-label="Đánh giá & chất lượng sản phẩm">
+        {/* v86 — Khung đánh giá render qua createPortal thẳng vào document.body: trước đây
+            nằm lồng trong .product-modal (có backdrop-filter), mà backdrop-filter khiến
+            phần tử con position:fixed bị "nhốt" trong khung modal thay vì phủ toàn màn
+            hình thật (lỗi CSS containing-block, không phải cố ý) — đây là lý do khung đánh
+            giá trước đây chỉ che 1 phần nhỏ màn hình. Đồng thời phóng to gần kín màn hình
+            theo đúng góp ý, để không cần cuộn lên/xuống mới xem hết được. */}
+        {reviewPanelOpen && createPortal(
+          <div className="review-overlay-v59 review-overlay-fullscreen-v86" role="dialog" aria-modal="true" aria-label="Đánh giá & chất lượng sản phẩm">
             <div className="review-overlay-card-v59">
               <div className="review-overlay-head-v59">
                 <div>
@@ -810,7 +841,8 @@ function ProductModal({ product, currency, onCurrencyChange, onClose, planId = '
                 <AIReviewSummary productId={product.id} />
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
